@@ -570,7 +570,7 @@ async function showUserProfile(userId) {
         if (userData.user) {
             document.getElementById('profile-banner-avatar').src = getAvatarUrl(userData.user.photo_url);
             document.getElementById('profile-banner-avatar').onclick = () => viewUserStories(userData.user.id);
-            document.getElementById('profile-banner-cover').src = userData.user.cover_url ? userData.user.cover_url : '';
+            document.getElementById('profile-banner-cover').src = userData.user.cover_url ? userData.user.cover_url : 'https://via.placeholder.com/600x200?text=No+Cover+Photo';
             document.getElementById('profile-banner-name').innerText = userData.user.username;
             document.getElementById('profile-banner-bio').innerText = userData.user.bio || 'No bio yet.';
             
@@ -647,7 +647,7 @@ document.getElementById('bio-form').onsubmit = async (e) => {
 document.getElementById('cover-upload').onchange = async (e) => {
     if (e.target.files && e.target.files[0]) {
         const formData = new FormData();
-        formData.append('photo', e.target.files[0]);
+        formData.append('cover', e.target.files[0]);
         formData.append('user_id', currentUser.id);
 
         try {
