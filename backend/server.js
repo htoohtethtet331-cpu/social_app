@@ -80,41 +80,41 @@ app.post('/api/auth', async (req, res) => {
 });
 
 // 2. Upload Profile Photo
-app.post('/api/users/:id/photo', upload.single('photo'), async (req, res) => {
-    const user_id = req.params.id;
+app.post('/api/upload-profile', upload.single('photo'), async (req, res) => {
+    const user_id = req.body.user_id;
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     
     const photo_url = req.file.filename ? ('/uploads/' + req.file.filename) : req.file.path;
 
     try {
         const user = await User.findByIdAndUpdate(user_id, { photo_url }, { new: true });
-        res.json({ user });
+        res.json({ success: true, photo_url: user.photo_url, user });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
 // 3. Upload Cover Photo
-app.post('/api/users/:id/cover', upload.single('cover'), async (req, res) => {
-    const user_id = req.params.id;
+app.post('/api/upload-cover', upload.single('cover'), async (req, res) => {
+    const user_id = req.body.user_id;
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     
     const cover_url = req.file.filename ? ('/uploads/' + req.file.filename) : req.file.path;
 
     try {
         const user = await User.findByIdAndUpdate(user_id, { cover_url }, { new: true });
-        res.json({ user });
+        res.json({ success: true, cover_url: user.cover_url, user });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
 // 4. Skip Photo Upload
-app.post('/api/users/:id/photo/skip', async (req, res) => {
-    const user_id = req.params.id;
+app.post('/api/skip-profile', async (req, res) => {
+    const user_id = req.body.user_id;
     try {
         const user = await User.findByIdAndUpdate(user_id, { photo_url: 'default' }, { new: true });
-        res.json({ user });
+        res.json({ success: true, photo_url: user.photo_url, user });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
