@@ -444,7 +444,7 @@ app.get('/api/stories', async (req, res) => {
 
 
 // Fallback route for frontend
-app.get('*', (req, res) => {
+app.use((req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
