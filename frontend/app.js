@@ -22,16 +22,18 @@ async function initApp() {
     }
 
     try {
+        const payload = { 
+            telegram_id: tgUser.id.toString(), 
+            username: tgUser.username || tgUser.first_name || 'Anonymous'
+        };
         const res = await fetch(`${API_BASE_URL}/auth`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                telegram_id: tgUser.id.toString(), 
-                username: tgUser.username || tgUser.first_name || 'Anonymous'
-            })
+            body: JSON.stringify(payload)
         });
         
         const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Auth failed');
         currentUser = data.user;
         
         if (!currentUser.photo_url) {
