@@ -135,15 +135,22 @@
 
     <!-- Photo Upload Modal -->
     <div id="photo-modal" class="modal">
-        <div class="modal-content">
-            <h2>Welcome!</h2>
-            <p>Please upload a profile photo to continue, or skip to use a default one.</p>
+        <div class="modal-content text-center">
+            <h2 style="margin-bottom: 10px;">Welcome! 👋</h2>
+            <p class="text-muted">Upload a profile photo to make your profile stand out, or skip for now.</p>
             
-            <form id="photo-form">
-                <input type="file" id="photo-input" accept="image/*" class="file-input">
-                <div class="modal-actions">
-                    <button type="button" id="skip-btn" class="btn secondary-btn">Skip</button>
-                    <button type="submit" class="btn primary-btn">Upload</button>
+            <form id="photo-form" class="photo-upload-form">
+                <div class="photo-preview-container">
+                    <img id="photo-preview-img" src="https://ui-avatars.com/api/?name=User&background=random" alt="Preview" class="photo-preview-circle">
+                    <label for="photo-input" class="photo-upload-badge">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input type="file" id="photo-input" accept="image/*" style="display:none;">
+                </div>
+                
+                <div class="modal-actions mt-4">
+                    <button type="button" id="skip-btn" class="btn secondary-btn" style="flex:1;">Skip</button>
+                    <button type="submit" class="btn primary-btn" style="flex:1;">Continue</button>
                 </div>
             </form>
         </div>

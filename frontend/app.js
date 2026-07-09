@@ -55,6 +55,20 @@ function showPhotoModal() {
 
     const skipBtn = document.getElementById('skip-btn');
     const photoForm = document.getElementById('photo-form');
+    const photoInput = document.getElementById('photo-input');
+    const photoPreviewImg = document.getElementById('photo-preview-img');
+
+    if (photoInput && photoPreviewImg) {
+        photoInput.onchange = (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    photoPreviewImg.src = e.target.result;
+                }
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        };
+    }
 
     skipBtn.onclick = async () => {
         try {
