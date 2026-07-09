@@ -49,7 +49,7 @@ if (process.env.CLOUDINARY_CLOUD_NAME) {
     });
 } else {
     storage = multer.diskStorage({
-        destination: './uploads/',
+        destination: path.join(__dirname, 'uploads'),
         filename: function(req, file, cb) {
             cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
         }
@@ -84,7 +84,7 @@ app.post('/api/upload-profile', upload.single('photo'), async (req, res) => {
     const user_id = req.body.user_id;
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     
-    const photo_url = req.file.filename ? ('/uploads/' + req.file.filename) : req.file.path;
+    const photo_url = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : ('/uploads/' + req.file.filename);
 
     try {
         const user = await User.findByIdAndUpdate(user_id, { photo_url }, { new: true });
@@ -99,7 +99,7 @@ app.post('/api/upload-cover', upload.single('cover'), async (req, res) => {
     const user_id = req.body.user_id;
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     
-    const cover_url = req.file.filename ? ('/uploads/' + req.file.filename) : req.file.path;
+    const cover_url = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : ('/uploads/' + req.file.filename);
 
     try {
         const user = await User.findByIdAndUpdate(user_id, { cover_url }, { new: true });
@@ -127,7 +127,7 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
 
     let image_url = null;
     if (req.file) {
-        image_url = req.file.filename ? ('/uploads/' + req.file.filename) : req.file.path;
+        image_url = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : ('/uploads/' + req.file.filename);
     }
 
     try {
@@ -350,7 +350,7 @@ app.post('/api/stories', upload.single('media'), async (req, res) => {
     const { user_id } = req.body;
     if (!req.file || !user_id) return res.status(400).json({ error: 'User ID and media file required' });
 
-    const media_url = req.file.filename ? ('/uploads/' + req.file.filename) : req.file.path;
+    const media_url = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : ('/uploads/' + req.file.filename);
     const media_type = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
 
     try {
