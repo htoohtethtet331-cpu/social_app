@@ -1150,13 +1150,15 @@ function escapeHtml(unsafe) {
 // --- User Profile Feature ---
 async function showUserProfile(userId) {
     try {
-        // Hide main feed
-        document.getElementById('posts-feed').style.display = 'none';
+        // Automatically swipe to Profile tab
+        const index = tabs.indexOf('profile');
+        if (currentTabIndex !== index) {
+            currentTabIndex = index;
+            snapToCurrentTab();
+        }
         
-        // Show profile section
         const profileSection = document.getElementById('user-profile-section');
         const userPostsFeed = document.getElementById('user-posts-feed');
-        profileSection.style.display = 'block';
         
         userPostsFeed.innerHTML = `
             <div class="skeleton-post">
