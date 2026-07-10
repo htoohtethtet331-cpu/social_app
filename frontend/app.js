@@ -233,7 +233,7 @@ async function loadAllUsers() {
                 const bio = user.bio || 'No bio available';
                 
                 const userHtml = `
-                    <div class="user-list-item" onclick="switchTab('profile'); showUserProfile(${user.id});">
+                    <div class="user-list-item" onclick="switchTab('profile'); showUserProfile('${user.id}');">
                         <img src="${photoUrl}" alt="${user.username}" class="user-list-avatar">
                         <div class="user-list-info">
                             <h3 class="user-list-name">${user.username}</h3>
@@ -308,9 +308,9 @@ function createPostHtml(post) {
     return `
         <div class="post-item" id="post-${post.id}">
             <div class="post-header">
-                <img src="${getAvatarUrl(post.photo_url)}" alt="${post.username}" class="avatar clickable-user" onclick="viewUserStories(${post.user_id})">
+                <img src="${getAvatarUrl(post.photo_url)}" alt="${post.username}" class="avatar clickable-user" onclick="viewUserStories('${post.user_id}')">
                 <div class="post-meta">
-                    <span class="post-author clickable-user" onclick="showUserProfile(${post.user_id})">${post.username}</span>
+                    <span class="post-author clickable-user" onclick="showUserProfile('${post.user_id}')">${post.username}</span>
                     <span class="post-date">${date}</span>
                 </div>
             </div>
@@ -323,11 +323,11 @@ function createPostHtml(post) {
             </div>
             
             <div class="post-actions-fb">
-                <button class="fb-interaction-btn ${post.has_liked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike(${post.id})">
+                <button class="fb-interaction-btn ${post.has_liked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
                     Like
                 </button>
-                <button class="fb-interaction-btn" onclick="openCommentsBottomSheet(${post.id})">
+                <button class="fb-interaction-btn" onclick="openCommentsBottomSheet('${post.id}')">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
                     Comment
                 </button>
@@ -383,15 +383,15 @@ function renderCommentBubble(c) {
     const timeAgo = formatTimeAgo(c.created_at);
     return `
         <div class="comment-item" id="comment-${c.id}">
-            <img src="${getAvatarUrl(c.photo_url)}" class="comment-avatar clickable-user" onclick="showUserProfile(${c.user_id}); closeCommentsBottomSheet();">
+            <img src="${getAvatarUrl(c.photo_url)}" class="comment-avatar clickable-user" onclick="showUserProfile('${c.user_id}'); closeCommentsBottomSheet();">
             <div class="comment-bubble-wrapper">
                 <div class="comment-bubble">
-                    <div class="comment-author-name clickable-user" onclick="showUserProfile(${c.user_id}); closeCommentsBottomSheet();">${c.username}</div>
+                    <div class="comment-author-name clickable-user" onclick="showUserProfile('${c.user_id}'); closeCommentsBottomSheet();">${c.username}</div>
                     <div class="comment-text">${escapeHtml(c.content)}</div>
                 </div>
                 <div class="comment-actions">
                     <span>${timeAgo}</span>
-                    <button class="comment-action-btn" onclick="replyToComment(${c.id}, '${escapeHtml(c.username)}')">Reply</button>
+                    <button class="comment-action-btn" onclick="replyToComment('${c.id}', '${escapeHtml(c.username)}')">Reply</button>
                 </div>
             </div>
         </div>
