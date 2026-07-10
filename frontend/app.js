@@ -458,44 +458,160 @@ function showNewPosts() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Navigation Functions
-function switchTab(tabName, userId = null) {
-    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-    
-    // Check if the tab name corresponds to a navigation button
-    const navBtn = document.querySelector(`.nav-item[onclick*="${tabName}"]`);
-    if (navBtn) navBtn.classList.add('active');
+// Swipeable Carousel Physics & State
+let currentTabIndex = 0; // 0: Home, 1: Users, 2: Profile, 3: Notifications
+const tabs = ['home', 'users', 'profile', 'notifications'];
+let isUsersLoaded = false;
+let isNotificationsLoaded = false;
 
-    if (tabName === 'profile') {
-        showUserProfile(userId || currentUser.id);
+let touchStartX = 0;
+let touchStartY = 0;
+let currentTranslate = 0;
+let prevTranslate = 0;
+let isCarouselDragging = false;
+let startDragTime = 0;
+let isScrolling = null; // null: undetermined, true: vertical, false: horizontal
+
+document.addEventListener('DOMContentLoaded', () => {
+    const swipeWrapper = document.getElementById('swipe-wrapper');
+    if (!swipeWrapper) return;
+
+    swipeWrapper.addEventListener('touchstart', touchStart);
+    swipeWrapper.addEventListener('touchmove', touchMove, { passive: false });
+    swipeWrapper.addEventListener('touchend', touchEnd);
+    
+    // Initial Indicator sync
+    syncNavIndicator();
+});
+
+function touchStart(event) {
+    if (event.touches.length > 1) return; // ignore multi-touch
+    isCarouselDragging = true;
+    startDragTime = Date.now();
+    touchStartX = event.touches[0].clientX;
+    touchStartY = event.touches[0].clientY;
+    
+    const swipeWrapper = document.getElementById('swipe-wrapper');
+    // Remove transition so it follows finger instantly
+    swipeWrapper.style.transition = 'none';
+    isScrolling = null;
+}
+
+function touchMove(event) {
+    if (!isCarouselDragging) return;
+    
+    const currentX = event.touches[0].clientX;
+    const currentY = event.touches[0].clientY;
+    const diffX = currentX - touchStartX;
+    const diffY = currentY - touchStartY;
+
+    // Determine scroll direction on first move
+    if (isScrolling === null) {
+        isScrolling = Math.abs(diffY) > Math.abs(diffX);
     }
+
+    // If vertical scrolling, ignore horizontal swipe
+    if (isScrolling) {
+        isCarouselDragging = false;
+        return;
+    }
+
+    // Prevent default vertical scroll while swiping horizontally
+    if (event.cancelable) event.preventDefault();
+
+    // Add resistance at the edges
+    let newTranslate = prevTranslate + diffX;
+    const maxTranslate = 0;
+    const minTranslate = -(tabs.length - 1) * window.innerWidth;
     
-    // Hide all main sections
-    document.getElementById('posts-feed').style.display = 'none';
-    document.getElementById('user-profile-section').style.display = 'none';
-    document.getElementById('users-list-section').style.display = 'none';
-    document.getElementById('notifications-section').style.display = 'none';
+    if (newTranslate > maxTranslate) {
+        newTranslate = maxTranslate + (newTranslate - maxTranslate) * 0.2; // Rubber band effect
+    } else if (newTranslate < minTranslate) {
+        newTranslate = minTranslate + (newTranslate - minTranslate) * 0.2;
+    }
+
+    currentTranslate = newTranslate;
+    document.getElementById('swipe-wrapper').style.transform = `translateX(${currentTranslate}px)`;
     
-    if (tabName === 'home') {
-        document.getElementById('nav-home').classList.add('active');
-        document.getElementById('posts-feed').style.display = 'block';
-    } else if (tabName === 'users') {
-        document.getElementById('nav-users').classList.add('active');
-        document.getElementById('users-list-section').style.display = 'block';
+    // Sync indicator proportionally
+    const progress = Math.abs(currentTranslate) / window.innerWidth;
+    const indicator = document.getElementById('nav-indicator');
+    if (indicator) {
+        indicator.style.transition = 'none';
+        indicator.style.transform = `translateX(${progress * 100}%)`;
+    }
+}
+
+function touchEnd(event) {
+    if (!isCarouselDragging || isScrolling) return;
+    isCarouselDragging = false;
+
+    const dragDistance = currentTranslate - prevTranslate;
+    const dragTime = Date.now() - startDragTime;
+    const velocity = Math.abs(dragDistance) / dragTime;
+
+    const threshold = window.innerWidth * 0.3; // 30% of screen to snap
+
+    if (dragDistance < -threshold || (dragDistance < -30 && velocity > 0.5)) {
+        if (currentTabIndex < tabs.length - 1) currentTabIndex += 1;
+    } else if (dragDistance > threshold || (dragDistance > 30 && velocity > 0.5)) {
+        if (currentTabIndex > 0) currentTabIndex -= 1;
+    }
+
+    snapToCurrentTab();
+}
+
+function snapToCurrentTab() {
+    const swipeWrapper = document.getElementById('swipe-wrapper');
+    prevTranslate = -currentTabIndex * window.innerWidth;
+    currentTranslate = prevTranslate;
+    
+    swipeWrapper.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+    swipeWrapper.style.transform = `translateX(${currentTranslate}px)`;
+
+    syncNavIndicator();
+    updateNavActiveState();
+    triggerLazyLoad();
+}
+
+function syncNavIndicator() {
+    const indicator = document.getElementById('nav-indicator');
+    if (indicator) {
+        indicator.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
+        indicator.style.transform = `translateX(${currentTabIndex * 100}%)`;
+    }
+}
+
+function updateNavActiveState() {
+    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+    const activeTabName = tabs[currentTabIndex];
+    const navBtn = document.querySelector(`.nav-item[onclick*="switchTab('${activeTabName}'"]`);
+    if (navBtn) navBtn.classList.add('active');
+}
+
+function triggerLazyLoad() {
+    const activeTabName = tabs[currentTabIndex];
+    
+    if (activeTabName === 'users' && !isUsersLoaded) {
         loadAllUsers();
-    } else if (tabName === 'profile') {
-        document.getElementById('nav-profile').classList.add('active');
-        if (userId) {
-            showUserProfile(userId);
-        } else {
-            showUserProfile(currentUser.id);
-        }
-    } else if (tabName === 'notifications') {
-        const navNotif = document.getElementById('nav-notifications');
-        if (navNotif) navNotif.classList.add('active');
-        document.getElementById('notifications-section').style.display = 'block';
+        isUsersLoaded = true;
+    } else if (activeTabName === 'notifications' && !isNotificationsLoaded) {
         loadNotifications();
         markNotificationsRead();
+        isNotificationsLoaded = true;
+    }
+}
+
+// Navigation Functions
+function switchTab(tabName, userId = null) {
+    if (tabName === 'profile' && userId) {
+        showUserProfile(userId);
+    }
+    
+    const index = tabs.indexOf(tabName);
+    if (index !== -1) {
+        currentTabIndex = index;
+        snapToCurrentTab();
     }
 }
 

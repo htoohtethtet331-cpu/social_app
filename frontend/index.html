@@ -6,7 +6,7 @@
     <title>Telegram Web App</title>
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css?v=36">
+    <link rel="stylesheet" href="style.css?v=37">
     <script>
         const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2RkZCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzkiIHI9IjE4IiBmaWxsPSIjOTk5Ii8+PHBhdGggZD0iTTIyLDgwIGEzMCwyMCAwIDAsMSw1NiwwIHoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=';
         window.handleImageError = function(img) {
@@ -30,7 +30,7 @@
         </header>
 
         <!-- Main Content -->
-        <main class="app-main">
+        <main class="app-main swipe-container" id="swipe-container">
             <!-- Create Post Modal -->
             <div id="create-post-modal" class="modal bottom-sheet" style="z-index: 4000;">
                 <div class="modal-content" style="padding: 0;">
@@ -65,7 +65,36 @@
             </div>
 
             <!-- User Profile Section -->
-            <section class="user-profile-section" id="user-profile-section" style="display: none;">
+            
+
+            <!-- Main Feed -->
+            
+
+            <!-- Users List Section -->
+            
+
+            <!-- Notifications Section -->
+            
+
+        
+            <div id="swipe-wrapper" class="swipe-wrapper">
+<div id="new-posts-pill" class="new-posts-pill swipe-slide"  onclick="showNewPosts()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+                <span id="new-posts-count">New Posts</span>
+            </div>
+            <section class="posts-feed" id="posts-feed">
+                <!-- Posts will be injected here -->
+                <p class="loading-text">Loading posts...</p>
+            </section>
+<section class="users-list-section swipe-slide" id="users-list-section" >
+                <div class="fb-profile-header">
+                    <h2>Users</h2>
+                </div>
+                <div id="users-list-container" style="padding: 15px;">
+                    <p class="loading-text">Loading users...</p>
+                </div>
+            </section>
+<section class="user-profile-section swipe-slide" id="user-profile-section" >
                 <div class="fb-profile-banner">
                     <div class="fb-cover-photo-container">
                         <img id="profile-banner-cover" src="" alt="" class="fb-cover-photo" onclick="if(this.src) viewFullScreenImage(this.src)">
@@ -114,29 +143,7 @@
                     <!-- User's posts will be injected here -->
                 </div>
             </section>
-
-            <!-- Main Feed -->
-            <div id="new-posts-pill" class="new-posts-pill" style="display: none;" onclick="showNewPosts()">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
-                <span id="new-posts-count">New Posts</span>
-            </div>
-            <section class="posts-feed" id="posts-feed">
-                <!-- Posts will be injected here -->
-                <p class="loading-text">Loading posts...</p>
-            </section>
-
-            <!-- Users List Section -->
-            <section class="users-list-section" id="users-list-section" style="display: none;">
-                <div class="fb-profile-header">
-                    <h2>Users</h2>
-                </div>
-                <div id="users-list-container" style="padding: 15px;">
-                    <p class="loading-text">Loading users...</p>
-                </div>
-            </section>
-
-            <!-- Notifications Section -->
-            <section class="notifications-section" id="notifications-section" style="display: none;">
+<section class="notifications-section swipe-slide" id="notifications-section" >
                 <div class="notifications-header">
                     <h2>Notifications</h2>
                 </div>
@@ -145,7 +152,7 @@
                     <p class="loading-text">Loading notifications...</p>
                 </div>
             </section>
-
+            </div>
         </main>
     </div>
     
@@ -377,6 +384,7 @@
     <!-- Full Width Bottom Navigation with Center FAB -->
     <div class="bottom-nav-container">
         <nav class="bottom-nav-bar" id="bottom-nav">
+            <div class="nav-indicator" id="nav-indicator"></div>
             <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                 <span>Posts</span>
@@ -404,6 +412,6 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=36"></script>
+    <script src="app.js?v=37"></script>
 </body>
 </html>
