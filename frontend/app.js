@@ -1592,136 +1592,69 @@ function updateLightboxTransform(animate) {
 
 function viewFullScreenImage(event, url) {
     if (!url) return;
-    const target = event.target;
-    const rect = target.getBoundingClientRect();
-    
-    // 1. Dynamically inject CSS if missing to bypass ANY mobile cache issues
-    if (!document.getElementById('lightbox-dynamic-css')) {
-        const style = document.createElement('style');
-        style.id = 'lightbox-dynamic-css';
-        style.innerHTML = `
-            .image-lightbox-modal {
-                background-color: transparent !important;
-                display: none;
-                position: fixed;
-                top: 0; left: 0; right: 0; bottom: 0;
-                z-index: 5000;
-            }
-            .image-lightbox-modal.active {
-                display: block !important;
-            }
-            .lightbox-overlay {
-                position: absolute;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background-color: rgba(0, 0, 0, 0);
-                transition: background-color 0.3s ease;
-                z-index: 1;
-            }
-            .image-lightbox-modal.active .lightbox-overlay {
-                background-color: rgba(0, 0, 0, 0.95) !important;
-            }
-            .lightbox-header {
-                position: absolute;
-                top: 0; left: 0; right: 0;
-                height: 60px;
-                z-index: 3;
-                display: flex;
-                justify-content: flex-end;
-                align-items: center;
-                padding: 0 20px;
-            }
-            .lightbox-close {
-                color: white;
-                font-size: 30px;
-                cursor: pointer;
-                text-shadow: 0 0 5px rgba(0,0,0,0.5);
-            }
-            .lightbox-content {
-                position: absolute;
-                top: 0; left: 0; right: 0; bottom: 0;
-                z-index: 2;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                pointer-events: none;
-            }
-            #full-screen-image {
-                max-width: 100%;
-                max-height: 100vh;
-                object-fit: contain;
-                transform-origin: center center;
-                will-change: transform;
-                pointer-events: auto;
-            }
-        `;
-        document.head.appendChild(style);
+    if (event) {
+        event.stopPropagation();
     }
-
-    // 2. Dynamically inject HTML if missing
-    let modal = document.getElementById('image-viewer-modal');
+    
+    let modal = document.getElementById('simple-image-viewer');
     if (!modal) {
         modal = document.createElement('div');
-        modal.className = 'modal image-lightbox-modal';
-        modal.id = 'image-viewer-modal';
+        modal.id = 'simple-image-viewer';
+        // Use inline styles to completely bypass any CSS cache or specificity issues
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.backgroundColor = 'rgba(0,0,0,0.95)';
+        modal.style.zIndex = '999999';
+        modal.style.display = 'none';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.opacity = '0';
+        modal.style.transition = 'opacity 0.2s ease-in-out';
+        
         modal.innerHTML = `
-            <div class="lightbox-overlay" id="lightbox-overlay" onclick="closeFullScreenImage()"></div>
-            <div class="lightbox-header">
-                <span class="lightbox-close" id="lightbox-close" onclick="closeFullScreenImage()">&times;</span>
-            </div>
-            <div class="lightbox-content" id="lightbox-content">
-                <img id="full-screen-image">
-            </div>
+            <div style="position:absolute; top:15px; right:20px; color:white; font-size:35px; cursor:pointer; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8);">&times;</div>
+            <img id="simple-full-screen-img" style="max-width:100%; max-height:100%; object-fit:contain; z-index:1; pointer-events:none;">
         `;
+        
+        modal.onclick = () => {
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.body.style.overflow = ''; // restore scroll
+                document.getElementById('simple-full-screen-img').src = '';
+            }, 200);
+        };
+        
         document.body.appendChild(modal);
     }
     
-    const img = document.getElementById('full-screen-image');
+    document.getElementById('simple-full-screen-img').src = url;
+    document.body.style.overflow = 'hidden'; // lock scroll
+    modal.style.display = 'flex';
     
-    img.src = url;
-    document.body.classList.add('modal-open');
-    modal.classList.add('active');
-    
-    lbScale = 1;
-    lbTransX = 0;
-    lbTransY = 0;
-    
-    // Set initial position based on clicked image
-    img.style.transition = 'none';
-    img.style.width = `${rect.width}px`;
-    img.style.height = `${rect.height}px`;
-    
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-    const targetCenterX = rect.left + rect.width / 2;
-    const targetCenterY = rect.top + rect.height / 2;
-    
-    const startX = targetCenterX - centerX;
-    const startY = targetCenterY - centerY;
-    
-    img.style.transform = `translate(${startX}px, ${startY}px) scale(1)`;
-    
-    // Force layout reflow
-    void img.offsetWidth;
-    
-    // Animate to center
-    img.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1), height 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
-    img.style.width = '100vw';
-    img.style.height = '100vh';
-    img.style.transform = `translate(0px, 0px) scale(1)`;
+    // Force reflow
+    void modal.offsetWidth;
+    modal.style.opacity = '1';
 }
 
 function closeFullScreenImage() {
-    const modal = document.getElementById('image-viewer-modal');
-    const img = document.getElementById('full-screen-image');
-    
-    modal.classList.remove('active');
+    // Left for backwards compatibility with any cached HTML
+    const oldModal = document.getElementById('image-viewer-modal');
+    if (oldModal) {
+        oldModal.classList.remove('active');
+    }
+    const simpleModal = document.getElementById('simple-image-viewer');
+    if (simpleModal) {
+        simpleModal.style.opacity = '0';
+        setTimeout(() => {
+            simpleModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 200);
+    }
     document.body.classList.remove('modal-open');
-    
-    setTimeout(() => {
-        img.src = '';
-        img.style.transform = '';
-        img.style.transition = '';
-    }, 300);
 }
 
 // Favorites in Settings
