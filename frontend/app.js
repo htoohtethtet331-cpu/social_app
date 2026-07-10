@@ -7,6 +7,7 @@ tg.expand();
 
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
+    setupLightboxEvents();
 });
 
 async function initApp() {
@@ -181,7 +182,7 @@ function setupUI() {
                 
                 files.forEach((file, index) => {
                     const src = URL.createObjectURL(file);
-                    previewGrid.innerHTML += `<img src="${src}" class="post-grid-img img-${index}" onclick="viewFullScreenImage('${src}')">`;
+                    previewGrid.innerHTML += `<img src="${src}" class="post-grid-img img-${index}" onclick="viewFullScreenImage(event, '${src}')">`;
                 });
                 
                 previewContainer.style.display = 'block';
@@ -253,14 +254,6 @@ function setupUI() {
                 switchTab('home');
             }
         } catch(e) { 
-            console.error(e); 
-        } finally {
-            const submitBtn = document.getElementById('post-submit-btn');
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerText = 'Post';
-            }
-        }
     };
 
     // Active Now Ping
@@ -376,7 +369,7 @@ async function loadNotifications() {
                 const time = formatTimeAgo(n.created_at);
                 const bgClass = n.status === 'unread' ? 'unread' : '';
                 return `
-                    <div class="notification-item ${bgClass}" onclick="handleNotificationClick('${n.type}', '${n.post_id || n.story_id}')">
+                    <div class="notification-item ${bgClass}" onclick="handleNotificationClick('${n.type}', '${n.post_id || n.story_id}', '${n.comment_id || ''}')">
                         <img src="${getAvatarUrl(n.actor_id ? n.actor_id.photo_url : null)}" class="notification-avatar" onerror="handleImageError(this)">
                         <div class="notification-content">
                             <p class="notification-text"><strong>${n.actor_id ? n.actor_id.username : 'Someone'}</strong> ${text}</p>
@@ -405,23 +398,46 @@ async function markNotificationsRead() {
     } catch(e) { console.error(e); }
 }
 
-function handleNotificationClick(type, id) {
+async function handleNotificationClick(type, id, commentId) {
     if (['like', 'comment', 'reply', 'favorite'].includes(type)) {
         switchTab('home'); 
-        setTimeout(() => {
+        setTimeout(async () => {
             const postElement = document.getElementById(`post-${id}`);
             if (postElement) {
                 postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                postElement.style.transition = 'background-color 0.5s';
-                postElement.style.backgroundColor = 'rgba(69, 189, 98, 0.1)';
-                setTimeout(() => {
-                    postElement.style.backgroundColor = 'var(--bg-color)';
-                    setTimeout(() => postElement.style.transition = '', 500);
-                }, 2000);
+                if ((type === 'comment' || type === 'reply') && commentId) {
+                    await openCommentsBottomSheet(id);
+                    setTimeout(() => {
+                        highlightComment(commentId);
+                    }, 500);
+                } else {
+                    postElement.style.transition = 'background-color 0.5s';
+                    postElement.style.backgroundColor = 'rgba(69, 189, 98, 0.1)';
+                    setTimeout(() => {
+                        postElement.style.backgroundColor = 'var(--bg-color)';
+                        setTimeout(() => postElement.style.transition = '', 500);
+                    }, 2000);
+                }
             }
         }, 300);
     } else if (type === 'story_like') {
         switchTab('profile'); 
+    }
+}
+
+function highlightComment(commentId) {
+    const commentEl = document.getElementById(`comment-${commentId}`);
+    if (commentEl) {
+        const sheetCommentsList = document.getElementById('sheet-comments-list');
+        sheetCommentsList.scrollTo({
+            top: commentEl.offsetTop - 50,
+            behavior: 'smooth'
+        });
+        
+        commentEl.querySelector('.comment-bubble').classList.add('highlight-fade');
+        setTimeout(() => {
+            commentEl.querySelector('.comment-bubble').classList.remove('highlight-fade');
+        }, 3000);
     }
 }
 
@@ -655,10 +671,10 @@ function createPostHtml(post) {
             </div>
             <div class="post-body">${escapeHtml(post.content || '')}</div>
             ${post.image_urls && post.image_urls.length > 0 ? `
-                <div class="post-images-grid ${post.layout_type}">
-                    ${post.image_urls.map((url, i) => createProgressiveImageHtml(url, `post-grid-img img-${i}`, `onclick="viewFullScreenImage('${url}')"`)).join('')}
+                <div class="preview-images-container preview-grid-${post.image_urls.length}">
+                    ${post.image_urls.map((url, i) => createProgressiveImageHtml(url, `post-grid-img img-${i}`, `onclick="viewFullScreenImage(event, '${url}')"`)).join('')}
                 </div>
-            ` : (post.image_url ? createProgressiveImageHtml(post.image_url, 'post-image', `onclick="viewFullScreenImage('${post.image_url}')"`) : '')}
+            ` : (post.image_url ? createProgressiveImageHtml(post.image_url, 'post-image', `onclick="viewFullScreenImage(event, '${post.image_url}')"`) : '')}
             
             <div class="post-stats">
                 <span id="like-count-${post.id}" onclick="viewPostLikes('${post.id}')" style="cursor: pointer;">${post.like_count} Likes</span>
@@ -752,17 +768,21 @@ function formatTimeAgo(dateString) {
 }
 
 function renderCommentBubble(c) {
-    const timeAgo = formatTimeAgo(c.created_at);
+    const isReply = !!c.replied_to_username;
+    const contentHtml = isReply 
+        ? `<span style="color: var(--primary-color); font-weight: bold;">@${escapeHtml(c.replied_to_username)}</span> ${escapeHtml(c.content)}`
+        : escapeHtml(c.content);
+
     return `
         <div class="comment-item" id="comment-${c.id}">
             <img src="${getAvatarUrl(c.photo_url)}" class="comment-avatar clickable-user" onclick="showUserProfile('${c.user_id}'); closeCommentsBottomSheet();" onerror="handleImageError(this)">
             <div class="comment-bubble-wrapper">
                 <div class="comment-bubble">
-                    <div class="comment-author-name clickable-user" onclick="showUserProfile('${c.user_id}'); closeCommentsBottomSheet();">${c.username}</div>
-                    <div class="comment-text">${escapeHtml(c.content)}</div>
+                    <div class="comment-author-name clickable-user" onclick="showUserProfile('${c.user_id}'); closeCommentsBottomSheet();">${escapeHtml(c.username)}</div>
+                    <div class="comment-text">${contentHtml}</div>
                 </div>
                 <div class="comment-actions">
-                    <span>${timeAgo}</span>
+                    <span class="comment-time">${formatTimeAgo(c.created_at)}</span>
                     <button class="comment-action-btn" onclick="replyToComment('${c.id}', '${escapeHtml(c.username)}')">Reply</button>
                 </div>
             </div>
@@ -1001,11 +1021,13 @@ async function showUserProfile(userId) {
             
             if (userId === currentUser.id) {
                 document.getElementById('edit-profile-btn').style.display = 'flex';
+                document.getElementById('view-archive-btn').style.display = 'flex';
                 document.getElementById('add-story-btn').style.display = 'flex';
                 document.getElementById('cover-camera-btn').style.display = 'flex';
                 document.getElementById('avatar-camera-btn').style.display = 'flex';
             } else {
                 document.getElementById('edit-profile-btn').style.display = 'none';
+                document.getElementById('view-archive-btn').style.display = 'none';
                 document.getElementById('add-story-btn').style.display = 'none';
                 document.getElementById('cover-camera-btn').style.display = 'none';
                 document.getElementById('avatar-camera-btn').style.display = 'none';
@@ -1177,11 +1199,54 @@ async function viewUserStories(userId) {
             document.getElementById('story-viewer-modal').style.display = 'flex';
             
             renderStoryProgress();
+            setupStoryTouchEvents();
             playStory();
         } else {
             showUserProfile(userId);
         }
     } catch(e) { console.error("Error fetching stories", e); }
+}
+
+let isStoryPaused = false;
+let storyTimeRemaining = STORY_DURATION;
+let storyStartTime = 0;
+
+function setupStoryTouchEvents() {
+    const mediaContainer = document.getElementById('story-media-container');
+    
+    // Prevent adding multiple listeners
+    const newContainer = mediaContainer.cloneNode(true);
+    mediaContainer.parentNode.replaceChild(newContainer, mediaContainer);
+    
+    newContainer.addEventListener('touchstart', () => {
+        isStoryPaused = true;
+        clearTimeout(storyTimer);
+        const video = newContainer.querySelector('video');
+        if (video) video.pause();
+        
+        const fill = document.getElementById(`story-progress-fill-${currentStoryIndex}`);
+        if (fill) {
+            fill.style.width = getComputedStyle(fill).width;
+            fill.style.transition = 'none';
+        }
+        storyTimeRemaining -= (Date.now() - storyStartTime);
+    });
+    
+    newContainer.addEventListener('touchend', () => {
+        isStoryPaused = false;
+        const video = newContainer.querySelector('video');
+        if (video) video.play();
+        
+        const fill = document.getElementById(`story-progress-fill-${currentStoryIndex}`);
+        if (fill && !video) {
+            fill.style.transition = `width ${storyTimeRemaining}ms linear`;
+            fill.style.width = '100%';
+        }
+        storyStartTime = Date.now();
+        if (!video) {
+            storyTimer = setTimeout(nextStory, storyTimeRemaining);
+        }
+    });
 }
 
 function renderStoryProgress() {
@@ -1213,6 +1278,25 @@ function playStory() {
     const story = currentStories[currentStoryIndex];
     const mediaContainer = document.getElementById('story-media-container');
     document.getElementById('story-time').innerText = formatTimeAgo(story.created_at);
+    
+    storyTimeRemaining = STORY_DURATION;
+    storyStartTime = Date.now();
+    
+    // Track View
+    fetch(`${API_BASE_URL}/stories/${story.id}/view`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: currentUser.id })
+    }).catch(e => console.error("Error tracking view", e));
+
+    // Update Viewers Button UI
+    const viewersBtn = document.getElementById('story-viewers-btn');
+    if (story.user_id === currentUser.id) {
+        viewersBtn.style.display = 'flex';
+        document.getElementById('story-viewers-count').innerText = story.viewers ? story.viewers.length : 0;
+    } else {
+        viewersBtn.style.display = 'none';
+    }
     
     // Update Like UI
     const likeIcon = document.getElementById('story-like-icon');
@@ -1273,16 +1357,74 @@ function playStory() {
 }
 
 function nextStory() {
-    currentStoryIndex++;
-    playStory();
+    if (currentStoryIndex < currentStories.length - 1) {
+        currentStoryIndex++;
+        playStory();
+    } else {
+        closeStoryViewer();
+    }
+}
+
+function prevStory() {
+    if (currentStoryIndex > 0) {
+        currentStoryIndex--;
+        playStory();
+    } else {
+        // Restart the first story
+        playStory();
+    }
 }
 
 function closeStoryViewer() {
     clearTimeout(storyTimer);
     document.getElementById('story-viewer-modal').style.display = 'none';
+    document.getElementById('story-viewers-modal').classList.remove('active');
     const mediaContainer = document.getElementById('story-media-container');
     mediaContainer.innerHTML = ''; // Stop video
     currentStories = [];
+}
+
+async function toggleStoryViewers() {
+    const modal = document.getElementById('story-viewers-modal');
+    if (modal.classList.contains('active')) {
+        modal.classList.remove('active');
+        return;
+    }
+    const story = currentStories[currentStoryIndex];
+    if (!story) return;
+    
+    const list = document.getElementById('story-viewers-list');
+    list.innerHTML = '<p style="text-align:center; padding: 20px;">Loading viewers...</p>';
+    modal.classList.add('active');
+    
+    try {
+        const res = await fetch(`${API_BASE_URL}/stories/${story.id}/view`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: currentUser.id })
+        });
+        const data = await res.json();
+        if (data.success && data.viewers) {
+            document.getElementById('story-viewers-count').innerText = data.viewers.length;
+            if (data.viewers.length === 0) {
+                list.innerHTML = '<p class="text-center text-muted" style="padding: 20px;">No viewers yet</p>';
+            } else {
+                list.innerHTML = data.viewers.map(v => {
+                    const user = v.user_id || {};
+                    return `
+                    <div class="user-list-item" onclick="showUserProfile('${user._id || user.id}')" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid var(--border-color);">
+                        <img src="${getAvatarUrl(user.photo_url)}" class="avatar" style="width: 40px; height: 40px;">
+                        <div>
+                            <strong>${escapeHtml(user.username || 'Unknown')}</strong>
+                            <div class="text-muted" style="font-size: 0.8em;">${formatTimeAgo(v.viewed_at)}</div>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        }
+    } catch(e) {
+        list.innerHTML = '<p class="text-center text-muted" style="padding: 20px;">Error loading viewers</p>';
+    }
 }
 
 async function toggleStoryLike(storyId) {
@@ -1370,12 +1512,137 @@ async function viewStoryLikes(storyId) {
 }
 
 // Full Screen Image Viewer
-function viewFullScreenImage(url) {
+// --- Lightbox Logic ---
+let lbScale = 1;
+let lbTransX = 0;
+let lbTransY = 0;
+let lbLastX = 0;
+let lbLastY = 0;
+let lbInitPinchDist = null;
+let lbInitScale = 1;
+let lbIsDragging = false;
+
+function setupLightboxEvents() {
+    const modal = document.getElementById('image-viewer-modal');
+    
+    modal.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            lbInitPinchDist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            lbInitScale = lbScale;
+            lbIsDragging = false;
+        } else if (e.touches.length === 1) {
+            lbIsDragging = true;
+            lbLastX = e.touches[0].clientX;
+            lbLastY = e.touches[0].clientY;
+        }
+    }, { passive: false });
+
+    modal.addEventListener('touchmove', (e) => {
+        if (!modal.classList.contains('active')) return;
+        e.preventDefault();
+        
+        if (e.touches.length === 2 && lbInitPinchDist) {
+            const currentDist = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            lbScale = Math.min(Math.max(1, lbInitScale * (currentDist / lbInitPinchDist)), 4);
+            updateLightboxTransform(false);
+        } else if (e.touches.length === 1 && lbIsDragging) {
+            const deltaX = e.touches[0].clientX - lbLastX;
+            const deltaY = e.touches[0].clientY - lbLastY;
+            lbLastX = e.touches[0].clientX;
+            lbLastY = e.touches[0].clientY;
+            
+            if (lbScale > 1) {
+                lbTransX += deltaX;
+                lbTransY += deltaY;
+                updateLightboxTransform(false);
+            } else {
+                if (deltaY > 15) {
+                    closeFullScreenImage();
+                }
+            }
+        }
+    }, { passive: false });
+
+    modal.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2) lbInitPinchDist = null;
+        if (e.touches.length === 0) {
+            lbIsDragging = false;
+            // Snap back
+            if (lbScale <= 1) {
+                lbScale = 1;
+                lbTransX = 0;
+                lbTransY = 0;
+                updateLightboxTransform(true);
+            }
+        }
+    });
+}
+
+function updateLightboxTransform(animate) {
+    const img = document.getElementById('full-screen-image');
+    img.style.transition = animate ? 'transform 0.3s ease-out' : 'none';
+    img.style.transform = `translate(${lbTransX}px, ${lbTransY}px) scale(${lbScale})`;
+}
+
+function viewFullScreenImage(event, url) {
     if (!url) return;
+    const target = event.target;
+    const rect = target.getBoundingClientRect();
+    
     const modal = document.getElementById('image-viewer-modal');
     const img = document.getElementById('full-screen-image');
+    
     img.src = url;
+    document.body.classList.add('modal-open');
     modal.classList.add('active');
+    
+    lbScale = 1;
+    lbTransX = 0;
+    lbTransY = 0;
+    
+    // Set initial position based on clicked image
+    img.style.transition = 'none';
+    img.style.width = `${rect.width}px`;
+    img.style.height = `${rect.height}px`;
+    // Center calculation logic
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    const targetCenterX = rect.left + rect.width / 2;
+    const targetCenterY = rect.top + rect.height / 2;
+    
+    const startX = targetCenterX - centerX;
+    const startY = targetCenterY - centerY;
+    
+    img.style.transform = `translate(${startX}px, ${startY}px) scale(1)`;
+    
+    // Force layout reflow
+    void img.offsetWidth;
+    
+    // Animate to center
+    img.style.transition = 'transform 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out';
+    img.style.width = '100%';
+    img.style.height = '100vh';
+    img.style.transform = `translate(0px, 0px) scale(1)`;
+}
+
+function closeFullScreenImage() {
+    const modal = document.getElementById('image-viewer-modal');
+    const img = document.getElementById('full-screen-image');
+    
+    modal.classList.remove('active');
+    document.body.classList.remove('modal-open');
+    
+    setTimeout(() => {
+        img.src = '';
+        img.style.transform = '';
+        img.style.transition = '';
+    }, 300);
 }
 
 // Favorites in Settings
@@ -1405,5 +1672,46 @@ async function loadFavorites() {
     } catch (e) {
         console.error(e);
         feed.innerHTML = '<p class="text-center text-muted mt-4">Failed to load favorites.</p>';
+    }
+}
+
+async function viewStoryArchive() {
+    const modal = document.getElementById('archive-modal');
+    const feed = document.getElementById('archive-feed');
+    feed.innerHTML = '<p class="text-center text-muted" style="grid-column: span 3; padding: 20px;">Loading archive...</p>';
+    modal.classList.add('active');
+    
+    try {
+        const res = await fetch(`${API_BASE_URL}/stories/archive?user_id=${currentUser.id}`);
+        const data = await res.json();
+        
+        if (data.stories && data.stories.length > 0) {
+            feed.innerHTML = data.stories.map(story => {
+                const mediaHtml = story.media_type === 'video' 
+                    ? `<video src="${story.media_url}" style="width:100%; height:120px; object-fit:cover;"></video>`
+                    : `<img src="${story.media_url}" style="width:100%; height:120px; object-fit:cover;">`;
+                return `
+                <div style="position:relative; cursor:pointer;" onclick="viewArchivedStory(event, '${story.id}')">
+                    ${mediaHtml}
+                    <div style="position:absolute; bottom:5px; right:5px; background:rgba(0,0,0,0.5); padding:2px 5px; border-radius:10px; font-size:0.7rem; color:white;">
+                        ${new Date(story.created_at).toLocaleDateString()}
+                    </div>
+                </div>`;
+            }).join('');
+            
+            window.archivedStories = data.stories;
+        } else {
+            feed.innerHTML = '<p class="text-center text-muted" style="grid-column: span 3; padding: 20px;">No archived stories found.</p>';
+        }
+    } catch(e) {
+        feed.innerHTML = '<p class="text-center text-muted" style="grid-column: span 3; padding: 20px;">Error loading archive</p>';
+    }
+}
+
+function viewArchivedStory(event, storyId) {
+    if (!window.archivedStories) return;
+    const story = window.archivedStories.find(s => s.id === storyId);
+    if (story) {
+        viewFullScreenImage(event, story.media_url);
     }
 }

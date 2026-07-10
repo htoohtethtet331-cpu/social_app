@@ -466,8 +466,30 @@ app.post('/api/posts/:id/comments', async (req, res) => {
     if (!user_id || !content) return res.status(400).json({ error: 'User ID and content required' });
 
     try {
-        let comment = await Comment.create({ post_id: postId, user_id, content, parent_id: parent_id || null });
+        let actualParentId = parent_id || null;
+        let actualRepliedToUserId = null;
+        
+        if (parent_id) {
+            const parentComment = await Comment.findById(parent_id);
+            if (parentComment) {
+                if (parentComment.parent_id) {
+                    // Flattening Logic: If replying to a reply, use the root's ID as parent
+                    actualParentId = parentComment.parent_id;
+                } else {
+                    // Replying to a root comment
+                    actualParentId = parentComment._id;
+                }
+                // We are targeting the author of the comment we clicked "Reply" on
+                actualRepliedToUserId = parentComment.user_id;
+            }
+        }
+        
+        let comment = await Comment.create({ post_id: postId, user_id, content, parent_id: actualParentId, replied_to_user_id: actualRepliedToUserId });
         comment = await comment.populate('user_id', 'username photo_url');
+        if (comment.replied_to_user_id) {
+            comment = await comment.populate('replied_to_user_id', 'username');
+        }
+        
         const formattedComment = {
             id: comment._id,
             post_id: comment.post_id,
@@ -476,6 +498,7 @@ app.post('/api/posts/:id/comments', async (req, res) => {
             photo_url: comment.user_id ? comment.user_id.photo_url : null,
             content: comment.content,
             parent_id: comment.parent_id,
+            replied_to_username: comment.replied_to_user_id ? comment.replied_to_user_id.username : null,
             created_at: comment.created_at
         };
         const count = await Comment.countDocuments({ post_id: postId });
@@ -483,25 +506,29 @@ app.post('/api/posts/:id/comments', async (req, res) => {
         
         // Notification logic
         const post = await Post.findById(postId);
-        if (parent_id) {
-            const parentComment = await Comment.findById(parent_id);
-            if (parentComment && parentComment.user_id.toString() !== user_id) {
-                const notif = await Notification.create({
-                    receiver_id: parentComment.user_id,
-                    actor_id: user_id,
-                    type: 'reply',
-                    post_id: post._id
-                });
-                const populatedNotif = await notif.populate('actor_id', 'username photo_url');
-                req.io.emit(`new_notification_${parentComment.user_id}`, populatedNotif);
-                sendTelegramNotification(parentComment.user_id, `${populatedNotif.actor_id.username} replied to your comment.`);
-            }
-        } else if (post && post.user_id.toString() !== user_id) {
+        
+        // Target: Replied User
+        if (actualRepliedToUserId && actualRepliedToUserId.toString() !== user_id) {
+            const notif = await Notification.create({
+                receiver_id: actualRepliedToUserId,
+                actor_id: user_id,
+                type: 'reply',
+                post_id: post._id,
+                comment_id: comment._id
+            });
+            const populatedNotif = await notif.populate('actor_id', 'username photo_url');
+            req.io.emit(`new_notification_${actualRepliedToUserId}`, populatedNotif);
+            sendTelegramNotification(actualRepliedToUserId, `${populatedNotif.actor_id.username} replied to your comment.`);
+        }
+        
+        // Target: Post Owner (only if they are not the ones who just got notified as the replied user)
+        if (post && post.user_id.toString() !== user_id && post.user_id.toString() !== (actualRepliedToUserId ? actualRepliedToUserId.toString() : '')) {
             const notif = await Notification.create({
                 receiver_id: post.user_id,
                 actor_id: user_id,
                 type: 'comment',
-                post_id: post._id
+                post_id: post._id,
+                comment_id: comment._id
             });
             const populatedNotif = await notif.populate('actor_id', 'username photo_url');
             req.io.emit(`new_notification_${post.user_id}`, populatedNotif);
@@ -517,7 +544,11 @@ app.post('/api/posts/:id/comments', async (req, res) => {
 // Get Comments for a Post
 app.get('/api/posts/:id/comments', async (req, res) => {
     try {
-        const comments = await Comment.find({ post_id: req.params.id }).populate('user_id', 'username photo_url').sort({ created_at: 1 });
+        const comments = await Comment.find({ post_id: req.params.id })
+            .populate('user_id', 'username photo_url')
+            .populate('replied_to_user_id', 'username')
+            .sort({ created_at: 1 });
+            
         const formatComments = comments.map(c => ({
             id: c._id,
             post_id: c.post_id,
@@ -526,6 +557,7 @@ app.get('/api/posts/:id/comments', async (req, res) => {
             photo_url: c.user_id ? c.user_id.photo_url : null,
             content: c.content,
             parent_id: c.parent_id,
+            replied_to_username: c.replied_to_user_id ? c.replied_to_user_id.username : null,
             created_at: c.created_at
         }));
         res.json({ comments: formatComments });
@@ -648,7 +680,8 @@ app.post('/api/stories', upload.single('media'), async (req, res) => {
     deleteLocalFile(req.file.path);
 
     try {
-        const story = await Story.create({ user_id, media_url, media_type });
+        const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const story = await Story.create({ user_id, media_url, media_type, expires_at });
         res.json({ success: true, story });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -663,7 +696,10 @@ app.get('/api/users/:id/stories', async (req, res) => {
         const user = await User.findById(userId).select('id username photo_url');
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        const stories = await Story.find({ user_id: userId }).sort({ created_at: 1 });
+        const stories = await Story.find({ 
+            user_id: userId,
+            $or: [ { expires_at: { $gt: new Date() } }, { expires_at: { $exists: false } } ]
+        }).sort({ created_at: 1 });
         res.json({ user, stories });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -726,7 +762,9 @@ app.get('/api/stories/:id/likes', async (req, res) => {
 // 16. Get All Users with Active Stories
 app.get('/api/stories', async (req, res) => {
     try {
-        const stories = await Story.find().populate('user_id', 'username photo_url');
+        const stories = await Story.find({
+            $or: [ { expires_at: { $gt: new Date() } }, { expires_at: { $exists: false } } ]
+        }).populate('user_id', 'username photo_url');
         
         const grouped = {};
         stories.forEach(story => {
@@ -748,6 +786,44 @@ app.get('/api/stories', async (req, res) => {
     }
 });
 
+// 17. Get Archived Stories for a User
+app.get('/api/stories/archive', async (req, res) => {
+    const user_id = req.query.user_id;
+    if (!user_id) return res.status(400).json({ error: 'User ID required' });
+    try {
+        const archivedStories = await Story.find({
+            user_id,
+            expires_at: { $lte: new Date() }
+        }).sort({ created_at: -1 });
+        res.json({ stories: archivedStories });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 18. Track Story View
+app.post('/api/stories/:id/view', async (req, res) => {
+    const storyId = req.params.id;
+    const { user_id } = req.body;
+    if (!user_id) return res.status(400).json({ error: 'User ID required' });
+    try {
+        const story = await Story.findById(storyId).populate('viewers.user_id', 'username photo_url');
+        if (!story) return res.status(404).json({ error: 'Story not found' });
+        
+        // Prevent story owner from being counted as a viewer, or count it? Usually owners aren't counted in 'seen by'.
+        if (story.user_id.toString() !== user_id) {
+            const hasViewed = story.viewers && story.viewers.some(v => v.user_id && v.user_id._id.toString() === user_id);
+            if (!hasViewed) {
+                story.viewers.push({ user_id, viewed_at: new Date() });
+                await story.save();
+                await story.populate('viewers.user_id', 'username photo_url');
+            }
+        }
+        res.json({ success: true, viewers: story.viewers || [] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // Fallback route for frontend
 app.use((req, res) => {

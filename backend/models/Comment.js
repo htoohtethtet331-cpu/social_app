@@ -5,6 +5,7 @@ const commentSchema = new mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   content: String,
   parent_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment', default: null },
+  replied_to_user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   created_at: { type: Date, default: Date.now }
 });
 

@@ -1534,3 +1534,96 @@ body.dark-mode .skeleton {
     color: var(--secondary-text);
 }
 
+/* --- Lightbox System --- */
+body.modal-open {
+    overflow: hidden; /* Lock background scroll */
+}
+
+.image-lightbox-modal {
+    background-color: transparent !important; /* Managed by overlay */
+    display: none;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+.image-lightbox-modal.active {
+    display: flex;
+}
+
+.lightbox-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0);
+    transition: background-color 0.3s ease;
+    z-index: 1;
+}
+
+.image-lightbox-modal.active .lightbox-overlay {
+    background-color: rgba(0, 0, 0, 0.95);
+}
+
+.lightbox-header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 60px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-lightbox-modal.active .lightbox-header {
+    opacity: 1;
+}
+
+.lightbox-close {
+    color: #fff;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.lightbox-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#full-screen-image {
+    max-width: 100%;
+    max-height: 100vh;
+    object-fit: contain;
+    transform-origin: center center;
+    will-change: transform;
+}
+
+/* --- Story UX Additions --- */
+.story-tap-zone {
+    position: absolute;
+    top: 60px; /* Below header */
+    bottom: 80px; /* Above actions */
+    width: 30%;
+    z-index: 3001;
+}
+.story-tap-zone.left { left: 0; }
+.story-tap-zone.right { right: 0; }
+
+/* --- Comment Highlight Animation --- */
+@keyframes highlight-fade {
+    0% { background-color: rgba(29, 155, 240, 0.3); }
+    100% { background-color: transparent; }
+}
+
+.highlight-fade {
+    animation: highlight-fade 3s ease-out forwards;
+}

@@ -6,6 +6,7 @@ const NotificationSchema = new mongoose.Schema({
     type: { type: String, enum: ['like', 'comment', 'reply', 'favorite', 'story_like'], required: true },
     post_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
     story_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Story' },
+    comment_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Comment' },
     status: { type: String, enum: ['unread', 'read'], default: 'unread' },
     created_at: { type: Date, default: Date.now }
 });

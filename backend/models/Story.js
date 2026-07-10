@@ -4,7 +4,12 @@ const storySchema = new mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   media_url: String,
   media_type: String,
-  created_at: { type: Date, default: Date.now }
+  created_at: { type: Date, default: Date.now },
+  expires_at: { type: Date },
+  viewers: [{
+      user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      viewed_at: { type: Date, default: Date.now }
+  }]
 });
 
 storySchema.virtual('id').get(function() { return this._id.toHexString(); });
