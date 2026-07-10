@@ -947,3 +947,12 @@ async function viewStoryLikes(storyId) {
         };
     } catch(e) { console.error(e); }
 }
+
+// Full Screen Image Viewer
+function viewFullScreenImage(url) {
+    if (!url) return;
+    const modal = document.getElementById('image-viewer-modal');
+    const img = document.getElementById('full-screen-image');
+    img.src = url;
+    modal.classList.add('active');
+}
