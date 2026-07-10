@@ -1447,8 +1447,10 @@ async function toggleStoryViewers() {
     const modal = document.getElementById('story-viewers-modal');
     if (modal.classList.contains('active')) {
         modal.classList.remove('active');
+        resumeStory();
         return;
     }
+    pauseStory();
     const story = currentStories[currentStoryIndex];
     if (!story) return;
     
