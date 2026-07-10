@@ -460,13 +460,20 @@ function showNewPosts() {
 
 // Navigation Functions
 function switchTab(tabName, userId = null) {
-    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    
+    // Check if the tab name corresponds to a navigation button
+    const navBtn = document.querySelector(`.nav-btn[onclick*="${tabName}"]`);
+    if (navBtn) navBtn.classList.add('active');
+
+    if (tabName === 'profile') {
+        showUserProfile(userId || currentUser.id);
+    }
     
     // Hide all main sections
     document.getElementById('posts-feed').style.display = 'none';
     document.getElementById('user-profile-section').style.display = 'none';
     document.getElementById('users-list-section').style.display = 'none';
-    document.getElementById('settings-section').style.display = 'none';
     document.getElementById('notifications-section').style.display = 'none';
     
     if (tabName === 'home') {
@@ -489,9 +496,19 @@ function switchTab(tabName, userId = null) {
         document.getElementById('notifications-section').style.display = 'block';
         loadNotifications();
         markNotificationsRead();
-    } else if (tabName === 'settings') {
-        // no nav item to add active to since it's an icon in the header now
-        document.getElementById('settings-section').style.display = 'block';
+    }
+}
+
+// Settings Drawer Logic
+function toggleSettingsDrawer() {
+    const drawer = document.getElementById('settings-drawer');
+    const backdrop = document.getElementById('settings-backdrop');
+    if (drawer.classList.contains('active')) {
+        drawer.classList.remove('active');
+        backdrop.classList.remove('active');
+    } else {
+        drawer.classList.add('active');
+        backdrop.classList.add('active');
     }
 }
 
