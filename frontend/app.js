@@ -115,6 +115,31 @@ function getAvatarUrl(url) {
     return url;
 }
 
+function createProgressiveImageHtml(url, classNames = '', onClickCode = '') {
+    if (!url) return '';
+    if (url.includes('res.cloudinary.com')) {
+        const parts = url.split('/upload/');
+        if (parts.length === 2) {
+            const tinyUrl = parts[0] + '/upload/w_50,e_blur:1000/' + parts[1];
+            return `<img src="${tinyUrl}" data-src="${url}" class="${classNames} progressive-img blur" ${onClickCode} onload="loadHighResImage(this)">`;
+        }
+    }
+    return `<img src="${url}" class="${classNames}" ${onClickCode}>`;
+}
+
+function loadHighResImage(img) {
+    if (!img.dataset.src || img.classList.contains('loaded')) return;
+    const highRes = new Image();
+    highRes.onload = () => {
+        img.src = img.dataset.src;
+        img.classList.remove('blur');
+        img.classList.add('loaded');
+        img.removeAttribute('onload');
+    };
+    highRes.src = img.dataset.src;
+}
+
+
 function setupUI() {
     
     const profileImg = document.getElementById('profile-photo');
@@ -342,7 +367,18 @@ async function loadAllUsers(silent = false) {
     const container = document.getElementById('users-list-container');
     if (!silent) {
         if (!container.innerHTML.includes('user-list-item')) {
-            container.innerHTML = '<p class="loading-text">Loading users...</p>';
+            const skeletonHtml = `
+                <div class="user-list-item" style="border: none;">
+                    <div class="avatar-wrapper">
+                        <div class="skeleton skeleton-avatar"></div>
+                    </div>
+                    <div class="user-list-info" style="flex: 1; margin-left: 10px;">
+                        <div class="skeleton skeleton-text short"></div>
+                        <div class="skeleton skeleton-text full"></div>
+                    </div>
+                </div>
+            `.repeat(4);
+            container.innerHTML = skeletonHtml;
         }
     }
     
@@ -431,9 +467,24 @@ function openCreatePostModal() {
 async function loadPosts(silent = false) {
     const feed = document.getElementById('posts-feed');
     if (!silent) {
-        // Only show loading text if not silently refreshing
+        // Only show skeletons if not silently refreshing
         if (!feed.innerHTML.includes('post-item')) {
-            feed.innerHTML = '<p class="loading-text">Loading...</p>';
+            const skeletonHtml = `
+                <div class="skeleton-post">
+                    <div class="skeleton-header">
+                        <div class="skeleton skeleton-avatar"></div>
+                        <div class="skeleton-header-info">
+                            <div class="skeleton skeleton-text short"></div>
+                            <div class="skeleton skeleton-text medium"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton skeleton-text full"></div>
+                    <div class="skeleton skeleton-text full"></div>
+                    <div class="skeleton skeleton-text medium"></div>
+                    <div class="skeleton skeleton-image"></div>
+                </div>
+            `.repeat(3);
+            feed.innerHTML = skeletonHtml;
         }
     }
     try {
@@ -495,9 +546,9 @@ function createPostHtml(post) {
             <div class="post-body">${escapeHtml(post.content || '')}</div>
             ${post.image_urls && post.image_urls.length > 0 ? `
                 <div class="post-images-grid ${post.layout_type}">
-                    ${post.image_urls.map((url, i) => `<img src="${url}" class="post-grid-img img-${i}" onclick="viewFullScreenImage('${url}')">`).join('')}
+                    ${post.image_urls.map((url, i) => createProgressiveImageHtml(url, `post-grid-img img-${i}`, `onclick="viewFullScreenImage('${url}')"`)).join('')}
                 </div>
-            ` : (post.image_url ? `<img src="${post.image_url}" class="post-image" onclick="viewFullScreenImage('${post.image_url}')">` : '')}
+            ` : (post.image_url ? createProgressiveImageHtml(post.image_url, 'post-image', `onclick="viewFullScreenImage('${post.image_url}')"`) : '')}
             
             <div class="post-stats">
                 <span id="like-count-${post.id}" onclick="viewPostLikes('${post.id}')" style="cursor: pointer;">${post.like_count} Likes</span>
@@ -801,7 +852,29 @@ async function showUserProfile(userId) {
         const profileSection = document.getElementById('user-profile-section');
         const userPostsFeed = document.getElementById('user-posts-feed');
         profileSection.style.display = 'block';
-        userPostsFeed.innerHTML = '<p class="loading-text">Loading user profile...</p>';
+        
+        userPostsFeed.innerHTML = `
+            <div class="skeleton-post">
+                <div class="skeleton-header">
+                    <div class="skeleton skeleton-avatar"></div>
+                    <div class="skeleton-header-info">
+                        <div class="skeleton skeleton-text short"></div>
+                        <div class="skeleton skeleton-text medium"></div>
+                    </div>
+                </div>
+                <div class="skeleton skeleton-text full"></div>
+                <div class="skeleton skeleton-text full"></div>
+                <div class="skeleton skeleton-text medium"></div>
+            </div>
+        `.repeat(2);
+        
+        const hlContainer = document.getElementById('profile-highlights-container');
+        hlContainer.style.display = 'flex';
+        hlContainer.innerHTML = `
+            <div class="highlight-item"><div class="skeleton skeleton-avatar" style="width:70px; height:70px; border-radius:50%;"></div></div>
+            <div class="highlight-item"><div class="skeleton skeleton-avatar" style="width:70px; height:70px; border-radius:50%;"></div></div>
+            <div class="highlight-item"><div class="skeleton skeleton-avatar" style="width:70px; height:70px; border-radius:50%;"></div></div>
+        `;
 
         // Fetch User Info
         const userRes = await fetch(`${API_BASE_URL}/users/${userId}`);
