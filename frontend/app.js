@@ -218,7 +218,7 @@ let socket;
 let pendingNewPosts = [];
 
 function initSocket() {
-    socket = io(API_BASE_URL);
+    socket = io('/', { transports: ['websocket'] });
 
     socket.on('new_post', (post) => {
         // If it's my own post, I might already have it or I don't want the pill
