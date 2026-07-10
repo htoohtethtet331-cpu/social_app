@@ -37,9 +37,10 @@ async function initApp() {
         if (!currentUser.photo_url) {
             showPhotoModal();
         } else {
+            setupUI();
             initSocket();
-        fetchInitialNotifications();
-        loadPosts();
+            fetchInitialNotifications();
+            loadPosts();
         }
     } catch (error) {
         console.error("Failed to auth user:", error);
