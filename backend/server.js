@@ -187,9 +187,9 @@ app.get('/api/posts', async (req, res) => {
                 content: post.content,
                 image_url: post.image_url,
                 created_at: post.created_at,
-                likes: likeData ? likeData.count : 0,
-                comments: commentData ? commentData.count : 0,
-                liked_by_user: userLikeSet.has(post._id.toString()) ? 1 : 0
+                like_count: likeData ? likeData.count : 0,
+                comment_count: commentData ? commentData.count : 0,
+                has_liked: userLikeSet.has(post._id.toString()) ? 1 : 0
             };
         });
         
@@ -322,9 +322,9 @@ app.get('/api/users/:id/posts', async (req, res) => {
                 content: post.content,
                 image_url: post.image_url,
                 created_at: post.created_at,
-                likes: likeData ? likeData.count : 0,
-                comments: commentData ? commentData.count : 0,
-                liked_by_user: userLikeSet.has(post._id.toString()) ? 1 : 0
+                like_count: likeData ? likeData.count : 0,
+                comment_count: commentData ? commentData.count : 0,
+                has_liked: userLikeSet.has(post._id.toString()) ? 1 : 0
             };
         });
         

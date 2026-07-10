@@ -193,7 +193,7 @@ function setupUI() {
 }
 
 // Navigation Functions
-function switchTab(tabName) {
+function switchTab(tabName, userId = null) {
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     
     // Hide all main sections
@@ -211,7 +211,11 @@ function switchTab(tabName) {
         loadAllUsers();
     } else if (tabName === 'profile') {
         document.getElementById('nav-profile').classList.add('active');
-        showUserProfile(currentUser.id);
+        if (userId) {
+            showUserProfile(userId);
+        } else {
+            showUserProfile(currentUser.id);
+        }
     } else if (tabName === 'settings') {
         document.getElementById('nav-settings').classList.add('active');
         document.getElementById('settings-section').style.display = 'block';
@@ -233,7 +237,7 @@ async function loadAllUsers() {
                 const bio = user.bio || 'No bio available';
                 
                 const userHtml = `
-                    <div class="user-list-item" onclick="switchTab('profile'); showUserProfile('${user.id}');">
+                    <div class="user-list-item" onclick="switchTab('profile', '${user.id}');">
                         <img src="${photoUrl}" alt="${user.username}" class="user-list-avatar">
                         <div class="user-list-info">
                             <h3 class="user-list-name">${user.username}</h3>
