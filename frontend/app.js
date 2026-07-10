@@ -1595,7 +1595,86 @@ function viewFullScreenImage(event, url) {
     const target = event.target;
     const rect = target.getBoundingClientRect();
     
-    const modal = document.getElementById('image-viewer-modal');
+    // 1. Dynamically inject CSS if missing to bypass ANY mobile cache issues
+    if (!document.getElementById('lightbox-dynamic-css')) {
+        const style = document.createElement('style');
+        style.id = 'lightbox-dynamic-css';
+        style.innerHTML = `
+            .image-lightbox-modal {
+                background-color: transparent !important;
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                z-index: 5000;
+            }
+            .image-lightbox-modal.active {
+                display: block !important;
+            }
+            .lightbox-overlay {
+                position: absolute;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background-color: rgba(0, 0, 0, 0);
+                transition: background-color 0.3s ease;
+                z-index: 1;
+            }
+            .image-lightbox-modal.active .lightbox-overlay {
+                background-color: rgba(0, 0, 0, 0.95) !important;
+            }
+            .lightbox-header {
+                position: absolute;
+                top: 0; left: 0; right: 0;
+                height: 60px;
+                z-index: 3;
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                padding: 0 20px;
+            }
+            .lightbox-close {
+                color: white;
+                font-size: 30px;
+                cursor: pointer;
+                text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            }
+            .lightbox-content {
+                position: absolute;
+                top: 0; left: 0; right: 0; bottom: 0;
+                z-index: 2;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                pointer-events: none;
+            }
+            #full-screen-image {
+                max-width: 100%;
+                max-height: 100vh;
+                object-fit: contain;
+                transform-origin: center center;
+                will-change: transform;
+                pointer-events: auto;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // 2. Dynamically inject HTML if missing
+    let modal = document.getElementById('image-viewer-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.className = 'modal image-lightbox-modal';
+        modal.id = 'image-viewer-modal';
+        modal.innerHTML = `
+            <div class="lightbox-overlay" id="lightbox-overlay" onclick="closeFullScreenImage()"></div>
+            <div class="lightbox-header">
+                <span class="lightbox-close" id="lightbox-close" onclick="closeFullScreenImage()">&times;</span>
+            </div>
+            <div class="lightbox-content" id="lightbox-content">
+                <img id="full-screen-image">
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
     const img = document.getElementById('full-screen-image');
     
     img.src = url;
@@ -1610,7 +1689,7 @@ function viewFullScreenImage(event, url) {
     img.style.transition = 'none';
     img.style.width = `${rect.width}px`;
     img.style.height = `${rect.height}px`;
-    // Center calculation logic
+    
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
     const targetCenterX = rect.left + rect.width / 2;
@@ -1625,8 +1704,8 @@ function viewFullScreenImage(event, url) {
     void img.offsetWidth;
     
     // Animate to center
-    img.style.transition = 'transform 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out';
-    img.style.width = '100%';
+    img.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1), height 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+    img.style.width = '100vw';
     img.style.height = '100vh';
     img.style.transform = `translate(0px, 0px) scale(1)`;
 }
