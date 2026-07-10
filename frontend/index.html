@@ -6,7 +6,7 @@
     <title>Telegram Web App</title>
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css?v=12">
+    <link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
     <div class="app-container">
@@ -81,7 +81,7 @@
                         <div class="fb-profile-actions">
                             <button id="add-story-btn" class="fb-action-btn primary" style="display: none;" onclick="document.getElementById('story-upload').click()">
                                 <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-                                Add to story
+                                Add Highlight
                             </button>
                             <input type="file" id="story-upload" accept="image/*,video/*" class="hidden-file-input">
                             <button id="edit-profile-btn" class="fb-action-btn secondary" style="display: none;" onclick="openBioModal()">
@@ -89,6 +89,10 @@
                                 Edit profile
                             </button>
                         </div>
+                    </div>
+                    
+                    <div class="profile-highlights-container" id="profile-highlights-container">
+                        <!-- Highlights injected here -->
                     </div>
                 </div>
                 <div id="user-posts-feed" class="posts-feed">
@@ -267,6 +271,6 @@
         </nav>
     </div>
 
-    <script src="app.js?v=13"></script>
+    <script src="app.js?v=14"></script>
 </body>
 </html>

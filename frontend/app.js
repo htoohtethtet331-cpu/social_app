@@ -312,7 +312,7 @@ function createPostHtml(post) {
     return `
         <div class="post-item" id="post-${post.id}">
             <div class="post-header">
-                <img src="${getAvatarUrl(post.photo_url)}" alt="${post.username}" class="avatar clickable-user" onclick="viewUserStories('${post.user_id}')">
+                <img src="${getAvatarUrl(post.photo_url)}" alt="${post.username}" class="avatar clickable-user" onclick="showUserProfile('${post.user_id}')">
                 <div class="post-meta">
                     <span class="post-author clickable-user" onclick="showUserProfile('${post.user_id}')">${post.username}</span>
                     <span class="post-date">${date}</span>
@@ -573,7 +573,7 @@ async function showUserProfile(userId) {
         
         if (userData.user) {
             document.getElementById('profile-banner-avatar').src = getAvatarUrl(userData.user.photo_url);
-            document.getElementById('profile-banner-avatar').onclick = () => viewUserStories(userData.user.id);
+            document.getElementById('profile-banner-avatar').onclick = null;
             document.getElementById('profile-banner-cover').src = userData.user.cover_url ? userData.user.cover_url : 'https://via.placeholder.com/600x200?text=No+Cover+Photo';
             document.getElementById('profile-banner-name').innerText = userData.user.username;
             document.getElementById('profile-banner-bio').innerText = userData.user.bio || 'No bio yet.';
@@ -594,6 +594,22 @@ async function showUserProfile(userId) {
         // Fetch User Posts
         const postsRes = await fetch(`${API_BASE_URL}/users/${userId}/posts?user_id=${currentUser.id}`);
         const postsData = await postsRes.json();
+
+        // Fetch User Highlights
+        const hlRes = await fetch(`${API_BASE_URL}/users/${userId}/stories?viewer_id=${currentUser.id}`);
+        const hlData = await hlRes.json();
+        
+        const hlContainer = document.getElementById('profile-highlights-container');
+        if (hlData.stories && hlData.stories.length > 0) {
+            hlContainer.innerHTML = hlData.stories.map((story, i) => `
+                <div class="highlight-item" onclick="viewUserStories('${userId}')">
+                    <img src="${story.media_url}" class="highlight-circle">
+                </div>
+            `).join('');
+            hlContainer.style.display = 'flex';
+        } else {
+            hlContainer.style.display = 'none';
+        }
 
         if (postsData.posts && postsData.posts.length > 0) {
             document.getElementById('profile-stats-posts').innerText = postsData.posts.length;

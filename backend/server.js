@@ -364,13 +364,12 @@ app.post('/api/stories', upload.single('media'), async (req, res) => {
 // 13. Get Active Stories for a User
 app.get('/api/users/:id/stories', async (req, res) => {
     const userId = req.params.id;
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     try {
         const user = await User.findById(userId).select('id username photo_url');
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        const stories = await Story.find({ user_id: userId, created_at: { $gt: twentyFourHoursAgo } }).sort({ created_at: 1 });
+        const stories = await Story.find({ user_id: userId }).sort({ created_at: 1 });
         res.json({ user, stories });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -417,10 +416,8 @@ app.get('/api/stories/:id/likes', async (req, res) => {
 
 // 16. Get All Users with Active Stories
 app.get('/api/stories', async (req, res) => {
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
     try {
-        const stories = await Story.find({ created_at: { $gt: twentyFourHoursAgo } }).populate('user_id', 'username photo_url');
+        const stories = await Story.find().populate('user_id', 'username photo_url');
         
         const grouped = {};
         stories.forEach(story => {
