@@ -154,7 +154,7 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
                 user_id: post.user_id._id,
                 username: post.user_id.username,
                 photo_url: post.user_id.photo_url,
-                last_active: post.user_id.last_active,
+                is_active: post.user_id.last_active ? (Date.now() - new Date(post.user_id.last_active).getTime() < 300000) : false,
                 content: post.content,
                 image_url: post.image_url,
                 created_at: post.created_at,
@@ -200,7 +200,7 @@ app.get('/api/posts', async (req, res) => {
                 user_id: post.user_id ? post.user_id._id : null,
                 username: post.user_id ? post.user_id.username : 'Unknown',
                 photo_url: post.user_id ? post.user_id.photo_url : null,
-                last_active: post.user_id ? post.user_id.last_active : null,
+                is_active: post.user_id && post.user_id.last_active ? (Date.now() - new Date(post.user_id.last_active).getTime() < 300000) : false,
                 content: post.content,
                 image_url: post.image_url,
                 created_at: post.created_at,
@@ -302,7 +302,11 @@ app.get('/api/posts/:id/comments', async (req, res) => {
 app.get('/api/users', async (req, res) => {
     try {
         const users = await User.find().select('id username photo_url bio last_active');
-        res.json({ users });
+        const mappedUsers = users.map(u => ({
+            ...u.toObject({ virtuals: true }),
+            is_active: u.last_active ? (Date.now() - new Date(u.last_active).getTime() < 300000) : false
+        }));
+        res.json({ users: mappedUsers });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -313,7 +317,11 @@ app.get('/api/users/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select('id username photo_url cover_url bio last_active');
         const posts_count = await Post.countDocuments({ user_id: req.params.id });
-        res.json({ user, posts_count });
+        const mappedUser = {
+            ...user.toObject({ virtuals: true }),
+            is_active: user.last_active ? (Date.now() - new Date(user.last_active).getTime() < 300000) : false
+        };
+        res.json({ user: mappedUser, posts_count });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

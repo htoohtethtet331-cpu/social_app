@@ -258,25 +258,40 @@ async function loadAllUsers(silent = false) {
         const data = await res.json();
         
         if (data.users && data.users.length > 0) {
-            container.innerHTML = '';
+            if (!silent) container.innerHTML = '';
+            
             data.users.forEach(user => {
-                const photoUrl = user.photo_url || 'https://via.placeholder.com/150';
-                const bio = user.bio || 'No bio available';
-                const isActive = user.last_active && (new Date() - new Date(user.last_active) < 300000);
+                const existingUser = document.getElementById(`user-item-${user.id}`);
+                const isActive = user.is_active;
                 
-                const userHtml = `
-                    <div class="user-list-item" onclick="switchTab('profile', '${user.id}');">
-                        <div class="avatar-wrapper">
-                            <img src="${photoUrl}" alt="${user.username}" class="user-list-avatar">
-                            ${isActive ? '<div class="active-dot"></div>' : ''}
+                if (existingUser && silent) {
+                    const avatarWrapper = existingUser.querySelector('.avatar-wrapper');
+                    if (avatarWrapper) {
+                        let dot = avatarWrapper.querySelector('.active-dot');
+                        if (isActive && !dot) {
+                            avatarWrapper.insertAdjacentHTML('beforeend', '<div class="active-dot"></div>');
+                        } else if (!isActive && dot) {
+                            dot.remove();
+                        }
+                    }
+                } else if (!existingUser) {
+                    const photoUrl = user.photo_url || 'https://via.placeholder.com/150';
+                    const bio = user.bio || 'No bio available';
+                    
+                    const userHtml = `
+                        <div class="user-list-item" id="user-item-${user.id}" onclick="switchTab('profile', '${user.id}');">
+                            <div class="avatar-wrapper">
+                                <img src="${photoUrl}" alt="${user.username}" class="user-list-avatar">
+                                ${isActive ? '<div class="active-dot"></div>' : ''}
+                            </div>
+                            <div class="user-list-info">
+                                <h3 class="user-list-name">${user.username}</h3>
+                                <p class="user-list-bio">${bio}</p>
+                            </div>
                         </div>
-                        <div class="user-list-info">
-                            <h3 class="user-list-name">${user.username}</h3>
-                            <p class="user-list-bio">${bio}</p>
-                        </div>
-                    </div>
-                `;
-                container.insertAdjacentHTML('beforeend', userHtml);
+                    `;
+                    container.insertAdjacentHTML('beforeend', userHtml);
+                }
             });
         } else {
             container.innerHTML = '<p class="loading-text" style="text-align:center;">No users found.</p>';
@@ -333,7 +348,32 @@ async function loadPosts(silent = false) {
         const data = await res.json();
         
         if (data.posts && data.posts.length > 0) {
-            feed.innerHTML = data.posts.map(post => createPostHtml(post)).join('');
+            if (silent) {
+                [...data.posts].reverse().forEach(post => {
+                    const existingPost = document.getElementById(`post-${post.id}`);
+                    if (existingPost) {
+                        const likeEl = document.getElementById(`like-count-${post.id}`);
+                        if (likeEl) likeEl.innerText = `${post.like_count} Likes`;
+                        
+                        const commentEl = document.getElementById(`comment-count-${post.id}`);
+                        if (commentEl) commentEl.innerText = `${post.comment_count} Comments`;
+                        
+                        const avatarWrapper = existingPost.querySelector('.avatar-wrapper');
+                        if (avatarWrapper) {
+                            let dot = avatarWrapper.querySelector('.active-dot');
+                            if (post.is_active && !dot) {
+                                avatarWrapper.insertAdjacentHTML('beforeend', '<div class="active-dot"></div>');
+                            } else if (!post.is_active && dot) {
+                                dot.remove();
+                            }
+                        }
+                    } else {
+                        feed.insertAdjacentHTML('afterbegin', createPostHtml(post));
+                    }
+                });
+            } else {
+                feed.innerHTML = data.posts.map(post => createPostHtml(post)).join('');
+            }
         } else {
             feed.innerHTML = '<p class="loading-text">No posts yet. Be the first to say something!</p>';
         }
@@ -345,7 +385,7 @@ async function loadPosts(silent = false) {
 
 function createPostHtml(post) {
     const date = new Date(post.created_at).toLocaleString();
-    const isActive = post.last_active && (new Date() - new Date(post.last_active) < 300000);
+    const isActive = post.is_active;
 
     return `
         <div class="post-item" id="post-${post.id}">
@@ -368,8 +408,8 @@ function createPostHtml(post) {
             </div>
             
             <div class="post-actions-fb">
-                <button class="fb-interaction-btn ${post.has_liked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+                <button class="fb-interaction-btn heart-btn ${post.has_liked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
+                    <svg viewBox="0 0 24 24" width="20" height="20" class="heart-icon"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                     Like
                 </button>
                 <button class="fb-interaction-btn" onclick="openCommentsBottomSheet('${post.id}')">
@@ -618,7 +658,7 @@ async function showUserProfile(userId) {
             document.getElementById('profile-banner-name').innerText = userData.user.username;
             document.getElementById('profile-banner-bio').innerText = userData.user.bio || 'No bio yet.';
             
-            const isActive = userData.user.last_active && (new Date() - new Date(userData.user.last_active) < 300000);
+            const isActive = userData.user.is_active;
             document.getElementById('profile-banner-active-dot').style.display = isActive ? 'block' : 'none';
             
             if (userId === currentUser.id) {
