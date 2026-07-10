@@ -1848,16 +1848,3 @@ body.modal-open {
     /* Optional: padding bottom so content isn't hidden by nav */
     padding-bottom: 80px; 
 }
-
-/* Navigation Indicator Syncing */
-.nav-indicator {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 3px;
-    width: 25vw; /* 100vw / 4 tabs (since + button doesn't count as a full swipeable tab) */
-    background-color: var(--primary-color);
-    border-radius: 0 0 4px 4px;
-    will-change: transform;
-    /* JS controls transform: translateX(...) for real-time tracking */
-}

@@ -520,9 +520,11 @@ function touchMove(event) {
     if (event.cancelable) event.preventDefault();
 
     // Add resistance at the edges
-    let newTranslate = prevTranslate + diffX;
+    let diffXPercent = (diffX / window.innerWidth) * 25; // 25% because 1 screen = 25% of 400vw wrapper
+    let newTranslate = prevTranslate + diffXPercent;
+    
     const maxTranslate = 0;
-    const minTranslate = -(tabs.length - 1) * window.innerWidth;
+    const minTranslate = -75; // -75% is the 4th screen (index 3)
     
     if (newTranslate > maxTranslate) {
         newTranslate = maxTranslate + (newTranslate - maxTranslate) * 0.2; // Rubber band effect
@@ -531,30 +533,24 @@ function touchMove(event) {
     }
 
     currentTranslate = newTranslate;
-    document.getElementById('swipe-wrapper').style.transform = `translateX(${currentTranslate}px)`;
-    
-    // Sync indicator proportionally
-    const progress = Math.abs(currentTranslate) / window.innerWidth;
-    const indicator = document.getElementById('nav-indicator');
-    if (indicator) {
-        indicator.style.transition = 'none';
-        indicator.style.transform = `translateX(${progress * 100}%)`;
-    }
+    document.getElementById('swipe-wrapper').style.transform = `translateX(${currentTranslate}%)`;
 }
 
 function touchEnd(event) {
     if (!isCarouselDragging || isScrolling) return;
     isCarouselDragging = false;
 
+    // dragDistance in percentage
     const dragDistance = currentTranslate - prevTranslate;
     const dragTime = Date.now() - startDragTime;
+    // rough velocity: percentage / ms
     const velocity = Math.abs(dragDistance) / dragTime;
 
-    const threshold = window.innerWidth * 0.3; // 30% of screen to snap
+    const threshold = 7.5; // 30% of 25% (1 screen) is 7.5%
 
-    if (dragDistance < -threshold || (dragDistance < -30 && velocity > 0.5)) {
+    if (dragDistance < -threshold || (dragDistance < -2 && velocity > 0.05)) {
         if (currentTabIndex < tabs.length - 1) currentTabIndex += 1;
-    } else if (dragDistance > threshold || (dragDistance > 30 && velocity > 0.5)) {
+    } else if (dragDistance > threshold || (dragDistance > 2 && velocity > 0.05)) {
         if (currentTabIndex > 0) currentTabIndex -= 1;
     }
 
@@ -563,23 +559,18 @@ function touchEnd(event) {
 
 function snapToCurrentTab() {
     const swipeWrapper = document.getElementById('swipe-wrapper');
-    prevTranslate = -currentTabIndex * window.innerWidth;
+    prevTranslate = -currentTabIndex * 25; // 25% per tab
     currentTranslate = prevTranslate;
     
     swipeWrapper.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
-    swipeWrapper.style.transform = `translateX(${currentTranslate}px)`;
+    swipeWrapper.style.transform = `translateX(${currentTranslate}%)`;
 
-    syncNavIndicator();
     updateNavActiveState();
     triggerLazyLoad();
 }
 
 function syncNavIndicator() {
-    const indicator = document.getElementById('nav-indicator');
-    if (indicator) {
-        indicator.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
-        indicator.style.transform = `translateX(${currentTabIndex * 100}%)`;
-    }
+    // Removed nav indicator logic
 }
 
 function updateNavActiveState() {
