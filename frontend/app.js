@@ -910,7 +910,7 @@ async function showUserProfile(userId) {
         const hlRes = await fetch(`${API_BASE_URL}/users/${userId}/stories?viewer_id=${currentUser.id}`);
         const hlData = await hlRes.json();
         
-        const hlContainer = document.getElementById('profile-highlights-container');
+        
         if (hlData.stories && hlData.stories.length > 0) {
             hlContainer.innerHTML = hlData.stories.map((story, i) => `
                 <div class="highlight-item" onclick="viewUserStories('${userId}')">
