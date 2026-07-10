@@ -1336,3 +1336,13 @@ body {
 .grid-3-portrait .img-0 {
     grid-row: span 2;
 }
+
+/* Modal Preview Layouts */
+.preview-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 130px;
+    gap: 8px;
+}
+.preview-grid-3 .post-grid-img {
+    border-radius: 12px;
+}

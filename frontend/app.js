@@ -151,7 +151,10 @@ function setupUI() {
                     currentLayoutType = isLandscape ? 'grid-3-landscape' : 'grid-3-portrait';
                 }
                 
-                previewGrid.className = `post-images-grid ${currentLayoutType}`;
+                let previewClass = currentLayoutType;
+                if (count === 3) previewClass = 'preview-grid-3';
+                
+                previewGrid.className = `post-images-grid ${previewClass}`;
                 previewGrid.innerHTML = '';
                 
                 files.forEach((file, index) => {
