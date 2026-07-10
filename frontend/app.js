@@ -175,11 +175,24 @@ function setupUI() {
     // Setup Post Form
     document.getElementById('post-form').onsubmit = async (e) => {
         e.preventDefault();
+        
+        const submitBtn = document.getElementById('post-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Posting...';
+        }
+
         const contentInput = document.getElementById('post-content');
         const content = contentInput.value.trim();
         const files = postImageInput.files;
 
-        if (!content && files.length === 0) return;
+        if (!content && files.length === 0) {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Post';
+            }
+            return;
+        }
 
         const formData = new FormData();
         formData.append('user_id', currentUser.id);
@@ -214,7 +227,15 @@ function setupUI() {
                 // Ensure we are on home tab
                 switchTab('home');
             }
-        } catch(e) { console.error(e); }
+        } catch(e) { 
+            console.error(e); 
+        } finally {
+            const submitBtn = document.getElementById('post-submit-btn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Post';
+            }
+        }
     };
 
     // Active Now Ping
