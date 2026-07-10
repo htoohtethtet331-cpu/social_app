@@ -367,6 +367,20 @@ app.post('/api/posts/:id/favorite', async (req, res) => {
         } else {
             await Favorite.create({ post_id, user_id });
             favorited = true;
+            
+            // Notification logic
+            const post = await Post.findById(post_id);
+            if (post && post.user_id.toString() !== user_id) {
+                const notif = await Notification.create({
+                    receiver_id: post.user_id,
+                    actor_id: user_id,
+                    type: 'favorite',
+                    post_id: post._id
+                });
+                const populatedNotif = await notif.populate('actor_id', 'username photo_url');
+                req.io.emit(`new_notification_${post.user_id}`, populatedNotif);
+                sendTelegramNotification(post.user_id, `${populatedNotif.actor_id.username} favorited your post.`);
+            }
         }
         res.json({ success: true, favorited });
     } catch (err) {
@@ -469,7 +483,20 @@ app.post('/api/posts/:id/comments', async (req, res) => {
         
         // Notification logic
         const post = await Post.findById(postId);
-        if (post && post.user_id.toString() !== user_id) {
+        if (parent_id) {
+            const parentComment = await Comment.findById(parent_id);
+            if (parentComment && parentComment.user_id.toString() !== user_id) {
+                const notif = await Notification.create({
+                    receiver_id: parentComment.user_id,
+                    actor_id: user_id,
+                    type: 'reply',
+                    post_id: post._id
+                });
+                const populatedNotif = await notif.populate('actor_id', 'username photo_url');
+                req.io.emit(`new_notification_${parentComment.user_id}`, populatedNotif);
+                sendTelegramNotification(parentComment.user_id, `${populatedNotif.actor_id.username} replied to your comment.`);
+            }
+        } else if (post && post.user_id.toString() !== user_id) {
             const notif = await Notification.create({
                 receiver_id: post.user_id,
                 actor_id: user_id,

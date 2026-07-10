@@ -369,6 +369,8 @@ async function loadNotifications() {
                 let text = '';
                 if (n.type === 'like') text = 'liked your post.';
                 else if (n.type === 'comment') text = 'commented on your post.';
+                else if (n.type === 'reply') text = 'replied to your comment.';
+                else if (n.type === 'favorite') text = 'favorited your post.';
                 else if (n.type === 'story_like') text = 'liked your story.';
                 
                 const time = formatTimeAgo(n.created_at);
@@ -404,8 +406,20 @@ async function markNotificationsRead() {
 }
 
 function handleNotificationClick(type, id) {
-    if (type === 'like' || type === 'comment') {
+    if (['like', 'comment', 'reply', 'favorite'].includes(type)) {
         switchTab('home'); 
+        setTimeout(() => {
+            const postElement = document.getElementById(`post-${id}`);
+            if (postElement) {
+                postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                postElement.style.transition = 'background-color 0.5s';
+                postElement.style.backgroundColor = 'rgba(69, 189, 98, 0.1)';
+                setTimeout(() => {
+                    postElement.style.backgroundColor = 'var(--bg-color)';
+                    setTimeout(() => postElement.style.transition = '', 500);
+                }, 2000);
+            }
+        }, 300);
     } else if (type === 'story_like') {
         switchTab('profile'); 
     }
