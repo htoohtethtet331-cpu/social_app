@@ -71,6 +71,28 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/unichat')
   .catch(err => console.error('MongoDB connection error:', err));
 
 
+// --- Telegram Bot Helper ---
+const TELEGRAM_BOT_TOKEN = '8840866745:AAGuTMJGMLQws913DBWiRd5muKFc37PHSGA';
+
+async function sendTelegramNotification(userId, message) {
+    try {
+        const user = await User.findById(userId);
+        if (user && user.telegram_id) {
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: user.telegram_id,
+                    text: message
+                })
+            });
+        }
+    } catch (err) {
+        console.error("Failed to send Telegram notification:", err);
+    }
+}
+
 // --- API Routes ---
 
 // --- Notifications APIs ---
@@ -320,6 +342,7 @@ app.post('/api/posts/:id/like', async (req, res) => {
                 });
                 const populatedNotif = await notif.populate('actor_id', 'username photo_url');
                 req.io.emit(`new_notification_${post.user_id}`, populatedNotif);
+                sendTelegramNotification(post.user_id, `${populatedNotif.actor_id.username} liked your post.`);
             }
         }
         const count = await Like.countDocuments({ post_id });
@@ -455,6 +478,7 @@ app.post('/api/posts/:id/comments', async (req, res) => {
             });
             const populatedNotif = await notif.populate('actor_id', 'username photo_url');
             req.io.emit(`new_notification_${post.user_id}`, populatedNotif);
+            sendTelegramNotification(post.user_id, `${populatedNotif.actor_id.username} commented on your post.`);
         }
 
         res.json({ comment: formattedComment });
@@ -644,6 +668,7 @@ app.post('/api/stories/:id/like', async (req, res) => {
                 });
                 const populatedNotif = await notif.populate('actor_id', 'username photo_url');
                 req.io.emit(`new_notification_${story.user_id}`, populatedNotif);
+                sendTelegramNotification(story.user_id, `${populatedNotif.actor_id.username} liked your story.`);
             }
             
             res.json({ success: true, liked: true });
