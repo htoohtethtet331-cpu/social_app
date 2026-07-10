@@ -54,7 +54,7 @@ if (process.env.CLOUDINARY_CLOUD_NAME) {
     });
 }
 
-const { uploadImageToCloudinary, uploadVideoToR2, deleteLocalFile } = require('./services/uploadService');
+const { uploadImageToCloudinary, uploadVideoToCloudinary, deleteLocalFile } = require('./services/uploadService');
 
 let storage = multer.diskStorage({
     destination: path.join(__dirname, 'uploads'),
@@ -164,7 +164,7 @@ app.post('/api/posts', upload.array('images', 3), async (req, res) => {
             try {
                 let fileUrl = '';
                 if (file.mimetype.startsWith('video/')) {
-                    fileUrl = await uploadVideoToR2(file.path, file.originalname);
+                    fileUrl = await uploadVideoToCloudinary(file.path);
                 } else {
                     fileUrl = await uploadImageToCloudinary(file.path);
                 }
@@ -527,7 +527,7 @@ app.post('/api/stories', upload.single('media'), async (req, res) => {
 
     try {
         if (media_type === 'video') {
-            media_url = await uploadVideoToR2(req.file.path, req.file.originalname);
+            media_url = await uploadVideoToCloudinary(req.file.path);
         } else {
             media_url = await uploadImageToCloudinary(req.file.path);
         }
