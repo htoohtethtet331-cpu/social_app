@@ -37,8 +37,9 @@ async function initApp() {
         if (!currentUser.photo_url) {
             showPhotoModal();
         } else {
-            setupUI();
-            loadPosts();
+            initSocket();
+        fetchInitialNotifications();
+        loadPosts();
         }
     } catch (error) {
         console.error("Failed to auth user:", error);
@@ -320,6 +321,93 @@ function initSocket() {
             commentEl.innerText = `${comments} Comments`;
         }
     });
+
+    socket.on(`new_notification_${currentUser.id}`, (notif) => {
+        unreadNotificationsCount++;
+        updateNotificationBadge();
+        // If we are currently on the notifications tab, reload it
+        if (document.getElementById('nav-notifications') && document.getElementById('nav-notifications').classList.contains('active')) {
+            loadNotifications();
+            markNotificationsRead();
+        }
+    });
+}
+
+// Notification Logic
+let unreadNotificationsCount = 0;
+
+function updateNotificationBadge() {
+    const badge = document.getElementById('nav-notification-badge');
+    if (!badge) return;
+    if (unreadNotificationsCount > 0) {
+        badge.innerText = unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount;
+        badge.style.display = 'flex';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+async function fetchInitialNotifications() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/notifications?user_id=${currentUser.id}`);
+        const data = await res.json();
+        if (data.notifications) {
+            unreadNotificationsCount = data.notifications.filter(n => n.status === 'unread').length;
+            updateNotificationBadge();
+        }
+    } catch(e) { console.error(e); }
+}
+
+async function loadNotifications() {
+    const feed = document.getElementById('notifications-feed');
+    try {
+        const res = await fetch(`${API_BASE_URL}/notifications?user_id=${currentUser.id}`);
+        const data = await res.json();
+        if (data.notifications && data.notifications.length > 0) {
+            feed.innerHTML = data.notifications.map(n => {
+                let text = '';
+                if (n.type === 'like') text = 'liked your post.';
+                else if (n.type === 'comment') text = 'commented on your post.';
+                else if (n.type === 'story_like') text = 'liked your story.';
+                
+                const time = formatTimeAgo(n.created_at);
+                const bgClass = n.status === 'unread' ? 'unread' : '';
+                return `
+                    <div class="notification-item ${bgClass}" onclick="handleNotificationClick('${n.type}', '${n.post_id || n.story_id}')">
+                        <img src="${getAvatarUrl(n.actor_id ? n.actor_id.photo_url : null)}" class="notification-avatar" onerror="handleImageError(this)">
+                        <div class="notification-content">
+                            <p class="notification-text"><strong>${n.actor_id ? n.actor_id.username : 'Someone'}</strong> ${text}</p>
+                            <p class="notification-time">${time}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            feed.innerHTML = '<p class="loading-text" style="text-align:center;">No notifications yet.</p>';
+        }
+    } catch(e) {
+        feed.innerHTML = '<p class="loading-text" style="text-align:center;">Failed to load notifications.</p>';
+    }
+}
+
+async function markNotificationsRead() {
+    try {
+        await fetch(`${API_BASE_URL}/notifications/read`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: currentUser.id })
+        });
+        unreadNotificationsCount = 0;
+        updateNotificationBadge();
+    } catch(e) { console.error(e); }
+}
+
+function handleNotificationClick(type, id) {
+    if (type === 'like' || type === 'comment') {
+        switchTab('home'); 
+    } else if (type === 'story_like') {
+        switchTab('profile'); 
+    }
 }
 
 function showNewPosts() {
@@ -342,6 +430,7 @@ function switchTab(tabName, userId = null) {
     document.getElementById('user-profile-section').style.display = 'none';
     document.getElementById('users-list-section').style.display = 'none';
     document.getElementById('settings-section').style.display = 'none';
+    document.getElementById('notifications-section').style.display = 'none';
     
     if (tabName === 'home') {
         document.getElementById('nav-home').classList.add('active');
@@ -357,8 +446,14 @@ function switchTab(tabName, userId = null) {
         } else {
             showUserProfile(currentUser.id);
         }
+    } else if (tabName === 'notifications') {
+        const navNotif = document.getElementById('nav-notifications');
+        if (navNotif) navNotif.classList.add('active');
+        document.getElementById('notifications-section').style.display = 'block';
+        loadNotifications();
+        markNotificationsRead();
     } else if (tabName === 'settings') {
-        document.getElementById('nav-settings').classList.add('active');
+        // no nav item to add active to since it's an icon in the header now
         document.getElementById('settings-section').style.display = 'block';
     }
 }

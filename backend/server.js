@@ -15,6 +15,7 @@ const Comment = require('./models/Comment');
 const Story = require('./models/Story');
 const StoryLike = require('./models/StoryLike');
 const Favorite = require('./models/Favorite');
+const Notification = require('./models/Notification');
 
 const http = require('http');
 const { Server } = require("socket.io");
@@ -71,6 +72,34 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/unichat')
 
 
 // --- API Routes ---
+
+// --- Notifications APIs ---
+
+// Get Notifications
+app.get('/api/notifications', async (req, res) => {
+    const { user_id } = req.query;
+    if (!user_id) return res.status(400).json({ error: 'User ID required' });
+    try {
+        const notifications = await Notification.find({ receiver_id: user_id })
+            .sort({ created_at: -1 })
+            .populate('actor_id', 'username photo_url');
+        res.json({ notifications });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Mark Notifications as Read
+app.put('/api/notifications/read', async (req, res) => {
+    const { user_id } = req.body;
+    if (!user_id) return res.status(400).json({ error: 'User ID required' });
+    try {
+        await Notification.updateMany({ receiver_id: user_id, status: 'unread' }, { status: 'read' });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // Admin Routes
 app.use('/api/admin', require('./routes/adminRoutes'));
@@ -279,6 +308,19 @@ app.post('/api/posts/:id/like', async (req, res) => {
         } else {
             await Like.create({ post_id, user_id });
             liked = true;
+            
+            // Notification logic
+            const post = await Post.findById(post_id);
+            if (post && post.user_id.toString() !== user_id) {
+                const notif = await Notification.create({
+                    receiver_id: post.user_id,
+                    actor_id: user_id,
+                    type: 'like',
+                    post_id: post._id
+                });
+                const populatedNotif = await notif.populate('actor_id', 'username photo_url');
+                req.io.emit(`new_notification_${post.user_id}`, populatedNotif);
+            }
         }
         const count = await Like.countDocuments({ post_id });
         req.io.emit('post_liked', { post_id, likes: count });
@@ -401,6 +443,20 @@ app.post('/api/posts/:id/comments', async (req, res) => {
         };
         const count = await Comment.countDocuments({ post_id: postId });
         req.io.emit('new_comment', { post_id: postId, comment: formattedComment, comments: count });
+        
+        // Notification logic
+        const post = await Post.findById(postId);
+        if (post && post.user_id.toString() !== user_id) {
+            const notif = await Notification.create({
+                receiver_id: post.user_id,
+                actor_id: user_id,
+                type: 'comment',
+                post_id: post._id
+            });
+            const populatedNotif = await notif.populate('actor_id', 'username photo_url');
+            req.io.emit(`new_notification_${post.user_id}`, populatedNotif);
+        }
+
         res.json({ comment: formattedComment });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -576,6 +632,20 @@ app.post('/api/stories/:id/like', async (req, res) => {
             res.json({ success: true, liked: false });
         } else {
             await StoryLike.create({ story_id: storyId, user_id });
+            
+            // Notification logic
+            const story = await Story.findById(storyId);
+            if (story && story.user_id.toString() !== user_id) {
+                const notif = await Notification.create({
+                    receiver_id: story.user_id,
+                    actor_id: user_id,
+                    type: 'story_like',
+                    story_id: story._id
+                });
+                const populatedNotif = await notif.populate('actor_id', 'username photo_url');
+                req.io.emit(`new_notification_${story.user_id}`, populatedNotif);
+            }
+            
             res.json({ success: true, liked: true });
         }
     } catch (err) {
