@@ -431,7 +431,7 @@ async function toggleLike(postId) {
         const data = await res.json();
         if (data.success) {
             const btn = document.getElementById(`like-btn-${postId}`);
-            if (data.action === 'liked') {
+            if (data.liked) {
                 btn.classList.add('liked');
             } else {
                 btn.classList.remove('liked');

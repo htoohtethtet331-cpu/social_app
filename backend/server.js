@@ -224,13 +224,15 @@ app.post('/api/posts/:id/like', async (req, res) => {
 
     try {
         const existing = await Like.findOne({ post_id, user_id });
+        let liked = false;
         if (existing) {
             await Like.deleteOne({ _id: existing._id });
-            res.json({ success: true, liked: false });
         } else {
             await Like.create({ post_id, user_id });
-            res.json({ success: true, liked: true });
+            liked = true;
         }
+        const count = await Like.countDocuments({ post_id });
+        res.json({ success: true, liked, likes: count });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
