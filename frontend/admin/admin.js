@@ -63,6 +63,7 @@ navLinks.forEach(link => {
         
         if (target === 'users-section') loadUsers();
         if (target === 'posts-section') loadPosts();
+        if (target === 'stories-section') loadStories();
     });
 });
 
@@ -89,6 +90,7 @@ async function loadDashboard() {
         document.getElementById('stat-posts').textContent = stats.posts || 0;
         document.getElementById('stat-comments').textContent = stats.comments || 0;
         document.getElementById('stat-likes').textContent = stats.likes || 0;
+        document.getElementById('stat-stories').textContent = stats.stories || 0;
     } catch (err) {
         console.error(err);
     }
@@ -245,4 +247,57 @@ async function deletePost(id) {
 // Utilities
 function closeModal(id) {
     document.getElementById(id).classList.remove('active');
+}
+
+// =====================================
+// Stories
+// =====================================
+async function loadStories() {
+    try {
+        const stories = await apiFetch('/stories');
+        const tbody = document.querySelector('#stories-table tbody');
+        tbody.innerHTML = '';
+        stories.forEach(story => {
+            const author = story.user_id ? story.user_id.username : 'Deleted User';
+            const date = new Date(story.created_at).toLocaleDateString();
+            let media = '-';
+            if (story.media_url) {
+                if (story.media_type === 'video') {
+                    media = `<video src="${story.media_url}" class="media-preview" muted></video>`;
+                } else {
+                    media = `<img src="${story.media_url}" class="media-preview">`;
+                }
+            }
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${author}</strong></td>
+                    <td>${media}</td>
+                    <td>${date}</td>
+                    <td>
+                        <button class="action-btn delete" onclick="deleteStory('${story.id}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+    } catch (err) { console.error(err); }
+}
+
+async function deleteStory(id) {
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "This will delete the story and its likes!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'Yes, delete it!'
+    });
+    if (result.isConfirmed) {
+        try {
+            await apiFetch(`/stories/${id}`, { method: 'DELETE' });
+            Swal.fire('Deleted!', 'Story has been deleted.', 'success');
+            loadStories();
+        } catch (err) {
+            Swal.fire('Error', 'Failed to delete story', 'error');
+        }
+    }
 }

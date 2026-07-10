@@ -34,6 +34,7 @@
                 <li class="active" data-target="dashboard-section"><i class="fas fa-chart-line"></i> Dashboard</li>
                 <li data-target="users-section"><i class="fas fa-users"></i> Users</li>
                 <li data-target="posts-section"><i class="fas fa-file-alt"></i> Posts</li>
+                <li data-target="stories-section"><i class="fas fa-history"></i> Stories</li>
                 <li id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</li>
             </ul>
         </aside>
@@ -73,6 +74,13 @@
                         <div class="stat-info">
                             <h3 id="stat-likes">0</h3>
                             <p>Total Likes</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-history stat-icon blue"></i>
+                        <div class="stat-info">
+                            <h3 id="stat-stories">0</h3>
+                            <p>Total Stories</p>
                         </div>
                     </div>
                 </div>
@@ -122,6 +130,30 @@
                             </thead>
                             <tbody>
                                 <!-- Posts will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Stories -->
+            <section id="stories-section" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Manage Stories</h2>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="stories-table">
+                            <thead>
+                                <tr>
+                                    <th>Author</th>
+                                    <th>Media</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Stories will be injected here -->
                             </tbody>
                         </table>
                     </div>

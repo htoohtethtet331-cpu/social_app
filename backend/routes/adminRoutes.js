@@ -5,6 +5,7 @@ const Post = require('../models/Post');
 const Like = require('../models/Like');
 const Comment = require('../models/Comment');
 const Story = require('../models/Story');
+const StoryLike = require('../models/StoryLike');
 const Favorite = require('../models/Favorite');
 
 // Admin Authentication Middleware
@@ -28,12 +29,14 @@ router.get('/stats', async (req, res) => {
         const totalPosts = await Post.countDocuments();
         const totalComments = await Comment.countDocuments();
         const totalLikes = await Like.countDocuments();
+        const totalStories = await Story.countDocuments();
 
         res.json({
             users: totalUsers,
             posts: totalPosts,
             comments: totalComments,
-            likes: totalLikes
+            likes: totalLikes,
+            stories: totalStories
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -89,6 +92,7 @@ router.delete('/users/:id', async (req, res) => {
         
         // Delete stories
         await Story.deleteMany({ user_id: userId });
+        await StoryLike.deleteMany({ user_id: userId });
 
         // Finally delete the user
         await User.findByIdAndDelete(userId);
@@ -137,6 +141,32 @@ router.delete('/posts/:id', async (req, res) => {
         await Favorite.deleteMany({ post_id: postId });
         await Post.findByIdAndDelete(postId);
         res.json({ success: true, message: 'Post deleted' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ==========================================
+// Stories Management
+// ==========================================
+
+// Get all stories with user populated
+router.get('/stories', async (req, res) => {
+    try {
+        const stories = await Story.find().populate('user_id', 'username').sort({ created_at: -1 });
+        res.json(stories);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete story and associated likes
+router.delete('/stories/:id', async (req, res) => {
+    const storyId = req.params.id;
+    try {
+        await StoryLike.deleteMany({ story_id: storyId });
+        await Story.findByIdAndDelete(storyId);
+        res.json({ success: true, message: 'Story deleted' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
