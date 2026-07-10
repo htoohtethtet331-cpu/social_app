@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
 const path = require('path');
@@ -55,23 +54,14 @@ if (process.env.CLOUDINARY_CLOUD_NAME) {
     });
 }
 
-let storage;
-if (process.env.CLOUDINARY_CLOUD_NAME) {
-    storage = new CloudinaryStorage({
-        cloudinary: cloudinary,
-        params: {
-            folder: 'unichat_uploads',
-            allowed_formats: ['jpg', 'png', 'jpeg', 'gif', 'mp4', 'mov']
-        }
-    });
-} else {
-    storage = multer.diskStorage({
-        destination: path.join(__dirname, 'uploads'),
-        filename: function(req, file, cb) {
-            cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-        }
-    });
-}
+const { uploadImageToCloudinary, uploadVideoToR2, deleteLocalFile } = require('./services/uploadService');
+
+let storage = multer.diskStorage({
+    destination: path.join(__dirname, 'uploads'),
+    filename: function(req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
 const upload = multer({ storage: storage });
 
 // Database Connection
@@ -111,12 +101,18 @@ app.post('/api/ping', async (req, res) => {
     }
 });
 
-// 2. Upload Profile Photo
 app.post('/api/upload-profile', upload.single('photo'), async (req, res) => {
     const user_id = req.body.user_id;
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     
-    const photo_url = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : ('/uploads/' + req.file.filename);
+    let photo_url = '';
+    try {
+        photo_url = await uploadImageToCloudinary(req.file.path);
+    } catch (err) {
+        deleteLocalFile(req.file.path);
+        return res.status(500).json({ error: 'Failed to upload photo' });
+    }
+    deleteLocalFile(req.file.path);
 
     try {
         const user = await User.findByIdAndUpdate(user_id, { photo_url }, { new: true });
@@ -126,12 +122,18 @@ app.post('/api/upload-profile', upload.single('photo'), async (req, res) => {
     }
 });
 
-// 3. Upload Cover Photo
 app.post('/api/upload-cover', upload.single('cover'), async (req, res) => {
     const user_id = req.body.user_id;
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     
-    const cover_url = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : ('/uploads/' + req.file.filename);
+    let cover_url = '';
+    try {
+        cover_url = await uploadImageToCloudinary(req.file.path);
+    } catch (err) {
+        deleteLocalFile(req.file.path);
+        return res.status(500).json({ error: 'Failed to upload cover' });
+    }
+    deleteLocalFile(req.file.path);
 
     try {
         const user = await User.findByIdAndUpdate(user_id, { cover_url }, { new: true });
@@ -152,14 +154,27 @@ app.post('/api/skip-profile', async (req, res) => {
     }
 });
 
-// 5. Create a Post
 app.post('/api/posts', upload.array('images', 3), async (req, res) => {
     const { user_id, content, layout_type } = req.body;
     if (!user_id || (!content && (!req.files || req.files.length === 0))) return res.status(400).json({ error: 'Content or images required' });
 
     let image_urls = [];
     if (req.files && req.files.length > 0) {
-        image_urls = req.files.map(file => (file.path && file.path.startsWith('http')) ? file.path : ('/uploads/' + file.filename));
+        for (const file of req.files) {
+            try {
+                let fileUrl = '';
+                if (file.mimetype.startsWith('video/')) {
+                    fileUrl = await uploadVideoToR2(file.path, file.originalname);
+                } else {
+                    fileUrl = await uploadImageToCloudinary(file.path);
+                }
+                image_urls.push(fileUrl);
+            } catch (err) {
+                console.error("Failed to upload file:", err);
+            } finally {
+                deleteLocalFile(file.path);
+            }
+        }
     }
 
     try {
@@ -503,13 +518,24 @@ app.put('/api/users/:id/bio', async (req, res) => {
     }
 });
 
-// 12. Create Story
 app.post('/api/stories', upload.single('media'), async (req, res) => {
     const { user_id } = req.body;
     if (!req.file || !user_id) return res.status(400).json({ error: 'User ID and media file required' });
 
-    const media_url = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : ('/uploads/' + req.file.filename);
+    let media_url = '';
     const media_type = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+
+    try {
+        if (media_type === 'video') {
+            media_url = await uploadVideoToR2(req.file.path, req.file.originalname);
+        } else {
+            media_url = await uploadImageToCloudinary(req.file.path);
+        }
+    } catch (err) {
+        deleteLocalFile(req.file.path);
+        return res.status(500).json({ error: 'Failed to upload media' });
+    }
+    deleteLocalFile(req.file.path);
 
     try {
         const story = await Story.create({ user_id, media_url, media_type });
