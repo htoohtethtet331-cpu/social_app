@@ -190,6 +190,29 @@ function setupUI() {
             }
         } catch(e) { console.error(e); }
     };
+
+    // Active Now Ping
+    setInterval(async () => {
+        try {
+            await fetch(`${API_BASE_URL}/ping`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentUser.id })
+            });
+        } catch(e) { console.error("Ping error:", e); }
+    }, 60000); // 1 minute
+
+    // Auto Refresh
+    setInterval(() => {
+        const isHome = document.getElementById('nav-home').classList.contains('active');
+        const isUsers = document.getElementById('nav-users').classList.contains('active');
+        if (isHome) {
+            loadPosts(true); // silent refresh
+        }
+        if (isUsers) {
+            loadAllUsers(true);
+        }
+    }, 30000); // 30 seconds
 }
 
 // Navigation Functions
@@ -222,9 +245,13 @@ function switchTab(tabName, userId = null) {
     }
 }
 
-async function loadAllUsers() {
+async function loadAllUsers(silent = false) {
     const container = document.getElementById('users-list-container');
-    container.innerHTML = '<p class="loading-text">Loading users...</p>';
+    if (!silent) {
+        if (!container.innerHTML.includes('user-list-item')) {
+            container.innerHTML = '<p class="loading-text">Loading users...</p>';
+        }
+    }
     
     try {
         const res = await fetch(`${API_BASE_URL}/users`);
@@ -235,10 +262,14 @@ async function loadAllUsers() {
             data.users.forEach(user => {
                 const photoUrl = user.photo_url || 'https://via.placeholder.com/150';
                 const bio = user.bio || 'No bio available';
+                const isActive = user.last_active && (new Date() - new Date(user.last_active) < 300000);
                 
                 const userHtml = `
                     <div class="user-list-item" onclick="switchTab('profile', '${user.id}');">
-                        <img src="${photoUrl}" alt="${user.username}" class="user-list-avatar">
+                        <div class="avatar-wrapper">
+                            <img src="${photoUrl}" alt="${user.username}" class="user-list-avatar">
+                            ${isActive ? '<div class="active-dot"></div>' : ''}
+                        </div>
                         <div class="user-list-info">
                             <h3 class="user-list-name">${user.username}</h3>
                             <p class="user-list-bio">${bio}</p>
@@ -289,8 +320,14 @@ function openCreatePostModal() {
     document.getElementById('create-post-modal').classList.add('active');
 }
 
-async function loadPosts() {
+async function loadPosts(silent = false) {
     const feed = document.getElementById('posts-feed');
+    if (!silent) {
+        // Only show loading text if not silently refreshing
+        if (!feed.innerHTML.includes('post-item')) {
+            feed.innerHTML = '<p class="loading-text">Loading...</p>';
+        }
+    }
     try {
         const res = await fetch(`${API_BASE_URL}/posts?user_id=${currentUser.id}`);
         const data = await res.json();
@@ -308,11 +345,15 @@ async function loadPosts() {
 
 function createPostHtml(post) {
     const date = new Date(post.created_at).toLocaleString();
+    const isActive = post.last_active && (new Date() - new Date(post.last_active) < 300000);
 
     return `
         <div class="post-item" id="post-${post.id}">
             <div class="post-header">
-                <img src="${getAvatarUrl(post.photo_url)}" alt="${post.username}" class="avatar clickable-user" onclick="showUserProfile('${post.user_id}')">
+                <div class="avatar-wrapper">
+                    <img src="${getAvatarUrl(post.photo_url)}" alt="${post.username}" class="avatar clickable-user" onclick="showUserProfile('${post.user_id}')">
+                    ${isActive ? '<div class="active-dot"></div>' : ''}
+                </div>
                 <div class="post-meta">
                     <span class="post-author clickable-user" onclick="showUserProfile('${post.user_id}')">${post.username}</span>
                     <span class="post-date">${date}</span>
@@ -573,10 +614,12 @@ async function showUserProfile(userId) {
         
         if (userData.user) {
             document.getElementById('profile-banner-avatar').src = getAvatarUrl(userData.user.photo_url);
-            document.getElementById('profile-banner-avatar').onclick = null;
             document.getElementById('profile-banner-cover').src = userData.user.cover_url ? userData.user.cover_url : 'https://via.placeholder.com/600x200?text=No+Cover+Photo';
             document.getElementById('profile-banner-name').innerText = userData.user.username;
             document.getElementById('profile-banner-bio').innerText = userData.user.bio || 'No bio yet.';
+            
+            const isActive = userData.user.last_active && (new Date() - new Date(userData.user.last_active) < 300000);
+            document.getElementById('profile-banner-active-dot').style.display = isActive ? 'block' : 'none';
             
             if (userId === currentUser.id) {
                 document.getElementById('edit-profile-btn').style.display = 'flex';

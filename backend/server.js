@@ -71,9 +71,24 @@ app.post('/api/auth', async (req, res) => {
     try {
         let user = await User.findOne({ telegram_id });
         if (!user) {
-            user = await User.create({ telegram_id, username, photo_url, bio: '' });
+            user = await User.create({ telegram_id, username, photo_url, bio: '', last_active: Date.now() });
+        } else {
+            user.last_active = Date.now();
+            await user.save();
         }
         res.json({ user });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 1.5 Ping Active Status
+app.post('/api/ping', async (req, res) => {
+    const { user_id } = req.body;
+    if (!user_id) return res.status(400).json({ error: 'User ID required' });
+    try {
+        await User.findByIdAndUpdate(user_id, { last_active: Date.now() });
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -132,13 +147,14 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
 
     try {
         let post = await Post.create({ user_id, content: content || '', image_url });
-        post = await post.populate('user_id', 'username photo_url');
+        post = await post.populate('user_id', 'username photo_url last_active');
         res.json({
             post: {
                 id: post._id,
                 user_id: post.user_id._id,
                 username: post.user_id.username,
                 photo_url: post.user_id.photo_url,
+                last_active: post.user_id.last_active,
                 content: post.content,
                 image_url: post.image_url,
                 created_at: post.created_at,
@@ -157,7 +173,7 @@ app.get('/api/posts', async (req, res) => {
     const user_id = req.query.user_id;
     
     try {
-        const posts = await Post.find().populate('user_id', 'username photo_url').sort({ created_at: -1 });
+        const posts = await Post.find().populate('user_id', 'username photo_url last_active').sort({ created_at: -1 });
         const postIds = posts.map(p => p._id);
         
         const likes = await Like.aggregate([
@@ -184,6 +200,7 @@ app.get('/api/posts', async (req, res) => {
                 user_id: post.user_id ? post.user_id._id : null,
                 username: post.user_id ? post.user_id.username : 'Unknown',
                 photo_url: post.user_id ? post.user_id.photo_url : null,
+                last_active: post.user_id ? post.user_id.last_active : null,
                 content: post.content,
                 image_url: post.image_url,
                 created_at: post.created_at,
@@ -284,7 +301,7 @@ app.get('/api/posts/:id/comments', async (req, res) => {
 // Get all users
 app.get('/api/users', async (req, res) => {
     try {
-        const users = await User.find().select('id username photo_url bio');
+        const users = await User.find().select('id username photo_url bio last_active');
         res.json({ users });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -294,7 +311,7 @@ app.get('/api/users', async (req, res) => {
 // 9. Get User Profile
 app.get('/api/users/:id', async (req, res) => {
     try {
-        const user = await User.findById(req.params.id).select('id username photo_url cover_url bio');
+        const user = await User.findById(req.params.id).select('id username photo_url cover_url bio last_active');
         const posts_count = await Post.countDocuments({ user_id: req.params.id });
         res.json({ user, posts_count });
     } catch (err) {

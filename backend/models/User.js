@@ -5,7 +5,8 @@ const userSchema = new mongoose.Schema({
   username: String,
   photo_url: String,
   cover_url: String,
-  bio: String
+  bio: String,
+  last_active: { type: Date, default: Date.now }
 });
 
 // To easily migrate from SQL 'id' to Mongo '_id' on frontend, we can add a virtual

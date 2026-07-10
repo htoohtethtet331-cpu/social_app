@@ -1211,3 +1211,19 @@ body {
     padding: 2px;
     object-fit: cover;
 }
+/* Active Status Dot */
+.avatar-wrapper {
+    position: relative;
+    display: inline-block;
+}
+.active-dot {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background-color: #31a24c;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    z-index: 1;
+}
