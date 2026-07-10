@@ -60,7 +60,7 @@
             <section class="user-profile-section" id="user-profile-section" style="display: none;">
                 <div class="fb-profile-banner">
                     <div class="fb-cover-photo-container">
-                        <img id="profile-banner-cover" src="" alt="" class="fb-cover-photo">
+                        <img id="profile-banner-cover" src="" alt="" class="fb-cover-photo" onclick="if(this.src) viewFullScreenImage(this.src)">
                         <div class="fb-camera-btn cover-camera-btn" id="cover-camera-btn" style="display: none;" onclick="document.getElementById('cover-upload').click()">
                             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 4h3l2-2h6l2 2h3c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm8 3c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/></svg>
                         </div>
@@ -267,9 +267,9 @@
         </div>
         
         <!-- Full Screen Image Viewer Modal -->
-        <div class="modal" id="image-viewer-modal" style="z-index: 5000; background-color: rgba(0,0,0,0.9);" onclick="this.classList.remove('active')">
+        <div class="modal" id="image-viewer-modal" style="z-index: 5000; background-color: rgba(0,0,0,0.95);" onclick="this.classList.remove('active')">
             <span style="position: absolute; top: 15px; right: 25px; color: #fff; font-size: 35px; font-weight: bold; cursor: pointer;">&times;</span>
-            <img class="modal-content" id="full-screen-image" style="margin: auto; display: block; max-width: 90%; max-height: 90vh; box-shadow: none; background: transparent; border-radius: 0;">
+            <img id="full-screen-image" style="margin: auto; display: block; max-width: 100%; max-height: 100vh; object-fit: contain;">
         </div>
         
     </div>

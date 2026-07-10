@@ -159,7 +159,7 @@ function setupUI() {
                 
                 files.forEach((file, index) => {
                     const src = URL.createObjectURL(file);
-                    previewGrid.innerHTML += `<img src="${src}" class="post-grid-img img-${index}">`;
+                    previewGrid.innerHTML += `<img src="${src}" class="post-grid-img img-${index}" onclick="viewFullScreenImage('${src}')">`;
                 });
                 
                 previewContainer.style.display = 'block';
