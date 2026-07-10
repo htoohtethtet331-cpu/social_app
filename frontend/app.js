@@ -1,5 +1,6 @@
 const API_BASE_URL = '/api'; 
 let currentUser = null;
+window.activeStoryUsers = {};
 
 // Initialize Telegram Web App
 const tg = window.Telegram.WebApp;
@@ -40,6 +41,7 @@ async function initApp() {
         } else {
             setupUI();
             initSocket();
+            await loadActiveStories();
             fetchInitialNotifications();
             loadPosts();
         }
@@ -324,6 +326,10 @@ function initSocket() {
             loadNotifications();
             markNotificationsRead();
         }
+    });
+
+    socket.on('story_added', async () => {
+        await loadActiveStories();
     });
 }
 
@@ -614,6 +620,7 @@ async function loadPosts(silent = false) {
         }
     }
     try {
+        await loadActiveStories();
         const res = await fetch(`${API_BASE_URL}/posts?user_id=${currentUser.id}`);
         const data = await res.json();
         
@@ -653,6 +660,39 @@ async function loadPosts(silent = false) {
     }
 }
 
+// --- Avatar Rendering Helper ---
+function renderAvatarWithStoryRing(user_id, photo_url, username, extraClasses = '') {
+    const storyData = window.activeStoryUsers[user_id];
+    const avatarImg = `<img src="${getAvatarUrl(photo_url)}" alt="${username}" class="avatar ${extraClasses}" onerror="handleImageError(this)">`;
+    
+    if (storyData) {
+        const ringClass = storyData.has_unseen ? 'unseen' : 'seen';
+        // Click Intercept Logic: Open story instead of profile
+        return `
+            <div class="story-ring-wrapper ${ringClass}" onclick="viewUserStories('${user_id}'); event.stopPropagation();">
+                ${avatarImg}
+            </div>
+        `;
+    } else {
+        // Normal profile navigation
+        return `
+            <div class="story-ring-wrapper none" onclick="showUserProfile('${user_id}'); event.stopPropagation();">
+                ${avatarImg}
+            </div>
+        `;
+    }
+}
+
+async function loadActiveStories() {
+    try {
+        const res = await fetch(`${API_BASE_URL}/stories?viewer_id=${currentUser.id}`);
+        const data = await res.json();
+        if (data.raw_grouped) {
+            window.activeStoryUsers = data.raw_grouped;
+        }
+    } catch(err) { console.error('Failed to load active stories', err); }
+}
+
 function createPostHtml(post) {
     const date = new Date(post.created_at).toLocaleString();
     const isActive = post.is_active;
@@ -661,7 +701,7 @@ function createPostHtml(post) {
         <div class="post-item" id="post-${post.id}">
             <div class="post-header">
                 <div class="avatar-wrapper">
-                    <img src="${getAvatarUrl(post.photo_url)}" alt="${post.username}" class="avatar clickable-user" onclick="showUserProfile('${post.user_id}')" onerror="handleImageError(this)">
+                    ${renderAvatarWithStoryRing(post.user_id, post.photo_url, post.username, 'clickable-user')}
                     ${isActive ? '<div class="active-dot"></div>' : ''}
                 </div>
                 <div class="post-meta">
@@ -775,7 +815,9 @@ function renderCommentBubble(c) {
 
     return `
         <div class="comment-item" id="comment-${c.id}">
-            <img src="${getAvatarUrl(c.photo_url)}" class="comment-avatar clickable-user" onclick="showUserProfile('${c.user_id}'); closeCommentsBottomSheet();" onerror="handleImageError(this)">
+            <div class="avatar-wrapper" style="margin-right: 10px;">
+                ${renderAvatarWithStoryRing(c.user_id, c.photo_url, c.username, 'comment-avatar clickable-user')}
+            </div>
             <div class="comment-bubble-wrapper">
                 <div class="comment-bubble">
                     <div class="comment-author-name clickable-user" onclick="showUserProfile('${c.user_id}'); closeCommentsBottomSheet();">${escapeHtml(c.username)}</div>
@@ -1196,7 +1238,24 @@ async function viewUserStories(userId) {
             
             document.getElementById('story-avatar').src = avatarUrl;
             document.getElementById('story-username').innerText = usernameStr;
+            // Fallback navigation logic
+            document.getElementById('story-avatar').onclick = () => { closeStoryViewer(); showUserProfile(userId); };
+            document.getElementById('story-username').onclick = () => { closeStoryViewer(); showUserProfile(userId); };
+            
             document.getElementById('story-viewer-modal').style.display = 'flex';
+            
+            // Mark as seen immediately in local state
+            if (window.activeStoryUsers[userId]) {
+                window.activeStoryUsers[userId].has_unseen = false;
+                // Re-render feed and comments to update rings
+                const rings = document.querySelectorAll(`.story-ring-wrapper`);
+                rings.forEach(ring => {
+                    if (ring.getAttribute('onclick').includes(userId)) {
+                        ring.classList.remove('unseen');
+                        ring.classList.add('seen');
+                    }
+                });
+            }
             
             renderStoryProgress();
             setupStoryTouchEvents();

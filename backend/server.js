@@ -682,6 +682,7 @@ app.post('/api/stories', upload.single('media'), async (req, res) => {
     try {
         const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000);
         const story = await Story.create({ user_id, media_url, media_type, expires_at });
+        req.io.emit('story_added', { user_id });
         res.json({ success: true, story });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -762,6 +763,7 @@ app.get('/api/stories/:id/likes', async (req, res) => {
 // 16. Get All Users with Active Stories
 app.get('/api/stories', async (req, res) => {
     try {
+        const viewerId = req.query.viewer_id;
         const stories = await Story.find({
             $or: [ { expires_at: { $gt: new Date() } }, { expires_at: { $exists: false } } ]
         }).populate('user_id', 'username photo_url');
@@ -770,17 +772,30 @@ app.get('/api/stories', async (req, res) => {
         stories.forEach(story => {
             if (!story.user_id) return;
             const uid = story.user_id._id.toString();
+            
+            let isUnseen = true;
+            if (viewerId) {
+                // If the viewer has viewed this story, this specific story is seen.
+                const hasViewed = story.viewers && story.viewers.some(v => v.user_id && v.user_id.toString() === viewerId);
+                if (hasViewed) isUnseen = false;
+            }
+            // For a user, if ANY story is unseen, the ring should be unseen.
+            // If ALL stories are seen, it's seen.
+
             if (!grouped[uid]) {
                 grouped[uid] = {
                     id: uid,
                     username: story.user_id.username,
                     photo_url: story.user_id.photo_url,
-                    has_unseen: true
+                    has_unseen: isUnseen
                 };
+            } else {
+                // If we found at least one unseen story, the whole user group is unseen.
+                if (isUnseen) grouped[uid].has_unseen = true;
             }
         });
         
-        res.json({ users_with_stories: Object.values(grouped) });
+        res.json({ users_with_stories: Object.values(grouped), raw_grouped: grouped });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
