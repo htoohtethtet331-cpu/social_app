@@ -72,7 +72,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/unichat')
 
 
 // --- Telegram Bot Helper ---
-const TELEGRAM_BOT_TOKEN = '8840866745:AAGuTMJGMLQws913DBWiRd5muKFc37PHSGA';
+const TELEGRAM_BOT_TOKEN = '8676108979:AAHfZKRXzxSFv6cq5woghS8_HwVGVkDA9lw';
 
 async function sendTelegramNotification(userId, message) {
     try {
