@@ -1319,20 +1319,12 @@ body {
     grid-template-rows: 350px;
 }
 
-/* 3 Images Landscape (Top 1, Bottom 2) */
-.grid-3-landscape {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 250px 150px;
+/* 3 Images (Mini squares row) */
+.grid-3-landscape, .grid-3-portrait {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 130px;
 }
-.grid-3-landscape .img-0 {
-    grid-column: span 2;
-}
-
-/* 3 Images Portrait (Left 1, Right 2) */
-.grid-3-portrait {
-    grid-template-columns: 2fr 1fr;
-    grid-template-rows: 175px 175px;
-}
-.grid-3-portrait .img-0 {
-    grid-row: span 2;
+.grid-3-landscape .img-0, .grid-3-portrait .img-0 {
+    grid-column: span 1;
+    grid-row: span 1;
 }
