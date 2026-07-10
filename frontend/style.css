@@ -296,13 +296,14 @@ body {
 .post-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    gap: 12px;
 }
 
 .post-header .avatar {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
+    display: block;
 }
 
 .post-meta {
@@ -1091,6 +1092,7 @@ body {
     border-bottom: 1px solid var(--border-color);
     cursor: pointer;
     transition: background-color 0.2s;
+    gap: 15px;
 }
 
 .user-list-item:hover {
@@ -1102,8 +1104,8 @@ body {
     height: 46px;
     border-radius: 50%;
     object-fit: cover;
-    margin-right: 15px;
     background-color: #ddd;
+    display: block;
 }
 
 .user-list-info {

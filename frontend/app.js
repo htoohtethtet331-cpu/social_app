@@ -662,23 +662,37 @@ function cancelReply() {
 let startY = 0;
 let currentY = 0;
 let isDragging = false;
+let startScrollTop = 0;
 
-dragArea.addEventListener('touchstart', (e) => {
+function handleTouchStart(e) {
     startY = e.touches[0].clientY;
-    isDragging = true;
-    sheet.style.transition = 'none'; // disable transition while dragging
-}, {passive: true});
+    currentY = startY;
+    isDragging = false;
+    
+    // Check if touch is on the scrollable list
+    const list = e.target.closest('.sheet-content');
+    if (list) {
+        startScrollTop = list.scrollTop;
+    } else {
+        startScrollTop = 0;
+    }
+    sheet.style.transition = 'none';
+}
 
-dragArea.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
+function handleTouchMove(e) {
     currentY = e.touches[0].clientY;
     const diff = currentY - startY;
-    if (diff > 0) {
+    
+    // If scrolling down on the list (meaning pulling content down) and we are at the top
+    if (startScrollTop === 0 && diff > 0) {
+        isDragging = true;
         sheet.style.transform = `translateY(${diff}px)`;
+        // If we are dragging the sheet, prevent the scroll container from trying to overscroll
+        if (e.cancelable) e.preventDefault();
     }
-}, {passive: true});
+}
 
-dragArea.addEventListener('touchend', () => {
+function handleTouchEnd() {
     if (!isDragging) return;
     isDragging = false;
     sheet.style.transition = 'transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1)';
@@ -686,9 +700,24 @@ dragArea.addEventListener('touchend', () => {
     if (diff > 100) { // Dragged down enough
         closeCommentsBottomSheet();
     } else { // Snap back
-        sheet.style.transform = 'translateY(0)';
+        sheet.style.transform = '';
     }
-});
+}
+
+dragArea.addEventListener('touchstart', handleTouchStart, {passive: true});
+dragArea.addEventListener('touchmove', (e) => {
+    isDragging = true; // Drag area always drags
+    currentY = e.touches[0].clientY;
+    const diff = currentY - startY;
+    if (diff > 0) {
+        sheet.style.transform = `translateY(${diff}px)`;
+    }
+}, {passive: true});
+dragArea.addEventListener('touchend', handleTouchEnd);
+
+sheetCommentsList.addEventListener('touchstart', handleTouchStart, {passive: true});
+sheetCommentsList.addEventListener('touchmove', handleTouchMove, {passive: false}); // non-passive to allow preventDefault
+sheetCommentsList.addEventListener('touchend', handleTouchEnd);
 
 // Close when clicking overlay
 sheetOverlay.addEventListener('click', (e) => {
