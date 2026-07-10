@@ -202,17 +202,65 @@ function setupUI() {
         } catch(e) { console.error("Ping error:", e); }
     }, 60000); // 1 minute
 
-    // Auto Refresh
+    // Users Auto Refresh
     setInterval(() => {
-        const isHome = document.getElementById('nav-home').classList.contains('active');
         const isUsers = document.getElementById('nav-users').classList.contains('active');
-        if (isHome) {
-            loadPosts(true); // silent refresh
-        }
         if (isUsers) {
             loadAllUsers(true);
         }
     }, 30000); // 30 seconds
+
+    // Initialize Socket.io
+    initSocket();
+}
+
+let socket;
+let pendingNewPosts = [];
+
+function initSocket() {
+    socket = io(API_BASE_URL);
+
+    socket.on('new_post', (post) => {
+        // If it's my own post, I might already have it or I don't want the pill
+        if (post.user_id === currentUser.id) {
+            // we could automatically prepend it or let the normal API call do it
+            // but the normal API call already does it in createPost!
+            return;
+        }
+        
+        pendingNewPosts.push(post);
+        const pill = document.getElementById('new-posts-pill');
+        const countSpan = document.getElementById('new-posts-count');
+        countSpan.innerText = `${pendingNewPosts.length} New Post${pendingNewPosts.length > 1 ? 's' : ''}`;
+        pill.style.display = 'flex';
+    });
+
+    socket.on('post_liked', (data) => {
+        const { post_id, likes } = data;
+        const likeEl = document.getElementById(`like-count-${post_id}`);
+        if (likeEl) {
+            likeEl.innerText = `${likes} Likes`;
+        }
+    });
+
+    socket.on('new_comment', (data) => {
+        const { post_id, comments } = data;
+        const commentEl = document.getElementById(`comment-count-${post_id}`);
+        if (commentEl) {
+            commentEl.innerText = `${comments} Comments`;
+        }
+    });
+}
+
+function showNewPosts() {
+    const feed = document.getElementById('posts-feed');
+    // Prepend all pending posts
+    [...pendingNewPosts].forEach(post => {
+        feed.insertAdjacentHTML('afterbegin', createPostHtml(post));
+    });
+    pendingNewPosts = [];
+    document.getElementById('new-posts-pill').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Navigation Functions

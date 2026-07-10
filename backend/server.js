@@ -16,7 +16,23 @@ const Comment = require('./models/Comment');
 const Story = require('./models/Story');
 const StoryLike = require('./models/StoryLike');
 
+const http = require('http');
+const { Server } = require("socket.io");
+
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
+// Attach io to req object to use in routes
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
@@ -148,21 +164,21 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
     try {
         let post = await Post.create({ user_id, content: content || '', image_url });
         post = await post.populate('user_id', 'username photo_url last_active');
-        res.json({
-            post: {
-                id: post._id,
-                user_id: post.user_id._id,
-                username: post.user_id.username,
-                photo_url: post.user_id.photo_url,
-                is_active: post.user_id.last_active ? (Date.now() - new Date(post.user_id.last_active).getTime() < 300000) : false,
-                content: post.content,
-                image_url: post.image_url,
-                created_at: post.created_at,
-                likes: 0,
-                comments: 0,
-                liked_by_user: 0
-            }
-        });
+        const newPost = {
+            id: post._id,
+            user_id: post.user_id._id,
+            username: post.user_id.username,
+            photo_url: post.user_id.photo_url,
+            is_active: post.user_id.last_active ? (Date.now() - new Date(post.user_id.last_active).getTime() < 300000) : false,
+            content: post.content,
+            image_url: post.image_url,
+            created_at: post.created_at,
+            like_count: 0,
+            comment_count: 0,
+            has_liked: 0
+        };
+        req.io.emit('new_post', newPost);
+        res.json({ post: newPost });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -232,6 +248,7 @@ app.post('/api/posts/:id/like', async (req, res) => {
             liked = true;
         }
         const count = await Like.countDocuments({ post_id });
+        req.io.emit('post_liked', { post_id, likes: count });
         res.json({ success: true, liked, likes: count });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -263,18 +280,19 @@ app.post('/api/posts/:id/comments', async (req, res) => {
     try {
         let comment = await Comment.create({ post_id: postId, user_id, content, parent_id: parent_id || null });
         comment = await comment.populate('user_id', 'username photo_url');
-        res.json({
-            comment: {
-                id: comment._id,
-                post_id: comment.post_id,
-                user_id: comment.user_id ? comment.user_id._id : null,
-                username: comment.user_id ? comment.user_id.username : 'Unknown',
-                photo_url: comment.user_id ? comment.user_id.photo_url : null,
-                content: comment.content,
-                parent_id: comment.parent_id,
-                created_at: comment.created_at
-            }
-        });
+        const formattedComment = {
+            id: comment._id,
+            post_id: comment.post_id,
+            user_id: comment.user_id ? comment.user_id._id : null,
+            username: comment.user_id ? comment.user_id.username : 'Unknown',
+            photo_url: comment.user_id ? comment.user_id.photo_url : null,
+            content: comment.content,
+            parent_id: comment.parent_id,
+            created_at: comment.created_at
+        };
+        const count = await Comment.countDocuments({ post_id: postId });
+        req.io.emit('new_comment', { post_id: postId, comment: formattedComment, comments: count });
+        res.json({ comment: formattedComment });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -488,7 +506,7 @@ app.use((req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
     const interfaces = require('os').networkInterfaces();
     for (let name of Object.keys(interfaces)) {

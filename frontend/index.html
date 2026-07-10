@@ -103,7 +103,11 @@
                 </div>
             </section>
 
-            <!-- Posts Feed -->
+            <!-- Main Feed -->
+            <div id="new-posts-pill" class="new-posts-pill" style="display: none;" onclick="showNewPosts()">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+                <span id="new-posts-count">New Posts</span>
+            </div>
             <section class="posts-feed" id="posts-feed">
                 <!-- Posts will be injected here -->
                 <p class="loading-text">Loading posts...</p>
@@ -297,6 +301,7 @@
         </nav>
     </div>
 
-    <script src="app.js?v=18"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js?v=19"></script>
 </body>
 </html>
