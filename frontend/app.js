@@ -518,6 +518,10 @@ function createPostHtml(post) {
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
                     Comment
                 </button>
+                <button class="fb-interaction-btn fav-btn ${post.has_favorited ? 'favorited' : ''}" id="fav-btn-${post.id}" onclick="toggleFavorite('${post.id}')">
+                    <svg viewBox="0 0 24 24" width="20" height="20" class="fav-icon"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                    Favorite
+                </button>
             </div>
         </div>
     `;
@@ -540,7 +544,32 @@ async function toggleLike(postId) {
             }
             document.getElementById(`like-count-${postId}`).innerText = `${data.likes} Likes`;
         }
-    } catch(e) { console.error(e); }
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function toggleFavorite(postId) {
+    try {
+        const res = await fetch(`${API_BASE_URL}/posts/${postId}/favorite`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: currentUser.id })
+        });
+        const data = await res.json();
+        if (data.success) {
+            const btn = document.getElementById(`fav-btn-${postId}`);
+            if (btn) {
+                if (data.favorited) {
+                    btn.classList.add('favorited');
+                } else {
+                    btn.classList.remove('favorited');
+                }
+            }
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 // --- Comments Bottom Sheet Feature ---
@@ -1169,4 +1198,34 @@ function viewFullScreenImage(url) {
     const img = document.getElementById('full-screen-image');
     img.src = url;
     modal.classList.add('active');
+}
+
+// Favorites in Settings
+function showFavorites() {
+    document.getElementById('settings-menu').style.display = 'none';
+    document.getElementById('favorites-container').style.display = 'block';
+    loadFavorites();
+}
+
+function hideFavorites() {
+    document.getElementById('favorites-container').style.display = 'none';
+    document.getElementById('settings-menu').style.display = 'block';
+}
+
+async function loadFavorites() {
+    const feed = document.getElementById('favorites-feed');
+    feed.innerHTML = '<p class="text-center text-muted mt-4">Loading favorites...</p>';
+    try {
+        const res = await fetch(`${API_BASE_URL}/favorites?user_id=${currentUser.id}`);
+        const data = await res.json();
+        
+        if (data.posts && data.posts.length > 0) {
+            feed.innerHTML = data.posts.map(post => createPostHtml(post)).join('');
+        } else {
+            feed.innerHTML = '<p class="text-center text-muted mt-4">No favorites yet.</p>';
+        }
+    } catch (e) {
+        console.error(e);
+        feed.innerHTML = '<p class="text-center text-muted mt-4">Failed to load favorites.</p>';
+    }
 }

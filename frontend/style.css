@@ -1250,6 +1250,23 @@ body {
     100% { transform: scale(1); }
 }
 
+/* Favorite Icon Styling */
+.fav-icon {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    transition: fill 0.2s, stroke 0.2s, transform 0.2s;
+}
+
+.fb-interaction-btn.favorited .fav-icon {
+    fill: #f5c33b;
+    stroke: #f5c33b;
+    animation: heartBeat 0.3s ease-in-out;
+}
+.fb-interaction-btn.favorited {
+    color: #f5c33b;
+}
+
 /* New Posts Pill */
 .new-posts-pill {
     position: sticky;

@@ -6,7 +6,7 @@
     <title>Telegram Web App</title>
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css?v=18">
+    <link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
     <div class="app-container">
@@ -128,7 +128,7 @@
                 <div class="fb-profile-header">
                     <h2>Settings</h2>
                 </div>
-                <div style="padding: 20px;">
+                <div id="settings-menu" style="padding: 20px;">
                     <div class="settings-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color);">
                         <div class="settings-item-info">
                             <h3 style="margin:0; font-size: 1.1rem;">Theme</h3>
@@ -139,6 +139,25 @@
                             <button id="dark-mode-btn" class="btn secondary-btn" onclick="setTheme('dark')" style="padding: 8px 16px; border-radius: 20px;">Dark</button>
                         </div>
                     </div>
+                    
+                    <div class="settings-item" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color); cursor: pointer;" onclick="showFavorites()">
+                        <div class="settings-item-info">
+                            <h3 style="margin:0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color: #f5c33b;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                                My Favorites
+                            </h3>
+                            <p style="margin:5px 0 0 0; font-size: 0.9rem; color: var(--secondary-color);">View posts you've added to favorites</p>
+                        </div>
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--secondary-color)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                    </div>
+                </div>
+                
+                <div id="favorites-container" style="display: none;">
+                    <div style="padding: 10px 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="hideFavorites()">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                        <h3 style="margin:0;">Back to Settings</h3>
+                    </div>
+                    <div id="favorites-feed" class="post-feed" style="padding-bottom: 80px;"></div>
                 </div>
             </section>
         </main>
@@ -302,6 +321,6 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=26"></script>
+    <script src="app.js?v=27"></script>
 </body>
 </html>

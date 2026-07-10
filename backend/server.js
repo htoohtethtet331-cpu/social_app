@@ -15,6 +15,7 @@ const Like = require('./models/Like');
 const Comment = require('./models/Comment');
 const Story = require('./models/Story');
 const StoryLike = require('./models/StoryLike');
+const Favorite = require('./models/Favorite');
 
 const http = require('http');
 const { Server } = require("socket.io");
@@ -206,9 +207,12 @@ app.get('/api/posts', async (req, res) => {
         ]);
         
         let userLikeSet = new Set();
+        let userFavoriteSet = new Set();
         if (user_id) {
             const userLikes = await Like.find({ user_id, post_id: { $in: postIds } });
             userLikes.forEach(l => userLikeSet.add(l.post_id.toString()));
+            const userFavorites = await Favorite.find({ user_id, post_id: { $in: postIds } });
+            userFavorites.forEach(f => userFavoriteSet.add(f.post_id.toString()));
         }
 
         const comments = await Comment.aggregate([
@@ -232,7 +236,8 @@ app.get('/api/posts', async (req, res) => {
                 created_at: post.created_at,
                 like_count: likeData ? likeData.count : 0,
                 comment_count: commentData ? commentData.count : 0,
-                has_liked: userLikeSet.has(post._id.toString()) ? 1 : 0
+                has_liked: userLikeSet.has(post._id.toString()) ? 1 : 0,
+                has_favorited: userFavoriteSet.has(post._id.toString()) ? 1 : 0
             };
         });
         
@@ -260,6 +265,82 @@ app.post('/api/posts/:id/like', async (req, res) => {
         const count = await Like.countDocuments({ post_id });
         req.io.emit('post_liked', { post_id, likes: count });
         res.json({ success: true, liked, likes: count });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 7b. Toggle Favorite on a Post
+app.post('/api/posts/:id/favorite', async (req, res) => {
+    const post_id = req.params.id;
+    const { user_id } = req.body;
+    if (!user_id) return res.status(400).json({ error: 'User ID required' });
+
+    try {
+        const existing = await Favorite.findOne({ post_id, user_id });
+        let favorited = false;
+        if (existing) {
+            await Favorite.deleteOne({ _id: existing._id });
+        } else {
+            await Favorite.create({ post_id, user_id });
+            favorited = true;
+        }
+        res.json({ success: true, favorited });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 7c. Get User Favorites
+app.get('/api/favorites', async (req, res) => {
+    const { user_id } = req.query;
+    if (!user_id) return res.status(400).json({ error: 'User ID required' });
+
+    try {
+        const favorites = await Favorite.find({ user_id }).populate({
+            path: 'post_id',
+            populate: { path: 'user_id', select: 'username photo_url last_active' }
+        }).sort({ created_at: -1 });
+        
+        const validFavorites = favorites.filter(f => f.post_id != null);
+        const postIds = validFavorites.map(f => f.post_id._id);
+
+        const likes = await Like.aggregate([
+            { $match: { post_id: { $in: postIds } } },
+            { $group: { _id: "$post_id", count: { $sum: 1 } } }
+        ]);
+
+        const comments = await Comment.aggregate([
+            { $match: { post_id: { $in: postIds } } },
+            { $group: { _id: "$post_id", count: { $sum: 1 } } }
+        ]);
+
+        const userLikes = await Like.find({ user_id, post_id: { $in: postIds } });
+        let userLikeSet = new Set(userLikes.map(l => l.post_id.toString()));
+
+        const formatPosts = validFavorites.map(fav => {
+            const post = fav.post_id;
+            const likeData = likes.find(l => l._id.toString() === post._id.toString());
+            const commentData = comments.find(c => c._id.toString() === post._id.toString());
+            return {
+                id: post._id,
+                user_id: post.user_id ? post.user_id._id : null,
+                username: post.user_id ? post.user_id.username : 'Unknown',
+                photo_url: post.user_id ? post.user_id.photo_url : null,
+                is_active: post.user_id && post.user_id.last_active ? (Date.now() - new Date(post.user_id.last_active).getTime() < 300000) : false,
+                content: post.content,
+                image_urls: post.image_urls,
+                image_url: post.image_url,
+                layout_type: post.layout_type,
+                created_at: post.created_at,
+                like_count: likeData ? likeData.count : 0,
+                comment_count: commentData ? commentData.count : 0,
+                has_liked: userLikeSet.has(post._id.toString()) ? 1 : 0,
+                has_favorited: 1 // since it is in favorites
+            };
+        });
+        
+        res.json({ posts: formatPosts });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -372,9 +453,12 @@ app.get('/api/users/:id/posts', async (req, res) => {
         ]);
         
         let userLikeSet = new Set();
+        let userFavoriteSet = new Set();
         if (current_user_id) {
             const userLikes = await Like.find({ user_id: current_user_id, post_id: { $in: postIds } });
             userLikes.forEach(l => userLikeSet.add(l.post_id.toString()));
+            const userFavorites = await Favorite.find({ user_id: current_user_id, post_id: { $in: postIds } });
+            userFavorites.forEach(f => userFavoriteSet.add(f.post_id.toString()));
         }
 
         const comments = await Comment.aggregate([
@@ -397,7 +481,8 @@ app.get('/api/users/:id/posts', async (req, res) => {
                 created_at: post.created_at,
                 like_count: likeData ? likeData.count : 0,
                 comment_count: commentData ? commentData.count : 0,
-                has_liked: userLikeSet.has(post._id.toString()) ? 1 : 0
+                has_liked: userLikeSet.has(post._id.toString()) ? 1 : 0,
+                has_favorited: userFavoriteSet.has(post._id.toString()) ? 1 : 0
             };
         });
         
