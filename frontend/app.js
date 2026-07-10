@@ -253,7 +253,7 @@ function setupUI() {
                 // Ensure we are on home tab
                 switchTab('home');
             }
-        } catch(e) { 
+        } catch(e) { console.error(e); }
     };
 
     // Active Now Ping
