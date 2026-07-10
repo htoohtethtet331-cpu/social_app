@@ -585,7 +585,7 @@ function syncNavIndicator() {
 function updateNavActiveState() {
     document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
     const activeTabName = tabs[currentTabIndex];
-    const navBtn = document.querySelector(`.nav-item[onclick*="switchTab('${activeTabName}'"]`);
+    const navBtn = document.getElementById('nav-' + activeTabName);
     if (navBtn) navBtn.classList.add('active');
 }
 

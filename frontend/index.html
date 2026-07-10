@@ -6,7 +6,7 @@
     <title>Telegram Web App</title>
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css?v=37">
+    <link rel="stylesheet" href="style.css?v=38">
     <script>
         const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2RkZCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzkiIHI9IjE4IiBmaWxsPSIjOTk5Ii8+PHBhdGggZD0iTTIyLDgwIGEzMCwyMCAwIDAsMSw1NiwwIHoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=';
         window.handleImageError = function(img) {
@@ -77,16 +77,19 @@
             
 
         
-            <div id="swipe-wrapper" class="swipe-wrapper">
-<div id="new-posts-pill" class="new-posts-pill swipe-slide"  onclick="showNewPosts()">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
-                <span id="new-posts-count">New Posts</span>
-            </div>
-            <section class="posts-feed" id="posts-feed">
+        <div id="swipe-wrapper" class="swipe-wrapper">
+            <!-- Posts Feed Section -->
+            <section class="posts-feed swipe-slide" id="posts-feed">
+                <div id="new-posts-pill" class="new-posts-pill" style="display: none;" onclick="showNewPosts()">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+                    <span id="new-posts-count">New Posts</span>
+                </div>
                 <!-- Posts will be injected here -->
                 <p class="loading-text">Loading posts...</p>
             </section>
-<section class="users-list-section swipe-slide" id="users-list-section" >
+            
+            <!-- Users List Section -->
+            <section class="users-list-section swipe-slide" id="users-list-section">
                 <div class="fb-profile-header">
                     <h2>Users</h2>
                 </div>
@@ -385,11 +388,11 @@
     <div class="bottom-nav-container">
         <nav class="bottom-nav-bar" id="bottom-nav">
             <div class="nav-indicator" id="nav-indicator"></div>
-            <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
+            <div class="nav-item active" id="nav-home">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
                 <span>Posts</span>
             </div>
-            <div class="nav-item" id="nav-users" onclick="switchTab('users')">
+            <div class="nav-item" id="nav-users">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
                 <span>Users</span>
             </div>
@@ -399,11 +402,11 @@
                 <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
             </button>
 
-            <div class="nav-item" id="nav-profile" onclick="switchTab('profile')">
+            <div class="nav-item" id="nav-profile">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                 <span>Profile</span>
             </div>
-            <div class="nav-item" id="nav-notifications" onclick="switchTab('notifications')" style="position: relative;">
+            <div class="nav-item" id="nav-notifications" style="position: relative;">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
                 <span class="notification-badge" id="nav-notification-badge" style="display: none;">0</span>
                 <span>Notifications</span>
@@ -412,6 +415,6 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=37"></script>
+    <script src="app.js?v=38"></script>
 </body>
 </html>
