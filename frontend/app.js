@@ -520,7 +520,8 @@ function touchMove(event) {
     if (event.cancelable) event.preventDefault();
 
     // Add resistance at the edges
-    let diffXPercent = (diffX / window.innerWidth) * 25; // 25% because 1 screen = 25% of 400vw wrapper
+    const containerWidth = document.getElementById('swipe-container').clientWidth;
+    let diffXPercent = (diffX / containerWidth) * 25; // 25% because 1 screen = 25% of 400% wrapper
     let newTranslate = prevTranslate + diffXPercent;
     
     const maxTranslate = 0;
