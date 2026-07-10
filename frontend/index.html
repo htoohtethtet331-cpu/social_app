@@ -17,7 +17,7 @@
                 <h1 style="margin: 0; color: var(--primary-color); font-size: 1.5rem; font-weight: bold;">WYU-Math</h1>
             </div>
             <div class="user-info">
-                <img id="profile-photo" src="" alt="Profile" class="avatar clickable-user" style="display: none;" onclick="viewUserStories(currentUser.id)">
+                <img id="profile-photo" src="" alt="Profile" class="avatar clickable-user" style="display: none;" onclick="viewUserStories(currentUser.id)" onerror="handleImageError(this)">
             </div>
         </header>
 
@@ -35,7 +35,7 @@
                     </div>
                     <form id="post-form" class="fb-post-form" style="padding: 15px;">
                         <div class="fb-input-area" style="align-items: flex-start; padding: 0;">
-                            <img id="form-avatar" src="" alt="Avatar" class="avatar clickable-user" onclick="viewUserStories(currentUser.id)" style="margin-top: 5px;">
+                            <img id="form-avatar" src="" alt="Avatar" class="avatar clickable-user" onclick="viewUserStories(currentUser.id)" style="margin-top: 5px;" onerror="handleImageError(this)">
                             <div style="flex: 1; display: flex; flex-direction: column;">
                                 <textarea id="post-content" placeholder="What's on your mind?" rows="4" style="border: none; background: transparent; padding: 8px 10px; font-size: 1.1rem; outline: none; resize: none;"></textarea>
                                 <div id="image-preview-container" class="image-preview-container" style="display: none; margin-top: 10px; position: relative; width: 100%; border-radius: 8px; border: 1px solid var(--border-color); padding: 12px; box-sizing: border-box;">
@@ -69,7 +69,7 @@
                     
                     <div class="fb-profile-info-container">
                         <div class="fb-avatar-container">
-                            <img id="profile-banner-avatar" src="" alt="Avatar" class="fb-avatar" onclick="if(this.src) viewFullScreenImage(this.src)">
+                            <img id="profile-banner-avatar" src="" alt="Avatar" class="fb-avatar" onclick="if(this.src) viewFullScreenImage(this.src)" onerror="handleImageError(this)">
                             <div id="profile-banner-active-dot" class="active-dot" style="display: none; width: 16px; height: 16px; bottom: 10px; right: 10px; border-width: 3px;"></div>
                             <div class="fb-camera-btn avatar-camera-btn" id="avatar-camera-btn" style="display: none;" onclick="document.getElementById('avatar-upload').click()">
                                 <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M4 4h3l2-2h6l2 2h3c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm8 3c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3z"/></svg>
@@ -152,7 +152,7 @@
             
             <form id="photo-form" class="photo-upload-form">
                 <div class="photo-preview-container">
-                    <img id="photo-preview-img" src="https://ui-avatars.com/api/?name=User&background=random" alt="Preview" class="photo-preview-circle">
+                    <img id="photo-preview-img" src="https://ui-avatars.com/api/?name=User&background=random" alt="Preview" class="photo-preview-circle" onerror="handleImageError(this)">
                     <label for="photo-input" class="photo-upload-badge">
                         <i class="fas fa-camera"></i>
                     </label>
@@ -214,7 +214,7 @@
         <div class="story-progress-container" id="story-progress-container"></div>
         <div class="story-header">
             <div class="story-user-info">
-                <img id="story-avatar" src="" alt="Avatar" class="avatar">
+                <img id="story-avatar" src="" alt="Avatar" class="avatar" onerror="handleImageError(this)">
                 <span id="story-username">Username</span>
                 <span id="story-time" class="story-time"></span>
             </div>
@@ -302,6 +302,6 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=24"></script>
+    <script src="app.js?v=25"></script>
 </body>
 </html>

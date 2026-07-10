@@ -1,6 +1,9 @@
 const API_BASE_URL = '/api'; 
 const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2RkZCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzkiIHI9IjE4IiBmaWxsPSIjOTk5Ii8+PHBhdGggZD0iTTIyLDgwIGEzMCwyMCAwIDAsMSw1NiwwIHoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=';
-
+window.handleImageError = function(img) {
+    img.onerror = null;
+    img.src = DEFAULT_AVATAR;
+};
 let currentUser = null;
 
 // Initialize Telegram Web App
@@ -376,7 +379,7 @@ async function loadAllUsers(silent = false) {
                     const userHtml = `
                         <div class="user-list-item" id="user-item-${user.id}" onclick="switchTab('profile', '${user.id}');">
                             <div class="avatar-wrapper">
-                                <img src="${photoUrl}" alt="${user.username}" class="user-list-avatar">
+                                <img src="${photoUrl}" alt="${user.username}" class="user-list-avatar" onerror="handleImageError(this)">
                                 ${isActive ? '<div class="active-dot"></div>' : ''}
                             </div>
                             <div class="user-list-info">
@@ -486,7 +489,7 @@ function createPostHtml(post) {
         <div class="post-item" id="post-${post.id}">
             <div class="post-header">
                 <div class="avatar-wrapper">
-                    <img src="${getAvatarUrl(post.photo_url)}" alt="${post.username}" class="avatar clickable-user" onclick="showUserProfile('${post.user_id}')">
+                    <img src="${getAvatarUrl(post.photo_url)}" alt="${post.username}" class="avatar clickable-user" onclick="showUserProfile('${post.user_id}')" onerror="handleImageError(this)">
                     ${isActive ? '<div class="active-dot"></div>' : ''}
                 </div>
                 <div class="post-meta">
@@ -567,7 +570,7 @@ function renderCommentBubble(c) {
     const timeAgo = formatTimeAgo(c.created_at);
     return `
         <div class="comment-item" id="comment-${c.id}">
-            <img src="${getAvatarUrl(c.photo_url)}" class="comment-avatar clickable-user" onclick="showUserProfile('${c.user_id}'); closeCommentsBottomSheet();">
+            <img src="${getAvatarUrl(c.photo_url)}" class="comment-avatar clickable-user" onclick="showUserProfile('${c.user_id}'); closeCommentsBottomSheet();" onerror="handleImageError(this)">
             <div class="comment-bubble-wrapper">
                 <div class="comment-bubble">
                     <div class="comment-author-name clickable-user" onclick="showUserProfile('${c.user_id}'); closeCommentsBottomSheet();">${c.username}</div>
@@ -1089,7 +1092,7 @@ async function viewPostLikes(postId) {
         if (data.likes && data.likes.length > 0) {
             list.innerHTML = data.likes.map(l => `
                 <div class="fb-user-item">
-                    <img src="${getAvatarUrl(l.photo_url)}" alt="Avatar">
+                    <img src="${getAvatarUrl(l.photo_url)}" alt="Avatar" onerror="handleImageError(this)">
                     <span>${l.username}</span>
                 </div>
             `).join('');
@@ -1114,7 +1117,7 @@ async function viewStoryLikes(storyId) {
         const list = document.getElementById('story-likes-list');
         list.innerHTML = data.likes.map(l => `
             <div class="fb-user-item">
-                <img src="${getAvatarUrl(l.photo_url)}" alt="Avatar">
+                <img src="${getAvatarUrl(l.photo_url)}" alt="Avatar" onerror="handleImageError(this)">
                 <span>${l.username}</span>
             </div>
         `).join('');
