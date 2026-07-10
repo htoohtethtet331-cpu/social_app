@@ -72,6 +72,9 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/unichat')
 
 // --- API Routes ---
 
+// Admin Routes
+app.use('/api/admin', require('./routes/adminRoutes'));
+
 // 1. Authenticate / Register User
 app.post('/api/auth', async (req, res) => {
     const { telegram_id, username, photo_url } = req.body;

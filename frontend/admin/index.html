@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniChat Admin Dashboard</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+
+    <!-- Login Modal Overlay -->
+    <div id="login-overlay" class="overlay active">
+        <div class="login-card">
+            <h2><i class="fas fa-lock"></i> Admin Access</h2>
+            <p>Please enter the master password to continue.</p>
+            <input type="password" id="admin-password" placeholder="Password" />
+            <button id="login-btn">Login</button>
+            <div id="login-error" class="error-msg"></div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboard-container" class="dashboard-container hidden">
+        
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>UniChat Admin</h2>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-target="dashboard-section"><i class="fas fa-chart-line"></i> Dashboard</li>
+                <li data-target="users-section"><i class="fas fa-users"></i> Users</li>
+                <li data-target="posts-section"><i class="fas fa-file-alt"></i> Posts</li>
+                <li id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <h1 id="page-title">Dashboard</h1>
+            </header>
+
+            <!-- Section: Dashboard Stats -->
+            <section id="dashboard-section" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-users stat-icon blue"></i>
+                        <div class="stat-info">
+                            <h3 id="stat-users">0</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-file-alt stat-icon green"></i>
+                        <div class="stat-info">
+                            <h3 id="stat-posts">0</h3>
+                            <p>Total Posts</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-comments stat-icon orange"></i>
+                        <div class="stat-info">
+                            <h3 id="stat-comments">0</h3>
+                            <p>Total Comments</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-heart stat-icon red"></i>
+                        <div class="stat-info">
+                            <h3 id="stat-likes">0</h3>
+                            <p>Total Likes</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Users -->
+            <section id="users-section" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Manage Users</h2>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="users-table">
+                            <thead>
+                                <tr>
+                                    <th>Photo</th>
+                                    <th>Username</th>
+                                    <th>Telegram ID</th>
+                                    <th>Joined/Active</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Users will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Posts -->
+            <section id="posts-section" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Manage Posts</h2>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="posts-table">
+                            <thead>
+                                <tr>
+                                    <th>Author</th>
+                                    <th>Content snippet</th>
+                                    <th>Media</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Posts will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="edit-user-modal" class="overlay">
+        <div class="modal-card">
+            <h3>Edit User</h3>
+            <input type="hidden" id="edit-user-id">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="edit-user-username">
+            </div>
+            <div class="form-group">
+                <label>Bio</label>
+                <textarea id="edit-user-bio" rows="3"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('edit-user-modal')">Cancel</button>
+                <button class="btn-save" onclick="saveUser()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Post Modal -->
+    <div id="edit-post-modal" class="overlay">
+        <div class="modal-card">
+            <h3>Edit Post</h3>
+            <input type="hidden" id="edit-post-id">
+            <div class="form-group">
+                <label>Content</label>
+                <textarea id="edit-post-content" rows="4"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('edit-post-modal')">Cancel</button>
+                <button class="btn-save" onclick="savePost()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="./admin.js"></script>
+</body>
+</html>
