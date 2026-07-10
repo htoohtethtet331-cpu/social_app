@@ -130,40 +130,66 @@ function setupUI() {
     // Image preview logic
     const postImageInput = document.getElementById('post-image');
     const previewContainer = document.getElementById('image-preview-container');
-    const previewImg = document.getElementById('image-preview');
+    const previewGrid = document.getElementById('multi-image-preview-grid');
     const removeImgBtn = document.getElementById('remove-img-btn');
+    let currentLayoutType = 'single';
 
     postImageInput.onchange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImg.src = e.target.result;
-                previewContainer.style.display = 'inline-block';
-            }
-            reader.readAsDataURL(e.target.files[0]);
+        if (e.target.files && e.target.files.length > 0) {
+            const files = Array.from(e.target.files).slice(0, 3); // Max 3
+            
+            const img = new Image();
+            img.onload = () => {
+                const isLandscape = img.width >= img.height;
+                const count = files.length;
+                
+                if (count === 1) {
+                    currentLayoutType = 'grid-1';
+                } else if (count === 2) {
+                    currentLayoutType = isLandscape ? 'grid-2-landscape' : 'grid-2-portrait';
+                } else {
+                    currentLayoutType = isLandscape ? 'grid-3-landscape' : 'grid-3-portrait';
+                }
+                
+                previewGrid.className = `post-images-grid ${currentLayoutType}`;
+                previewGrid.innerHTML = '';
+                
+                files.forEach((file, index) => {
+                    const src = URL.createObjectURL(file);
+                    previewGrid.innerHTML += `<img src="${src}" class="post-grid-img img-${index}">`;
+                });
+                
+                previewContainer.style.display = 'block';
+            };
+            img.src = URL.createObjectURL(files[0]);
         }
     };
 
     removeImgBtn.onclick = () => {
         postImageInput.value = "";
         previewContainer.style.display = 'none';
-        previewImg.src = "";
+        previewGrid.innerHTML = "";
+        currentLayoutType = 'single';
     };
-
 
     // Setup Post Form
     document.getElementById('post-form').onsubmit = async (e) => {
         e.preventDefault();
         const contentInput = document.getElementById('post-content');
         const content = contentInput.value.trim();
-        const imageFile = postImageInput.files[0];
+        const files = postImageInput.files;
 
-        if (!content && !imageFile) return;
+        if (!content && files.length === 0) return;
 
         const formData = new FormData();
         formData.append('user_id', currentUser.id);
         if (content) formData.append('content', content);
-        if (imageFile) formData.append('image', imageFile);
+        if (files.length > 0) {
+            Array.from(files).slice(0, 3).forEach(file => {
+                formData.append('images', file);
+            });
+            formData.append('layout_type', currentLayoutType);
+        }
 
         try {
             const res = await fetch(`${API_BASE_URL}/posts`, {
@@ -448,7 +474,11 @@ function createPostHtml(post) {
                 </div>
             </div>
             <div class="post-body">${escapeHtml(post.content || '')}</div>
-            ${post.image_url ? `<img src="${post.image_url}" class="post-image">` : ''}
+            ${post.image_urls && post.image_urls.length > 0 ? `
+                <div class="post-images-grid ${post.layout_type}">
+                    ${post.image_urls.map((url, i) => `<img src="${url}" class="post-grid-img img-${i}" onclick="viewFullScreenImage('${url}')">`).join('')}
+                </div>
+            ` : (post.image_url ? `<img src="${post.image_url}" class="post-image" onclick="viewFullScreenImage('${post.image_url}')">` : '')}
             
             <div class="post-stats">
                 <span id="like-count-${post.id}" onclick="viewPostLikes('${post.id}')" style="cursor: pointer;">${post.like_count} Likes</span>

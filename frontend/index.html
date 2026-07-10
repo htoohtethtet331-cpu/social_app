@@ -38,9 +38,9 @@
                             <img id="form-avatar" src="" alt="Avatar" class="avatar clickable-user" onclick="viewUserStories(currentUser.id)" style="margin-top: 5px;">
                             <div style="flex: 1; display: flex; flex-direction: column;">
                                 <textarea id="post-content" placeholder="What's on your mind?" rows="4" style="border: none; background: transparent; padding: 8px 10px; font-size: 1.1rem; outline: none; resize: none;"></textarea>
-                                <div id="image-preview-container" class="image-preview-container" style="display: none; margin-left: 10px; margin-bottom: 10px; position: relative; width: 80px; height: 80px;">
-                                    <img id="image-preview" class="image-preview" src="" alt="Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);">
-                                    <button type="button" id="remove-img-btn" class="story-close-btn" style="top: -8px; right: -8px; width: 24px; height: 24px; font-size: 16px; line-height: 24px; padding: 0; background: var(--white); color: #333; border: 1px solid #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center;">&times;</button>
+                                <div id="image-preview-container" class="image-preview-container" style="display: none; margin-top: 10px; position: relative; width: 100%; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color);">
+                                    <div id="multi-image-preview-grid" style="width: 100%; height: 200px;"></div>
+                                    <button type="button" id="remove-img-btn" class="story-close-btn" style="top: 8px; right: 8px; width: 30px; height: 30px; font-size: 20px; line-height: 30px; padding: 0; background: rgba(255,255,255,0.8); color: #333; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; position: absolute; z-index: 10; border-radius: 50%; cursor: pointer;">&times;</button>
                                 </div>
                             </div>
                         </div>
@@ -49,7 +49,7 @@
                                 <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.96-2.36L6.5 17h11l-3.54-4.71z"/></svg>
                                 Photo/Video
                             </label>
-                            <input type="file" id="post-image" accept="image/*" class="hidden-file-input">
+                            <input type="file" id="post-image" accept="image/*" class="hidden-file-input" multiple>
                             <button type="submit" class="btn primary-btn" style="padding: 8px 24px; border-radius: 20px;">Post</button>
                         </div>
                     </form>
@@ -302,6 +302,6 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=20"></script>
+    <script src="app.js?v=21"></script>
 </body>
 </html>

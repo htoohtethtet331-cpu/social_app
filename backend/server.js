@@ -152,17 +152,23 @@ app.post('/api/skip-profile', async (req, res) => {
 });
 
 // 5. Create a Post
-app.post('/api/posts', upload.single('image'), async (req, res) => {
-    const { user_id, content } = req.body;
-    if (!user_id || (!content && !req.file)) return res.status(400).json({ error: 'Content or image required' });
+app.post('/api/posts', upload.array('images', 3), async (req, res) => {
+    const { user_id, content, layout_type } = req.body;
+    if (!user_id || (!content && (!req.files || req.files.length === 0))) return res.status(400).json({ error: 'Content or images required' });
 
-    let image_url = null;
-    if (req.file) {
-        image_url = (req.file.path && req.file.path.startsWith('http')) ? req.file.path : ('/uploads/' + req.file.filename);
+    let image_urls = [];
+    if (req.files && req.files.length > 0) {
+        image_urls = req.files.map(file => (file.path && file.path.startsWith('http')) ? file.path : ('/uploads/' + file.filename));
     }
 
     try {
-        let post = await Post.create({ user_id, content: content || '', image_url });
+        let post = await Post.create({ 
+            user_id, 
+            content: content || '', 
+            image_urls,
+            image_url: image_urls.length > 0 ? image_urls[0] : null,
+            layout_type: layout_type || 'single'
+        });
         post = await post.populate('user_id', 'username photo_url last_active');
         const newPost = {
             id: post._id,
@@ -171,7 +177,9 @@ app.post('/api/posts', upload.single('image'), async (req, res) => {
             photo_url: post.user_id.photo_url,
             is_active: post.user_id.last_active ? (Date.now() - new Date(post.user_id.last_active).getTime() < 300000) : false,
             content: post.content,
+            image_urls: post.image_urls,
             image_url: post.image_url,
+            layout_type: post.layout_type,
             created_at: post.created_at,
             like_count: 0,
             comment_count: 0,
@@ -218,7 +226,9 @@ app.get('/api/posts', async (req, res) => {
                 photo_url: post.user_id ? post.user_id.photo_url : null,
                 is_active: post.user_id && post.user_id.last_active ? (Date.now() - new Date(post.user_id.last_active).getTime() < 300000) : false,
                 content: post.content,
+                image_urls: post.image_urls,
                 image_url: post.image_url,
+                layout_type: post.layout_type,
                 created_at: post.created_at,
                 like_count: likeData ? likeData.count : 0,
                 comment_count: commentData ? commentData.count : 0,
@@ -381,7 +391,9 @@ app.get('/api/users/:id/posts', async (req, res) => {
                 username: post.user_id ? post.user_id.username : 'Unknown',
                 photo_url: post.user_id ? post.user_id.photo_url : null,
                 content: post.content,
+                image_urls: post.image_urls,
                 image_url: post.image_url,
+                layout_type: post.layout_type,
                 created_at: post.created_at,
                 like_count: likeData ? likeData.count : 0,
                 comment_count: commentData ? commentData.count : 0,
