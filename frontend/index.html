@@ -242,6 +242,22 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Post Likes Modal -->
+        <div class="modal bottom-sheet" id="post-likes-modal" style="z-index: 4000;">
+            <div class="modal-content" style="max-height: 60vh; display: flex; flex-direction: column; padding: 0;">
+                <div class="fb-modal-header">
+                    <div style="width: 36px;"></div> <!-- Spacer -->
+                    <h2>Post Likes</h2>
+                    <button type="button" class="fb-close-btn" onclick="document.getElementById('post-likes-modal').classList.remove('active')">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path></svg>
+                    </button>
+                </div>
+                <div id="post-likes-list" style="overflow-y: auto; flex: 1; padding: 0 10px;">
+                    <!-- Likers will go here -->
+                </div>
+            </div>
+        </div>
     </div>
     <!-- Full Width Bottom Navigation with Center FAB -->
     <div class="bottom-nav-container">
@@ -271,6 +287,6 @@
         </nav>
     </div>
 
-    <script src="app.js?v=14"></script>
+    <script src="app.js?v=15"></script>
 </body>
 </html>

@@ -322,7 +322,7 @@ function createPostHtml(post) {
             ${post.image_url ? `<img src="${post.image_url}" class="post-image">` : ''}
             
             <div class="post-stats">
-                <span id="like-count-${post.id}">${post.like_count} Likes</span>
+                <span id="like-count-${post.id}" onclick="viewPostLikes('${post.id}')" style="cursor: pointer;">${post.like_count} Likes</span>
                 <span id="comment-count-${post.id}">${post.comment_count} Comments</span>
             </div>
             
@@ -897,6 +897,28 @@ async function toggleStoryLike(storyId) {
         }
     } catch(e) { console.error(e); }
 }
+
+async function viewPostLikes(postId) {
+    try {
+        const res = await fetch(`${API_BASE_URL}/posts/${postId}/likes`);
+        const data = await res.json();
+        
+        const list = document.getElementById('post-likes-list');
+        if (data.likes && data.likes.length > 0) {
+            list.innerHTML = data.likes.map(l => `
+                <div class="fb-user-item">
+                    <img src="${getAvatarUrl(l.photo_url)}" alt="Avatar">
+                    <span>${l.username}</span>
+                </div>
+            `).join('');
+        } else {
+            list.innerHTML = '<p class="text-center text-muted mt-4">No likes yet.</p>';
+        }
+        
+        document.getElementById('post-likes-modal').classList.add('active');
+    } catch(e) { console.error(e); }
+}
+
 
 async function viewStoryLikes(storyId) {
     clearTimeout(storyTimer);

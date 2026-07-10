@@ -219,6 +219,22 @@ app.post('/api/posts/:id/like', async (req, res) => {
     }
 });
 
+// 7.1 Get Likes for a Post
+app.get('/api/posts/:id/likes', async (req, res) => {
+    const post_id = req.params.id;
+    try {
+        const likes = await Like.find({ post_id }).populate('user_id', 'username photo_url');
+        const formattedLikes = likes.map(l => ({
+            user_id: l.user_id._id,
+            username: l.user_id.username,
+            photo_url: l.user_id.photo_url
+        }));
+        res.json({ likes: formattedLikes });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // 8. Add a Comment
 app.post('/api/posts/:id/comments', async (req, res) => {
     const postId = req.params.id;

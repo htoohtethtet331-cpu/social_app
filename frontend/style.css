@@ -40,7 +40,8 @@ body {
     border-left: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
     position: relative;
-    padding-bottom: 70px; /* Space for bottom nav */
+    padding-bottom: 70px;
+    /* Space for bottom nav */
 }
 
 /* Header */
@@ -162,6 +163,7 @@ body {
 .modal.bottom-sheet {
     align-items: flex-end;
 }
+
 .modal.bottom-sheet .modal-content {
     width: 100%;
     max-width: 600px;
@@ -169,11 +171,17 @@ body {
     margin: 0;
     animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     background-color: var(--white);
-    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
 }
+
 @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    from {
+        transform: translateY(100%);
+    }
+
+    to {
+        transform: translateY(0);
+    }
 }
 
 .fb-modal-header {
@@ -425,14 +433,14 @@ body {
 
 /* Modal */
 .modal {
-    display: none; 
+    display: none;
     position: fixed;
     z-index: 3000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     align-items: center;
     justify-content: center;
 }
@@ -448,7 +456,7 @@ body {
     width: 90%;
     max-width: 400px;
     text-align: center;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .modal-content h2 {
@@ -587,8 +595,11 @@ body {
 /* Comments Bottom Sheet */
 .bottom-sheet-overlay {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
     z-index: 3000;
     display: none;
     flex-direction: column;
@@ -795,7 +806,7 @@ body {
     padding: 0;
     margin: -1px;
     overflow: hidden;
-    clip: rect(0,0,0,0);
+    clip: rect(0, 0, 0, 0);
     border: 0;
 }
 
@@ -809,7 +820,7 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     color: #050505;
     z-index: 10;
 }
@@ -1013,7 +1024,8 @@ body {
 .nav-fab-center {
     position: absolute;
     left: 50%;
-    top: -25px; /* Floating above the nav bar */
+    top: -25px;
+    /* Floating above the nav bar */
     transform: translateX(-50%);
     width: 60px;
     height: 60px;
@@ -1036,10 +1048,11 @@ body {
 }
 
 /* Optional spacing adjustments to leave room for FAB */
-.bottom-nav-bar > :nth-child(2) {
+.bottom-nav-bar> :nth-child(2) {
     margin-right: 35px;
 }
-.bottom-nav-bar > :nth-child(4) {
+
+.bottom-nav-bar> :nth-child(4) {
     margin-left: 35px;
 }
 
@@ -1080,7 +1093,7 @@ body {
 }
 
 .user-list-item:hover {
-    background-color: rgba(0,0,0,0.05);
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .user-list-avatar {
@@ -1121,14 +1134,16 @@ body {
     height: 120px;
     margin: 20px auto;
 }
+
 .photo-preview-circle {
     width: 100%;
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--primary-color);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
+
 .photo-upload-badge {
     position: absolute;
     bottom: 0;
@@ -1145,24 +1160,39 @@ body {
     border: 3px solid var(--bg-color);
     transition: transform 0.2s;
 }
+
 .photo-upload-badge:hover {
     transform: scale(1.1);
 }
-.text-center { text-align: center; }
-.text-muted { color: var(--text-color); opacity: 0.7; font-size: 0.9rem; margin-bottom: 15px; }
-.mt-4 { margin-top: 20px; }
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: var(--text-color);
+    opacity: 0.7;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.mt-4 {
+    margin-top: 20px;
+}
 
 /* Highlights UI */
 .profile-highlights-container {
     display: flex;
     overflow-x: auto;
-    padding: 15px 15px 5px 15px;
+    padding: 15px 15px 15px 15px;
     gap: 15px;
     border-bottom: 1px solid var(--border-color);
 }
+
 .profile-highlights-container::-webkit-scrollbar {
     display: none;
 }
+
 .highlight-item {
     display: flex;
     flex-direction: column;
@@ -1171,6 +1201,7 @@ body {
     cursor: pointer;
     flex-shrink: 0;
 }
+
 .highlight-circle {
     width: 64px;
     height: 64px;
