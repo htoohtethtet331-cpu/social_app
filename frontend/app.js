@@ -460,10 +460,10 @@ function showNewPosts() {
 
 // Navigation Functions
 function switchTab(tabName, userId = null) {
-    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
     
     // Check if the tab name corresponds to a navigation button
-    const navBtn = document.querySelector(`.nav-btn[onclick*="${tabName}"]`);
+    const navBtn = document.querySelector(`.nav-item[onclick*="${tabName}"]`);
     if (navBtn) navBtn.classList.add('active');
 
     if (tabName === 'profile') {

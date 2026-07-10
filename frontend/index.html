@@ -6,7 +6,7 @@
     <title>Telegram Web App</title>
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css?v=35">
+    <link rel="stylesheet" href="style.css?v=36">
     <script>
         const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2RkZCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzkiIHI9IjE4IiBmaWxsPSIjOTk5Ii8+PHBhdGggZD0iTTIyLDgwIGEzMCwyMCAwIDAsMSw1NiwwIHoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=';
         window.handleImageError = function(img) {
@@ -156,27 +156,38 @@
             <h2 style="margin:0;">Settings</h2>
             <button type="button" class="fb-close-btn" onclick="toggleSettingsDrawer()" style="background:none; border:none; font-size: 24px; cursor: pointer;">&times;</button>
         </div>
-        <div id="settings-menu" style="padding: 20px;">
-            <div class="settings-item hover-scale" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color);">
-                <div class="settings-item-info">
-                    <h3 style="margin:0; font-size: 1.1rem;">Theme</h3>
-                    <p style="margin:5px 0 0 0; font-size: 0.9rem; color: var(--secondary-color);">Choose between light and dark mode</p>
-                </div>
-                <div class="theme-toggle" style="display: flex; gap: 10px;">
-                    <button id="light-mode-btn" class="btn primary-btn active-scale" onclick="setTheme('light')" style="padding: 8px 16px; border-radius: 20px;">Light</button>
-                    <button id="dark-mode-btn" class="btn secondary-btn active-scale" onclick="setTheme('dark')" style="padding: 8px 16px; border-radius: 20px;">Dark</button>
+        <div id="settings-menu" style="padding: 10px 0; padding-bottom: 30px;">
+            <div class="settings-section-title">Preferences</div>
+            <div class="settings-card">
+                <div class="settings-row" style="cursor: default;">
+                    <div class="settings-icon-wrapper" style="background: rgba(29, 155, 240, 0.1); color: #1d9bf0;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm1-17.93c3.94.49 7 3.85 7 7.93s-3.05 7.44-7 7.93V4.07z"/></svg>
+                    </div>
+                    <div class="settings-info">
+                        <h4>Theme</h4>
+                        <p>Appearance mode</p>
+                    </div>
+                    <div class="settings-action">
+                        <div class="theme-segmented-control">
+                            <div id="light-mode-btn" class="theme-segment active" onclick="setTheme('light')">Light</div>
+                            <div id="dark-mode-btn" class="theme-segment" onclick="setTheme('dark')">Dark</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="settings-item hover-scale active-scale" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-color); cursor: pointer;" onclick="showFavorites()">
-                <div class="settings-item-info">
-                    <h3 style="margin:0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="color: #f5c33b;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                        My Favorites
-                    </h3>
-                    <p style="margin:5px 0 0 0; font-size: 0.9rem; color: var(--secondary-color);">View posts you've added to favorites</p>
+
+            <div class="settings-section-title">Activity</div>
+            <div class="settings-card">
+                <div class="settings-row" onclick="showFavorites()">
+                    <div class="settings-icon-wrapper" style="background: rgba(245, 195, 59, 0.1); color: #f5c33b;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                    </div>
+                    <div class="settings-info">
+                        <h4>My Favorites</h4>
+                        <p>View saved posts</p>
+                    </div>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="var(--secondary-color)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
                 </div>
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--secondary-color)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
             </div>
         </div>
         
@@ -393,6 +404,6 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=35"></script>
+    <script src="app.js?v=36"></script>
 </body>
 </html>
