@@ -19,8 +19,8 @@
     <div class="app-container">
         <!-- Header -->
         <header class="app-header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;">
-            <div class="brand" style="display: flex; align-items: center; gap: 10px;">
-                <img src="/logo.png" alt="WYU-Math Logo" style="height: 40px; border-radius: 50%;">
+            <div class="logo-container" style="display: flex; align-items: center; gap: 10px;" onclick="switchTab('profile', document.querySelector('.nav-btn[onclick*=\'profile\']'))">
+                <img id="app-bar-profile-pic" src="https://ui-avatars.com/api/?name=User&background=random" alt="Profile" style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover; cursor: pointer;">
                 <h1 style="margin: 0; color: var(--primary-color); font-size: 1.5rem; font-weight: bold;">WYU-Math</h1>
             </div>
             <div class="user-info" style="display: flex; gap: 15px; align-items: center;">

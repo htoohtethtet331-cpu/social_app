@@ -147,7 +147,8 @@ function loadHighResImage(img) {
 
 function setupUI() {
     
-    // removed profileImg
+    const appBarProfilePic = document.getElementById('app-bar-profile-pic');
+    if (appBarProfilePic) appBarProfilePic.src = getAvatarUrl(currentUser.photo_url);
 
     const formAvatar = document.getElementById('form-avatar');
     if (formAvatar) formAvatar.src = getAvatarUrl(currentUser.photo_url);
@@ -1366,6 +1367,9 @@ document.getElementById('avatar-upload').onchange = async (e) => {
                 document.getElementById('profile-photo').src = data.photo_url;
                 const formAvatar = document.getElementById('form-avatar');
                 if (formAvatar) formAvatar.src = data.photo_url;
+                
+                const appBarProfilePic = document.getElementById('app-bar-profile-pic');
+                if (appBarProfilePic) appBarProfilePic.src = data.photo_url;
                 
                 currentUser.photo_url = data.photo_url;
                 localStorage.setItem('user', JSON.stringify(currentUser));
