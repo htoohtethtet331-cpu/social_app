@@ -999,8 +999,8 @@ function renderCommentBubble(c) {
                 ${renderAvatarWithStoryRing(c.user_id, c.photo_url, c.username, 'comment-avatar clickable-user')}
             </div>
             <div class="comment-bubble-wrapper">
-                <div class="comment-bubble">
-                    <div class="comment-author-name clickable-user" onclick="showUserProfile('${c.user_id}'); closeCommentsBottomSheet();">${escapeHtml(c.username)}</div>
+                <div class="comment-bubble" onclick="replyToComment('${c.id}', '${escapeHtml(c.username)}')">
+                    <div class="comment-author-name">${escapeHtml(c.username)}</div>
                     <div class="comment-text">${contentHtml}</div>
                 </div>
                 <div class="comment-actions">

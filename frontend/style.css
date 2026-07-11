@@ -705,6 +705,7 @@ body {
     padding: 8px 12px;
     display: inline-block;
     max-width: fit-content;
+    cursor: pointer;
 }
 
 .comment-author-name {
