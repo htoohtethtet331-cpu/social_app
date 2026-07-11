@@ -409,11 +409,12 @@ body {
 
 .comment-input {
     flex: 1;
-    padding: 8px;
+    padding: 10px 12px;
     border: 1px solid var(--border-color);
     border-radius: 16px;
     outline: none;
     font-family: var(--font-family);
+    line-height: 1.5;
 }
 
 .comment-submit {
@@ -675,6 +676,8 @@ body {
     background: transparent;
     outline: none;
     font-size: 0.95rem;
+    line-height: 1.5;
+    padding: 8px 0;
 }
 
 /* Facebook Comment Bubbles */
