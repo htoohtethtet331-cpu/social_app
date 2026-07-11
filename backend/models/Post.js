@@ -6,6 +6,8 @@ const postSchema = new mongoose.Schema({
   image_urls: { type: [String], default: [] },
   image_url: String, // Keeping for backward compatibility
   layout_type: { type: String, default: 'single' },
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  like_count: { type: Number, default: 0 },
   created_at: { type: Date, default: Date.now }
 });
 

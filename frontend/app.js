@@ -867,26 +867,75 @@ function createPostHtml(post) {
     `;
 }
 
+const likeTimeouts = new Map();
+
 async function toggleLike(postId) {
-    try {
-        const res = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: currentUser.id })
-        });
-        const data = await res.json();
-        if (data.success) {
-            const btn = document.getElementById(`like-btn-${postId}`);
-            if (data.liked) {
-                btn.classList.add('liked');
-            } else {
-                btn.classList.remove('liked');
-            }
-            document.getElementById(`like-count-${postId}`).innerText = `${data.likes} Likes`;
-        }
-    } catch (e) {
-        console.error(e);
+    const btn = document.getElementById(`like-btn-${postId}`);
+    const countEl = document.getElementById(`like-count-${postId}`);
+    
+    if (!btn || !countEl) return;
+
+    // 1. Optimistic UI Update
+    const isCurrentlyLiked = btn.classList.contains('liked');
+    const newLikedState = !isCurrentlyLiked;
+    
+    let currentCountMatch = countEl.innerText.match(/\d+/);
+    let currentCount = currentCountMatch ? parseInt(currentCountMatch[0]) : 0;
+    
+    // Immediately apply UI changes
+    if (newLikedState) {
+        btn.classList.add('liked');
+        currentCount++;
+    } else {
+        btn.classList.remove('liked');
+        currentCount--;
     }
+    countEl.innerText = `${currentCount} Likes`;
+
+    // 2. Debounce Logic
+    if (likeTimeouts.has(postId)) {
+        clearTimeout(likeTimeouts.get(postId));
+    }
+    
+    const timeout = setTimeout(async () => {
+        try {
+            const finalAction = btn.classList.contains('liked') ? 'like' : 'unlike';
+            
+            const res = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentUser.id, action: finalAction })
+            });
+            
+            const data = await res.json();
+            
+            // 3. Rollback Logic
+            if (!data.success) {
+                throw new Error("API reported failure");
+            }
+            
+            // Sync exactly with server count just in case
+            if (data.likes !== undefined) {
+                countEl.innerText = `${data.likes} Likes`;
+            }
+        } catch (e) {
+            console.error(e);
+            // Revert Optimistic UI Changes
+            if (newLikedState) {
+                btn.classList.remove('liked');
+                currentCount--;
+            } else {
+                btn.classList.add('liked');
+                currentCount++;
+            }
+            countEl.innerText = `${currentCount} Likes`;
+            
+            // Simple toast/alert for error
+            alert("Like ပေး၍ မရပါ");
+        }
+    }, 500); // 500ms debounce
+    
+    likeTimeouts.set(postId, timeout);
 }
 
 async function toggleFavorite(postId) {
