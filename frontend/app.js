@@ -1911,6 +1911,7 @@ let currentGalleryIndex = 0;
 let galleryTouchStartX = 0;
 let galleryTouchEndX = 0;
 let galleryTouchMoveX = 0;
+let galleryTouchStartTime = 0;
 let galleryIsSwiping = false;
 let galleryDidSwipe = false;
 
@@ -1935,7 +1936,7 @@ function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
         modal.style.left = '0';
         modal.style.width = '100vw';
         modal.style.height = '100vh';
-        modal.style.backgroundColor = 'rgba(0,0,0,0.95)';
+        modal.style.backgroundColor = 'black'; // TikTok uses solid black for gallery
         modal.style.zIndex = '999999';
         modal.style.display = 'none';
         modal.style.alignItems = 'center';
@@ -1944,20 +1945,29 @@ function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
         modal.style.transition = 'opacity 0.2s ease-in-out';
         
         modal.innerHTML = `
-            <div id="gallery-dots-container" style="position:absolute; bottom:25px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:2; align-items:center;"></div>
-            <div style="position:absolute; top:50%; left:10px; color:white; font-size:30px; cursor:pointer; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8); transform: translateY(-50%); padding: 20px;" onclick="prevGalleryImage(event)" id="gallery-prev-btn">&#10094;</div>
-            <img id="gallery-full-screen-img" style="max-width:100%; max-height:100%; object-fit:contain; z-index:1; pointer-events:none; transition: transform 0.3s ease;">
-            <div style="position:absolute; top:50%; right:10px; color:white; font-size:30px; cursor:pointer; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8); transform: translateY(-50%); padding: 20px;" onclick="nextGalleryImage(event)" id="gallery-next-btn">&#10095;</div>
+            <div id="gallery-slides-container" style="position:absolute; top:0; left:0; width:100%; height:100%; overflow:hidden;"></div>
+            <div id="gallery-ui-container" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index: 100;">
+                <div id="gallery-dots-container" style="position:absolute; bottom:25px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center;"></div>
+                <div style="position:absolute; top:50%; left:10px; color:white; font-size:30px; cursor:pointer; text-shadow: 0 0 10px rgba(0,0,0,0.8); transform: translateY(-50%); padding: 20px; pointer-events:auto;" onclick="prevGalleryImage(event)" id="gallery-prev-btn">&#10094;</div>
+                <div style="position:absolute; top:50%; right:10px; color:white; font-size:30px; cursor:pointer; text-shadow: 0 0 10px rgba(0,0,0,0.8); transform: translateY(-50%); padding: 20px; pointer-events:auto;" onclick="nextGalleryImage(event)" id="gallery-next-btn">&#10095;</div>
+            </div>
         `;
         document.body.appendChild(modal);
         
         // Swiping support
         modal.addEventListener('touchstart', (e) => {
             galleryTouchStartX = e.changedTouches[0].screenX;
+            galleryTouchStartTime = Date.now();
             galleryIsSwiping = true;
             galleryDidSwipe = false;
-            const img = document.getElementById('gallery-full-screen-img');
-            img.style.transition = 'none'; // remove transition for smooth dragging
+            
+            // Remove transitions for smooth 1:1 dragging
+            for (let i = 0; i < currentGalleryUrls.length; i++) {
+                const slide = document.getElementById(`gallery-slide-${i}`);
+                const overlay = document.getElementById(`gallery-slide-overlay-${i}`);
+                if (slide) slide.style.transition = 'none';
+                if (overlay) overlay.style.transition = 'none';
+            }
         }, {passive: true});
         
         modal.addEventListener('touchmove', (e) => {
@@ -1965,16 +1975,56 @@ function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
             galleryTouchMoveX = e.changedTouches[0].screenX;
             const deltaX = galleryTouchMoveX - galleryTouchStartX;
             if (Math.abs(deltaX) > 10) galleryDidSwipe = true;
-            const img = document.getElementById('gallery-full-screen-img');
-            img.style.transform = `translateX(${deltaX}px)`;
+            
+            const screenWidth = window.innerWidth;
+            const progress = deltaX / screenWidth;
+            
+            // TikTok 3D Stacking Logic
+            for (let i = 0; i < currentGalleryUrls.length; i++) {
+                const slide = document.getElementById(`gallery-slide-${i}`);
+                const overlay = document.getElementById(`gallery-slide-overlay-${i}`);
+                if (!slide) continue;
+                
+                if (i === currentGalleryIndex) {
+                    if (deltaX < 0) { // Swiping left (next)
+                        // Current shrinks and darkens
+                        const scale = Math.max(0.9, 1 - Math.abs(progress) * 0.1);
+                        slide.style.transform = `scale(${scale})`;
+                        slide.style.zIndex = 5;
+                        overlay.style.opacity = Math.abs(progress) * 0.6;
+                    } else { // Swiping right (prev)
+                        // Current slides right
+                        slide.style.transform = `translateX(${deltaX}px)`;
+                        slide.style.zIndex = 10;
+                        overlay.style.opacity = 0;
+                    }
+                } else if (i === currentGalleryIndex + 1) { // Next slide
+                    if (deltaX < 0) {
+                        // Next comes in from right
+                        slide.style.transform = `translateX(${screenWidth + deltaX}px)`;
+                        slide.style.zIndex = 10;
+                        overlay.style.opacity = 0;
+                    } else {
+                        slide.style.transform = `translateX(100%)`;
+                    }
+                } else if (i === currentGalleryIndex - 1) { // Prev slide
+                    if (deltaX > 0) {
+                        // Prev grows and brightens
+                        const scale = Math.min(1, 0.9 + Math.abs(progress) * 0.1);
+                        slide.style.transform = `scale(${scale})`;
+                        slide.style.zIndex = 5;
+                        overlay.style.opacity = 0.6 - Math.abs(progress) * 0.6;
+                    } else {
+                        slide.style.transform = `translateX(-100%)`;
+                    }
+                }
+            }
         }, {passive: true});
         
         modal.addEventListener('touchend', (e) => {
+            if (!galleryIsSwiping) return;
             galleryTouchEndX = e.changedTouches[0].screenX;
             galleryIsSwiping = false;
-            const img = document.getElementById('gallery-full-screen-img');
-            img.style.transition = 'transform 0.3s ease'; // restore transition
-            img.style.transform = ''; // snap back or animate out handled by next/prev
             handleGallerySwipe();
         }, {passive: true});
         
@@ -1984,35 +2034,90 @@ function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
                 galleryDidSwipe = false;
                 return;
             }
-            if (e.target === modal || e.target.id === 'gallery-full-screen-img') {
+            // Check if clicked exactly on slides container or a slide (not UI)
+            if (e.target.classList.contains('gallery-slide') || e.target.tagName === 'IMG' || e.target.id === 'gallery-slides-container') {
                 closeGallery();
             }
         });
     }
     
+    // Initialize slides
+    const container = document.getElementById('gallery-slides-container');
+    container.innerHTML = currentGalleryUrls.map((url, i) => `
+        <div class="gallery-slide" id="gallery-slide-${i}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; transform: translateX(${i === currentGalleryIndex ? 0 : (i < currentGalleryIndex ? '-100%' : '100%')}); z-index: ${i === currentGalleryIndex ? 10 : 1};">
+            <div class="gallery-slide-overlay" id="gallery-slide-overlay-${i}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; opacity: 0; z-index: 2; pointer-events: none;"></div>
+            <img src="${url}" style="max-width: 100%; max-height: 100%; object-fit: contain; z-index: 1;">
+        </div>
+    `).join('');
+    
     updateGalleryImageUI();
     document.body.style.overflow = 'hidden';
     modal.style.display = 'flex';
     setTimeout(() => { modal.style.opacity = '1'; }, 10);
+    animateToSlide(currentGalleryIndex); // Ensure initial state is perfect
 }
 
 function handleGallerySwipe() {
-    const swipeThreshold = 50;
-    if (galleryTouchEndX < galleryTouchStartX - swipeThreshold) {
-        nextGalleryImage();
-    } else if (galleryTouchEndX > galleryTouchStartX + swipeThreshold) {
-        prevGalleryImage();
+    const deltaX = galleryTouchEndX - galleryTouchStartX;
+    const deltaTime = Date.now() - galleryTouchStartTime;
+    const velocity = Math.abs(deltaX) / (deltaTime || 1); // px per ms
+    
+    const threshold = window.innerWidth * 0.4;
+    let nextIndex = currentGalleryIndex;
+    
+    if (deltaX < 0 && (Math.abs(deltaX) > threshold || velocity > 0.5) && currentGalleryIndex < currentGalleryUrls.length - 1) {
+        nextIndex = currentGalleryIndex + 1;
+    } else if (deltaX > 0 && (Math.abs(deltaX) > threshold || velocity > 0.5) && currentGalleryIndex > 0) {
+        nextIndex = currentGalleryIndex - 1;
+    }
+    
+    if (nextIndex === currentGalleryIndex && (deltaX < 0 && currentGalleryIndex === currentGalleryUrls.length - 1 || deltaX > 0 && currentGalleryIndex === 0)) {
+        // Swiped past the bounds, close gallery like TikTok
+        if (Math.abs(deltaX) > threshold || velocity > 0.5) {
+            closeGallery();
+            return;
+        }
+    }
+    
+    animateToSlide(nextIndex);
+}
+
+function animateToSlide(targetIndex) {
+    currentGalleryIndex = targetIndex;
+    updateGalleryImageUI(); // update dots
+    
+    // Spring physics in CSS (bounce/damping)
+    const springEasing = 'cubic-bezier(0.175, 0.885, 0.32, 1.15)'; 
+    const transitionTime = '0.4s';
+    
+    for (let i = 0; i < currentGalleryUrls.length; i++) {
+        const slide = document.getElementById(`gallery-slide-${i}`);
+        const overlay = document.getElementById(`gallery-slide-overlay-${i}`);
+        if (!slide) continue;
+        
+        slide.style.transition = `transform ${transitionTime} ${springEasing}`;
+        overlay.style.transition = `opacity ${transitionTime} ease-out`;
+        
+        if (i === currentGalleryIndex) {
+            slide.style.transform = `translateX(0px) scale(1)`;
+            slide.style.zIndex = 10;
+            overlay.style.opacity = 0;
+        } else if (i < currentGalleryIndex) {
+            slide.style.transform = `scale(0.9)`; // stay underneath and scale down
+            slide.style.zIndex = 5;
+            overlay.style.opacity = 0.6;
+        } else {
+            slide.style.transform = `translateX(100%)`; // move right out of view
+            slide.style.zIndex = 10;
+            overlay.style.opacity = 0;
+        }
     }
 }
 
 function updateGalleryImageUI() {
-    const img = document.getElementById('gallery-full-screen-img');
     const dotsContainer = document.getElementById('gallery-dots-container');
     const prevBtn = document.getElementById('gallery-prev-btn');
     const nextBtn = document.getElementById('gallery-next-btn');
-    
-    if(!img) return;
-    img.src = currentGalleryUrls[currentGalleryIndex];
     
     if (dotsContainer) {
         if (currentGalleryUrls.length > 1) {
@@ -2027,27 +2132,25 @@ function updateGalleryImageUI() {
         }
     }
     
-    prevBtn.style.display = currentGalleryIndex > 0 ? 'block' : 'none';
-    nextBtn.style.display = currentGalleryIndex < currentGalleryUrls.length - 1 ? 'block' : 'none';
+    if(prevBtn) prevBtn.style.display = currentGalleryIndex > 0 ? 'block' : 'none';
+    if(nextBtn) nextBtn.style.display = currentGalleryIndex < currentGalleryUrls.length - 1 ? 'block' : 'none';
 }
 
 function nextGalleryImage(e) {
     if(e) e.stopPropagation();
     if (currentGalleryIndex < currentGalleryUrls.length - 1) {
-        currentGalleryIndex++;
-        updateGalleryImageUI();
+        animateToSlide(currentGalleryIndex + 1);
     } else {
-        closeGallery(); // Close if swiped past the last image like TikTok
+        closeGallery(); 
     }
 }
 
 function prevGalleryImage(e) {
     if(e) e.stopPropagation();
     if (currentGalleryIndex > 0) {
-        currentGalleryIndex--;
-        updateGalleryImageUI();
+        animateToSlide(currentGalleryIndex - 1);
     } else {
-        closeGallery(); // Close if swiped past the first image
+        closeGallery(); 
     }
 }
 
@@ -2059,7 +2162,7 @@ function closeGallery(e) {
         setTimeout(() => {
             modal.style.display = 'none';
             document.body.style.overflow = '';
-            document.getElementById('gallery-full-screen-img').src = '';
+            document.getElementById('gallery-slides-container').innerHTML = ''; // clear memory
         }, 200);
     }
 }
