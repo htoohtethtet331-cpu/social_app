@@ -48,15 +48,11 @@ async function initApp() {
             console.error('Error fetching follow map', e);
         }
         
-        if (!currentUser.photo_url) {
-            showPhotoModal();
-        } else {
-            setupUI();
-            initSocket();
-            await loadActiveStories();
-            fetchInitialNotifications();
-            loadPosts();
-        }
+        setupUI();
+        initSocket();
+        await loadActiveStories();
+        fetchInitialNotifications();
+        loadPosts();
     } catch (error) {
         console.error("Failed to auth user:", error);
         const usernameEl = document.getElementById('username');
@@ -1004,7 +1000,7 @@ async function loadActiveStories() {
     } catch(err) { console.error('Failed to load active stories', err); }
 }
 
-function createPostHtml(post, searchQuery = '') {
+function createPostHtml(post, searchQuery = '', isMinimized = false) {
     const date = new Date(post.created_at).toLocaleString();
     const isActive = post.is_active;
 
@@ -1016,7 +1012,7 @@ function createPostHtml(post, searchQuery = '') {
     }
 
     return `
-        <div class="post-item" id="post-${post.id}">
+        <div class="post-item ${isMinimized ? 'post-minimized' : ''}" id="post-${post.id}">
             <div class="post-header">
                 <div class="avatar-wrapper">
                     ${renderAvatarWithStoryRing(post.user_id, post.photo_url, post.username, 'clickable-user')}
@@ -2534,7 +2530,7 @@ async function performSearch(query) {
         
         if (data.posts && data.posts.length > 0) {
             feed.innerHTML = `<h3 style="padding: 10px 15px; margin: 0; color: var(--text-color);">Search Results for "${escapeHtml(query)}"</h3>` +
-                             data.posts.map(post => createPostHtml(post, query)).join('');
+                             data.posts.map(post => createPostHtml(post, query, true)).join('');
         } else {
             feed.innerHTML = `<p class="loading-text">No results found for "${escapeHtml(query)}". Try different keywords.</p>`;
         }

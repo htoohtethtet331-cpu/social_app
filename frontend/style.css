@@ -2137,3 +2137,29 @@ body.modal-open {
 [data-theme="dark"] .cat {
   filter: invert(1) hue-rotate(180deg) brightness(1.2);
 }
+
+/* Minimized Post Styles */
+.post-minimized {
+    padding-bottom: 5px;
+}
+.post-minimized .post-body {
+    max-height: 60px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    margin-bottom: 5px;
+}
+.post-minimized .preview-images-container,
+.post-minimized .post-image {
+    max-height: 100px !important;
+    overflow: hidden;
+}
+.post-minimized .post-grid-img, 
+.post-minimized .post-image {
+    max-height: 100px !important;
+    object-fit: cover;
+}
+.post-minimized .post-actions-fb {
+    padding-top: 5px !important;
+}
