@@ -721,7 +721,9 @@ function triggerLazyLoad() {
         loadAllUsers();
         isUsersLoaded = true;
     } else if (activeTabName === 'profile' && !isProfileLoaded) {
-        showUserProfile(currentUser.id);
+        if (currentUser) {
+            showUserProfile(currentUser.id);
+        }
     }
 }
 
