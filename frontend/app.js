@@ -460,6 +460,7 @@ function showNewPosts() {
 let currentTabIndex = 0; // 0: Home, 1: Users, 2: Profile, 3: Notifications
 const tabs = ['home', 'users', 'profile', 'settings'];
 let isUsersLoaded = false;
+let isProfileLoaded = false;
 let isNotificationsLoaded = false;
 
 let touchStartX = 0;
@@ -585,6 +586,8 @@ function triggerLazyLoad() {
     if (activeTabName === 'users' && !isUsersLoaded) {
         loadAllUsers();
         isUsersLoaded = true;
+    } else if (activeTabName === 'profile' && !isProfileLoaded) {
+        showUserProfile(currentUser.id);
     }
 }
 
@@ -1148,6 +1151,7 @@ async function showUserProfile(userId) {
             currentTabIndex = index;
             snapToCurrentTab();
         }
+        isProfileLoaded = true;
         
         const profileSection = document.getElementById('user-profile-section');
         const userPostsFeed = document.getElementById('user-posts-feed');
