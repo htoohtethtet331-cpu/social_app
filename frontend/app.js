@@ -2569,6 +2569,14 @@ async function openUsersListModal(type, userId) {
     
     title.innerText = type === 'followers' ? 'Followers' : 'Following';
     container.innerHTML = '<p class="loading-text" style="text-align:center;">Loading...</p>';
+    
+    // FORCE inline styles to bypass aggressive index.html caching on mobile
+    modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    modal.style.setProperty('background-color', 'rgba(0, 0, 0, 0.5)', 'important');
+    container.style.flex = '1 1 auto';
+    container.style.minHeight = '250px';
+    container.style.display = 'block'; // Remove flex from container to avoid collapsing entirely
+    
     modal.classList.add('active');
     console.log("Modal classes after add:", modal.className);
     console.log("Modal display style:", window.getComputedStyle(modal).display);
@@ -2630,6 +2638,7 @@ async function fetchAndRenderUsersList(isInitial) {
         }
         
         if (isInitial) container.innerHTML = '';
+        console.log("Users fetched:", data.users.length, data.users);
         
         const html = data.users.map(user => {
             const isFollowing = currentUserFollows.following.includes(user._id || user.id);
