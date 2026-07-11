@@ -972,8 +972,7 @@ const dragArea = document.getElementById('sheet-drag-area');
 const sheetCommentsList = document.getElementById('sheet-comments-list');
 const sheetCommentForm = document.getElementById('sheet-comment-form');
 const sheetCommentInput = document.getElementById('sheet-comment-input');
-const replyingIndicatorInline = document.getElementById('replying-indicator-inline');
-const replyingTextInline = document.getElementById('replying-text-inline');
+const cancelReplyBtn = document.getElementById('cancel-reply-btn');
 
 function formatTimeAgo(dateString) {
     const d = new Date(dateString);
@@ -1014,8 +1013,7 @@ function renderCommentBubble(c) {
 
 async function openCommentsBottomSheet(postId) {
     currentCommentPostId = postId;
-    replyingToCommentId = null;
-    replyingIndicatorInline.style.display = 'none';
+    cancelReply();
     sheetOverlay.style.display = 'flex';
     // Trigger animation
     setTimeout(() => {
@@ -1076,14 +1074,19 @@ function closeCommentsBottomSheet() {
 
 function replyToComment(commentId, username) {
     replyingToCommentId = commentId;
-    replyingTextInline.innerText = `Replying to ${username}`;
-    replyingIndicatorInline.style.display = 'flex';
+    sheetCommentInput.placeholder = `Replying to ${username}`;
+    sheetCommentInput.style.borderLeft = '2px solid var(--like-color)';
+    sheetCommentInput.style.paddingLeft = '8px';
+    cancelReplyBtn.style.display = 'block';
     sheetCommentInput.focus();
 }
 
 function cancelReply() {
     replyingToCommentId = null;
-    replyingIndicatorInline.style.display = 'none';
+    sheetCommentInput.placeholder = 'Write a comment...';
+    sheetCommentInput.style.borderLeft = 'none';
+    sheetCommentInput.style.paddingLeft = '0';
+    cancelReplyBtn.style.display = 'none';
 }
 
 // Drag to close logic
