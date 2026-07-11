@@ -2504,3 +2504,57 @@ async function performSearch(query) {
         console.error(e);
     }
 }
+
+// --- Followers / Following List Feature ---
+async function openUsersListModal(type, userId) {
+    if (!userId) return;
+    const modal = document.getElementById('users-list-modal');
+    const container = document.getElementById('users-list-container');
+    const title = document.getElementById('users-list-title');
+    
+    title.innerText = type === 'followers' ? 'Followers' : 'Following';
+    container.innerHTML = '<p class="loading-text" style="text-align:center;">Loading...</p>';
+    modal.classList.add('active');
+    
+    try {
+        const res = await fetch(`${API_BASE_URL}/users/${userId}/${type}`);
+        const data = await res.json();
+        
+        if (!data.users || data.users.length === 0) {
+            container.innerHTML = `<p class="loading-text" style="text-align:center;">No ${type} yet.</p>`;
+            return;
+        }
+        
+        container.innerHTML = data.users.map(user => {
+            const isFollowing = currentUserFollows.following.includes(user._id || user.id);
+            const isMutual = currentUserFollows.followers.includes(user._id || user.id) && isFollowing;
+            let followBtnHtml = '';
+            
+            if (currentUser && currentUser.id !== (user._id || user.id)) {
+                let btnClass = 'primary-btn';
+                let btnText = 'Follow';
+                if (isMutual) { btnClass = 'secondary-btn'; btnText = 'Friends'; }
+                else if (isFollowing) { btnClass = 'secondary-btn'; btnText = 'Following'; }
+                
+                followBtnHtml = `<button class="follow-btn-small btn ${btnClass}" onclick="event.stopPropagation(); toggleFollow('${user._id || user.id}', this)" style="padding: 6px 12px; border-radius: 16px; font-size: 0.9rem;">${btnText}</button>`;
+            }
+            
+            return `
+                <div class="user-list-item" onclick="document.getElementById('users-list-modal').classList.remove('active'); switchTab('profile', '${user._id || user.id}');">
+                    <div class="avatar-wrapper">
+                        <img src="${getAvatarUrl(user.photo_url)}" alt="${user.username}" class="user-list-avatar" onerror="handleImageError(this)">
+                        ${user.is_active ? '<div class="active-dot"></div>' : ''}
+                    </div>
+                    <div class="user-list-info" style="flex: 1;">
+                        <h3 class="user-list-name">${user.username}</h3>
+                        <p class="user-list-bio">${user.bio || ''}</p>
+                    </div>
+                    ${followBtnHtml}
+                </div>
+            `;
+        }).join('');
+    } catch(err) {
+        console.error(err);
+        container.innerHTML = '<p class="loading-text" style="text-align:center; color: var(--like-color);">Error loading users.</p>';
+    }
+}
