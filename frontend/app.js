@@ -847,10 +847,20 @@ function createPostHtml(post, searchQuery = '') {
             </div>
             <div class="post-body">${contentHtml}</div>
             ${post.image_urls && post.image_urls.length > 0 ? `
-                <div class="preview-images-container preview-grid-${post.image_urls.length}">
-                    ${post.image_urls.map((url, i) => createProgressiveImageHtml(url, `post-grid-img img-${i}`, `onclick="viewFullScreenImage(event, '${url}')"`)).join('')}
+                <div class="preview-images-container ${post.image_urls.length > 1 ? 'preview-grid-2' : 'preview-grid-1'}">
+                    ${post.image_urls.slice(0, 2).map((url, i) => {
+                        let overlayHtml = '';
+                        if (i === 1 && post.image_urls.length > 2) {
+                            overlayHtml = \`<div class="more-images-overlay">+\${post.image_urls.length - 2}</div>\`;
+                        }
+                        const urlsJson = encodeURIComponent(JSON.stringify(post.image_urls));
+                        return \`<div style="position: relative; width: 100%; height: 100%; cursor: pointer;" onclick="viewFullScreenGallery(event, '\${urlsJson}', \${i})">
+                            \${createProgressiveImageHtml(url, \`post-grid-img img-\${i}\`, '')}
+                            \${overlayHtml}
+                        </div>\`;
+                    }).join('')}
                 </div>
-            ` : (post.image_url ? createProgressiveImageHtml(post.image_url, 'post-image', `onclick="viewFullScreenImage(event, '${post.image_url}')"`) : '')}
+            ` : (post.image_url ? createProgressiveImageHtml(post.image_url, 'post-image', `onclick="viewFullScreenGallery(event, '${encodeURIComponent(JSON.stringify([post.image_url]))}', 0)"`) : '')}
             
             <div class="post-actions-fb" style="padding-top: 10px;">
                 <button class="fb-interaction-btn heart-btn ${post.has_liked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')" style="display: flex; gap: 5px; align-items: center;">
@@ -1842,6 +1852,10 @@ function updateLightboxTransform(animate) {
 }
 
 function viewFullScreenImage(event, url) {
+    if (!url && typeof event === 'string') {
+        url = event;
+        event = null;
+    }
     if (!url) return;
     if (event) {
         event.stopPropagation();
@@ -1883,12 +1897,134 @@ function viewFullScreenImage(event, url) {
     }
     
     document.getElementById('simple-full-screen-img').src = url;
-    document.body.style.overflow = 'hidden'; // lock scroll
+    document.body.style.overflow = 'hidden'; // prevent background scroll
     modal.style.display = 'flex';
+    // tiny delay for transition to work
+    setTimeout(() => {
+        modal.style.opacity = '1';
+    }, 10);
+}
+
+// Global variables for gallery state
+let currentGalleryUrls = [];
+let currentGalleryIndex = 0;
+let galleryTouchStartX = 0;
+let galleryTouchEndX = 0;
+
+function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
+    if (event) event.stopPropagation();
     
-    // Force reflow
-    void modal.offsetWidth;
-    modal.style.opacity = '1';
+    try {
+        currentGalleryUrls = JSON.parse(decodeURIComponent(urlsJson));
+    } catch(e) {
+        currentGalleryUrls = [];
+    }
+    
+    if (currentGalleryUrls.length === 0) return;
+    currentGalleryIndex = startIndex;
+    
+    let modal = document.getElementById('gallery-image-viewer');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'gallery-image-viewer';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100vw';
+        modal.style.height = '100vh';
+        modal.style.backgroundColor = 'rgba(0,0,0,0.95)';
+        modal.style.zIndex = '999999';
+        modal.style.display = 'none';
+        modal.style.alignItems = 'center';
+        modal.style.justifyContent = 'center';
+        modal.style.opacity = '0';
+        modal.style.transition = 'opacity 0.2s ease-in-out';
+        
+        modal.innerHTML = `
+            <div style="position:absolute; top:15px; right:20px; color:white; font-size:35px; cursor:pointer; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8);" onclick="closeGallery(event)">&times;</div>
+            <div id="gallery-counter" style="position:absolute; top:20px; left:20px; color:white; font-size:16px; font-weight:bold; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8);"></div>
+            <div style="position:absolute; top:50%; left:10px; color:white; font-size:30px; cursor:pointer; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8); transform: translateY(-50%); padding: 20px;" onclick="prevGalleryImage(event)" id="gallery-prev-btn">&#10094;</div>
+            <img id="gallery-full-screen-img" style="max-width:100%; max-height:100%; object-fit:contain; z-index:1; pointer-events:none; transition: transform 0.2s ease;">
+            <div style="position:absolute; top:50%; right:10px; color:white; font-size:30px; cursor:pointer; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8); transform: translateY(-50%); padding: 20px;" onclick="nextGalleryImage(event)" id="gallery-next-btn">&#10095;</div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Swiping support
+        modal.addEventListener('touchstart', (e) => {
+            galleryTouchStartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+        
+        modal.addEventListener('touchend', (e) => {
+            galleryTouchEndX = e.changedTouches[0].screenX;
+            handleGallerySwipe();
+        }, {passive: true});
+        
+        // Close on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeGallery();
+        });
+    }
+    
+    updateGalleryImageUI();
+    document.body.style.overflow = 'hidden';
+    modal.style.display = 'flex';
+    setTimeout(() => { modal.style.opacity = '1'; }, 10);
+}
+
+function handleGallerySwipe() {
+    const swipeThreshold = 50;
+    if (galleryTouchEndX < galleryTouchStartX - swipeThreshold) {
+        nextGalleryImage();
+    } else if (galleryTouchEndX > galleryTouchStartX + swipeThreshold) {
+        prevGalleryImage();
+    }
+}
+
+function updateGalleryImageUI() {
+    const img = document.getElementById('gallery-full-screen-img');
+    const counter = document.getElementById('gallery-counter');
+    const prevBtn = document.getElementById('gallery-prev-btn');
+    const nextBtn = document.getElementById('gallery-next-btn');
+    
+    if(!img) return;
+    img.src = currentGalleryUrls[currentGalleryIndex];
+    counter.innerText = currentGalleryUrls.length > 1 ? (currentGalleryIndex + 1) + ' / ' + currentGalleryUrls.length : '';
+    
+    prevBtn.style.display = currentGalleryIndex > 0 ? 'block' : 'none';
+    nextBtn.style.display = currentGalleryIndex < currentGalleryUrls.length - 1 ? 'block' : 'none';
+}
+
+function nextGalleryImage(e) {
+    if(e) e.stopPropagation();
+    if (currentGalleryIndex < currentGalleryUrls.length - 1) {
+        currentGalleryIndex++;
+        updateGalleryImageUI();
+    } else {
+        closeGallery(); // Close if swiped past the last image like TikTok
+    }
+}
+
+function prevGalleryImage(e) {
+    if(e) e.stopPropagation();
+    if (currentGalleryIndex > 0) {
+        currentGalleryIndex--;
+        updateGalleryImageUI();
+    } else {
+        closeGallery(); // Close if swiped past the first image
+    }
+}
+
+function closeGallery(e) {
+    if(e) e.stopPropagation();
+    const modal = document.getElementById('gallery-image-viewer');
+    if(modal) {
+        modal.style.opacity = '0';
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+            document.getElementById('gallery-full-screen-img').src = '';
+        }, 200);
+    }
 }
 
 function closeFullScreenImage() {
