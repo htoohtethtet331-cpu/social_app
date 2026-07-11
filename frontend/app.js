@@ -1910,6 +1910,9 @@ let currentGalleryUrls = [];
 let currentGalleryIndex = 0;
 let galleryTouchStartX = 0;
 let galleryTouchEndX = 0;
+let galleryTouchMoveX = 0;
+let galleryIsSwiping = false;
+let galleryDidSwipe = false;
 
 function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
     if (event) event.stopPropagation();
@@ -1941,10 +1944,9 @@ function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
         modal.style.transition = 'opacity 0.2s ease-in-out';
         
         modal.innerHTML = `
-            <div style="position:absolute; top:15px; right:20px; color:white; font-size:35px; cursor:pointer; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8);" onclick="closeGallery(event)">&times;</div>
-            <div id="gallery-counter" style="position:absolute; top:20px; left:20px; color:white; font-size:16px; font-weight:bold; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8);"></div>
+            <div id="gallery-dots-container" style="position:absolute; bottom:25px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:2; align-items:center;"></div>
             <div style="position:absolute; top:50%; left:10px; color:white; font-size:30px; cursor:pointer; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8); transform: translateY(-50%); padding: 20px;" onclick="prevGalleryImage(event)" id="gallery-prev-btn">&#10094;</div>
-            <img id="gallery-full-screen-img" style="max-width:100%; max-height:100%; object-fit:contain; z-index:1; pointer-events:none; transition: transform 0.2s ease;">
+            <img id="gallery-full-screen-img" style="max-width:100%; max-height:100%; object-fit:contain; z-index:1; pointer-events:none; transition: transform 0.3s ease;">
             <div style="position:absolute; top:50%; right:10px; color:white; font-size:30px; cursor:pointer; z-index:2; text-shadow: 0 0 10px rgba(0,0,0,0.8); transform: translateY(-50%); padding: 20px;" onclick="nextGalleryImage(event)" id="gallery-next-btn">&#10095;</div>
         `;
         document.body.appendChild(modal);
@@ -1952,16 +1954,39 @@ function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
         // Swiping support
         modal.addEventListener('touchstart', (e) => {
             galleryTouchStartX = e.changedTouches[0].screenX;
+            galleryIsSwiping = true;
+            galleryDidSwipe = false;
+            const img = document.getElementById('gallery-full-screen-img');
+            img.style.transition = 'none'; // remove transition for smooth dragging
+        }, {passive: true});
+        
+        modal.addEventListener('touchmove', (e) => {
+            if (!galleryIsSwiping) return;
+            galleryTouchMoveX = e.changedTouches[0].screenX;
+            const deltaX = galleryTouchMoveX - galleryTouchStartX;
+            if (Math.abs(deltaX) > 10) galleryDidSwipe = true;
+            const img = document.getElementById('gallery-full-screen-img');
+            img.style.transform = `translateX(${deltaX}px)`;
         }, {passive: true});
         
         modal.addEventListener('touchend', (e) => {
             galleryTouchEndX = e.changedTouches[0].screenX;
+            galleryIsSwiping = false;
+            const img = document.getElementById('gallery-full-screen-img');
+            img.style.transition = 'transform 0.3s ease'; // restore transition
+            img.style.transform = ''; // snap back or animate out handled by next/prev
             handleGallerySwipe();
         }, {passive: true});
         
         // Close on background click
         modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeGallery();
+            if (galleryDidSwipe) {
+                galleryDidSwipe = false;
+                return;
+            }
+            if (e.target === modal || e.target.id === 'gallery-full-screen-img') {
+                closeGallery();
+            }
         });
     }
     
@@ -1982,13 +2007,25 @@ function handleGallerySwipe() {
 
 function updateGalleryImageUI() {
     const img = document.getElementById('gallery-full-screen-img');
-    const counter = document.getElementById('gallery-counter');
+    const dotsContainer = document.getElementById('gallery-dots-container');
     const prevBtn = document.getElementById('gallery-prev-btn');
     const nextBtn = document.getElementById('gallery-next-btn');
     
     if(!img) return;
     img.src = currentGalleryUrls[currentGalleryIndex];
-    counter.innerText = currentGalleryUrls.length > 1 ? (currentGalleryIndex + 1) + ' / ' + currentGalleryUrls.length : '';
+    
+    if (dotsContainer) {
+        if (currentGalleryUrls.length > 1) {
+            dotsContainer.innerHTML = currentGalleryUrls.map((_, i) => {
+                const isActive = i === currentGalleryIndex;
+                const size = isActive ? '8px' : '6px';
+                const opacity = isActive ? '1' : '0.5';
+                return `<div style="width:${size}; height:${size}; border-radius:50%; background:white; opacity:${opacity}; transition:all 0.2s ease;"></div>`;
+            }).join('');
+        } else {
+            dotsContainer.innerHTML = '';
+        }
+    }
     
     prevBtn.style.display = currentGalleryIndex > 0 ? 'block' : 'none';
     nextBtn.style.display = currentGalleryIndex < currentGalleryUrls.length - 1 ? 'block' : 'none';
