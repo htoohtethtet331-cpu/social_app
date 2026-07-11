@@ -2097,7 +2097,7 @@ body.modal-open {
   position: absolute;
   width: 50%; height: 50%;
   background-size: 200%; background-repeat: no-repeat;
-  background-image: url("https://images.weserv.nl/?url=i.imgur.com/M1raXX3.png&il");
+  background-image: url("./cat.png");
 }
 .cat__head::before {
   top: 0; right: 0;
