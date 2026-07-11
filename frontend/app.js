@@ -313,7 +313,7 @@ function initSocket() {
         const { post_id, comments } = data;
         const commentEl = document.getElementById(`comment-count-${post_id}`);
         if (commentEl) {
-            commentEl.innerText = `${comments} Comments`;
+            commentEl.innerText = comments > 0 ? comments : '';
         }
     });
 
@@ -759,10 +759,10 @@ async function loadPosts(silent = false) {
                     const existingPost = document.getElementById(`post-${post.id}`);
                     if (existingPost) {
                         const likeEl = document.getElementById(`like-count-${post.id}`);
-                        if (likeEl) likeEl.innerText = `${post.like_count} Likes`;
+                        if (likeEl) likeEl.innerText = post.like_count > 0 ? post.like_count : '';
                         
                         const commentEl = document.getElementById(`comment-count-${post.id}`);
-                        if (commentEl) commentEl.innerText = `${post.comment_count} Comments`;
+                        if (commentEl) commentEl.innerText = post.comment_count > 0 ? post.comment_count : '';
                         
                         const avatarWrapper = existingPost.querySelector('.avatar-wrapper');
                         if (avatarWrapper) {
@@ -845,23 +845,18 @@ function createPostHtml(post) {
                 </div>
             ` : (post.image_url ? createProgressiveImageHtml(post.image_url, 'post-image', `onclick="viewFullScreenImage(event, '${post.image_url}')"`) : '')}
             
-            <div class="post-stats">
-                <span id="like-count-${post.id}" onclick="viewPostLikes('${post.id}')" style="cursor: pointer;">${post.like_count} Likes</span>
-                <span id="comment-count-${post.id}">${post.comment_count} Comments</span>
-            </div>
-            
-            <div class="post-actions-fb">
-                <button class="fb-interaction-btn heart-btn ${post.has_liked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')">
+            <div class="post-actions-fb" style="padding-top: 10px;">
+                <button class="fb-interaction-btn heart-btn ${post.has_liked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')" style="display: flex; gap: 5px; align-items: center;">
                     <svg viewBox="0 0 24 24" width="20" height="20" class="heart-icon"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                    Like
+                    <span>Like <span id="like-count-${post.id}" onclick="event.stopPropagation(); viewPostLikes('${post.id}')">${post.like_count > 0 ? post.like_count : ''}</span></span>
                 </button>
-                <button class="fb-interaction-btn" onclick="openCommentsBottomSheet('${post.id}')">
+                <button class="fb-interaction-btn" onclick="openCommentsBottomSheet('${post.id}')" style="display: flex; gap: 5px; align-items: center;">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
-                    Comment
+                    <span>Comment <span id="comment-count-${post.id}">${post.comment_count > 0 ? post.comment_count : ''}</span></span>
                 </button>
-                <button class="fb-interaction-btn fav-btn ${post.has_favorited ? 'favorited' : ''}" id="fav-btn-${post.id}" onclick="toggleFavorite('${post.id}')">
+                <button class="fb-interaction-btn fav-btn ${post.has_favorited ? 'favorited' : ''}" id="fav-btn-${post.id}" onclick="toggleFavorite('${post.id}')" style="display: flex; gap: 5px; align-items: center;">
                     <svg viewBox="0 0 24 24" width="20" height="20" class="fav-icon"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
-                    Favorite
+                    <span>Favorite</span>
                 </button>
             </div>
         </div>
@@ -891,7 +886,7 @@ async function toggleLike(postId) {
         btn.classList.remove('liked');
         currentCount--;
     }
-    countEl.innerText = `${currentCount} Likes`;
+    countEl.innerText = currentCount > 0 ? currentCount : '';
 
     // 2. Debounce Logic
     if (likeTimeouts.has(postId)) {
@@ -917,7 +912,7 @@ async function toggleLike(postId) {
             
             // Sync exactly with server count just in case
             if (data.likes !== undefined) {
-                countEl.innerText = `${data.likes} Likes`;
+                countEl.innerText = data.likes > 0 ? data.likes : '';
             }
         } catch (e) {
             console.error(e);
@@ -929,7 +924,7 @@ async function toggleLike(postId) {
                 btn.classList.add('liked');
                 currentCount++;
             }
-            countEl.innerText = `${currentCount} Likes`;
+            countEl.innerText = currentCount > 0 ? currentCount : '';
             
             // Simple toast/alert for error
             alert("Like ပေး၍ မရပါ");
@@ -1176,7 +1171,7 @@ sheetCommentForm.onsubmit = async (e) => {
             if (countEl) {
                 // To be exact, fetch posts or simply increment
                 const currentCount = parseInt(countEl.innerText) || 0;
-                countEl.innerText = `${currentCount + 1} Comments`;
+                countEl.innerText = currentCount + 1;
             }
         }
     } catch(e) { console.error("Error submitting comment", e); }
