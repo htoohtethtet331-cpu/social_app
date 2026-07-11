@@ -772,15 +772,6 @@ body {
     z-index: 1;
 }
 
-.replying-indicator {
-    background: var(--border-color);
-    padding: 5px 15px;
-    font-size: 0.85rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 /* FB Profile Styles */
 .user-profile-section {
     padding-bottom: 20px;

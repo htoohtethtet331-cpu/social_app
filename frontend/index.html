@@ -274,14 +274,17 @@
             <div id="sheet-comments-list" class="sheet-content">
                 <!-- Comments injected here -->
             </div>
-            <div id="replying-indicator" class="replying-indicator" style="display: none;">
-                <span id="replying-text">Replying to User...</span>
-                <button type="button" class="cancel-reply-btn" onclick="cancelReply()">&times;</button>
-            </div>
-            <div class="sheet-footer">
-                <form id="sheet-comment-form">
-                    <input type="text" id="sheet-comment-input" placeholder="Write a comment..." required autocomplete="off">
-                    <button type="submit" class="btn primary-btn send-btn">
+            <div class="sheet-footer" style="padding-top: 10px;">
+                <form id="sheet-comment-form" style="display: flex; gap: 10px; align-items: center; width: 100%;">
+                    <div class="tiktok-input-wrapper" style="display: flex; align-items: center; flex: 1; background: var(--bg-color); border-radius: 20px; padding: 5px 15px; border: 1px solid var(--border-color);">
+                        <div id="replying-indicator-inline" style="display: none; align-items: center; margin-right: 5px;">
+                            <div style="width: 2px; height: 16px; background-color: var(--like-color); margin-right: 5px;"></div>
+                            <span id="replying-text-inline" style="font-size: 0.9rem; color: var(--secondary-color); white-space: nowrap;">Replying to...</span>
+                            <button type="button" onclick="cancelReply()" style="background: none; border: none; margin-left: 5px; margin-right: 5px; color: var(--secondary-color); font-size: 1.1rem; cursor: pointer;">&times;</button>
+                        </div>
+                        <input type="text" id="sheet-comment-input" placeholder="Write a comment..." required autocomplete="off" style="flex: 1; border: none; background: transparent; padding: 8px 0; outline: none; color: var(--text-color); min-width: 0;">
+                    </div>
+                    <button type="submit" class="btn primary-btn send-btn" style="border-radius: 50%; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center;">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                     </button>
                 </form>
