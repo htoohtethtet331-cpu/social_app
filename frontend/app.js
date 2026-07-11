@@ -1,8 +1,8 @@
 const API_BASE_URL = '/api'; 
-let currentUser = null;
-let currentProfileUserId = null;
-let currentProfileUsername = null;
-let currentUserFollows = { following: [], followers: [] };
+var currentUser = null;
+var currentProfileUserId = null;
+var currentProfileUsername = null;
+var currentUserFollows = { following: [], followers: [] };
 window.activeStoryUsers = {};
 
 // Initialize Telegram Web App
