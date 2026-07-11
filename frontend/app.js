@@ -521,11 +521,11 @@ function touchMove(event) {
 
     // Add resistance at the edges
     const containerWidth = document.getElementById('swipe-container').clientWidth;
-    let diffXPercent = (diffX / containerWidth) * 25; // 25% because 1 screen = 25% of 400% wrapper
+    let diffXPercent = (diffX / containerWidth) * 100; // 100% because 1 screen = 100% of 100% wrapper
     let newTranslate = prevTranslate + diffXPercent;
     
     const maxTranslate = 0;
-    const minTranslate = -75; // -75% is the 4th screen (index 3)
+    const minTranslate = -300; // -300% is the 4th screen (index 3)
     
     if (newTranslate > maxTranslate) {
         newTranslate = maxTranslate + (newTranslate - maxTranslate) * 0.2; // Rubber band effect
@@ -547,11 +547,11 @@ function touchEnd(event) {
     // rough velocity: percentage / ms
     const velocity = Math.abs(dragDistance) / dragTime;
 
-    const threshold = 7.5; // 30% of 25% (1 screen) is 7.5%
+    const threshold = 30; // 30% of 100% (1 screen) is 30%
 
-    if (dragDistance < -threshold || (dragDistance < -2 && velocity > 0.05)) {
+    if (dragDistance < -threshold || (dragDistance < -10 && velocity > 0.05)) {
         if (currentTabIndex < tabs.length - 1) currentTabIndex += 1;
-    } else if (dragDistance > threshold || (dragDistance > 2 && velocity > 0.05)) {
+    } else if (dragDistance > threshold || (dragDistance > 10 && velocity > 0.05)) {
         if (currentTabIndex > 0) currentTabIndex -= 1;
     }
 
@@ -560,7 +560,7 @@ function touchEnd(event) {
 
 function snapToCurrentTab() {
     const swipeWrapper = document.getElementById('swipe-wrapper');
-    prevTranslate = -currentTabIndex * 25; // 25% per tab
+    prevTranslate = -currentTabIndex * 100; // 100% per tab
     currentTranslate = prevTranslate;
     
     swipeWrapper.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)';
