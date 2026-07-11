@@ -2548,8 +2548,16 @@ let isFetchingUsersList = false;
 let hasMoreUsersList = true;
 
 async function openUsersListModal(type, userId) {
-    if (!userId) return;
+    console.log("openUsersListModal triggered:", type, userId);
+    if (!userId) {
+        console.warn("openUsersListModal aborted: no userId");
+        return;
+    }
     const modal = document.getElementById('users-list-modal');
+    if (!modal) {
+        console.error("openUsersListModal: modal element not found!");
+        return;
+    }
     const container = document.getElementById('users-list-container');
     const title = document.getElementById('users-list-title');
     

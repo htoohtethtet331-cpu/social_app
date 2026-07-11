@@ -584,8 +584,8 @@
         </div>
 
         <!-- Users List Modal -->
-        <div class="modal bottom-sheet-modal" id="users-list-modal" onclick="if(event.target === this) this.classList.remove('active')" style="z-index: 5000;">
-            <div class="modal-content bottom-sheet">
+        <div class="modal bottom-sheet" id="users-list-modal" onclick="if(event.target === this) this.classList.remove('active')" style="z-index: 5000;">
+            <div class="modal-content" style="max-height: 80vh; display: flex; flex-direction: column; padding: 0;">
                 <div class="bottom-sheet-handle"></div>
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--border-color);">
                     <h3 id="users-list-title" style="margin: 0; font-size: 1.1rem;">Users</h3>
@@ -645,7 +645,7 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=47"></script>
+    <script src="app.js?v=48"></script>
 </body>
 
 </html>
