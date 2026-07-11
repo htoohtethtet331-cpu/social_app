@@ -2078,9 +2078,7 @@ body.modal-open {
   width: 100%;
   max-width: 5em;
   overflow: hidden;
-  background-color: #e6dcdc;
-  border-radius: 50%;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  background-color: transparent;
 }
 .cat::before {
   content: "";
