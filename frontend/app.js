@@ -1459,10 +1459,8 @@ async function showUserProfile(userId) {
         }
 
         if (postsData.posts && postsData.posts.length > 0) {
-            document.getElementById('profile-stats-posts').innerText = postsData.posts.length;
             userPostsFeed.innerHTML = postsData.posts.map(post => createPostHtml(post)).join('');
         } else {
-            document.getElementById('profile-stats-posts').innerText = '0';
             userPostsFeed.innerHTML = '<p class="loading-text">This user has no posts yet.</p>';
         }
 
