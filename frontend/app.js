@@ -286,6 +286,9 @@ function setupUI() {
             loadAllUsers(true);
         }
     }, 15000); // Poll every 15s
+
+    // Initialize Socket.io
+    initSocket();
 }
 
 // --- Follow Feature ---
@@ -407,8 +410,6 @@ function updateFollowButtonUI(btn, isFollowing, isMutual) {
             svg.style.display = isFollowing || isMutual ? 'none' : 'block';
         }
     }
-} // Initialize Socket.io
-    initSocket();
 }
 
 let socket;

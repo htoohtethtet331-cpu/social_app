@@ -1057,7 +1057,7 @@ body {
     background: var(--white);
     border-radius: 16px;
     margin: 0 15px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     border: 1px solid var(--border-color);
     overflow: hidden;
 }
@@ -1070,9 +1070,11 @@ body {
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
+
 .settings-row:last-child {
     border-bottom: none;
 }
+
 .settings-row:active {
     background-color: var(--hover-color);
 }
@@ -1130,7 +1132,7 @@ body {
 .theme-segment.active {
     background: var(--white);
     color: var(--primary-color);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .nav-item {
@@ -1288,11 +1290,13 @@ body {
     padding: 2px;
     object-fit: cover;
 }
+
 /* Active Status Dot */
 .avatar-wrapper {
     position: relative;
     display: inline-block;
 }
+
 .active-dot {
     position: absolute;
     bottom: 2px;
@@ -1320,15 +1324,31 @@ body {
 }
 
 @keyframes heartBeat {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes like-animation {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 /* =========================================
@@ -1338,13 +1358,17 @@ body {
 /* Drawer Backdrop */
 .drawer-backdrop {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     z-index: 4999;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
 }
+
 .drawer-backdrop.active {
     opacity: 1;
     pointer-events: auto;
@@ -1353,18 +1377,20 @@ body {
 /* Settings Drawer */
 .settings-drawer {
     position: fixed;
-    top: 0; right: -100%;
+    top: 0;
+    right: -100%;
     width: 85%;
     max-width: 400px;
     height: 100vh;
     background: var(--bg-color);
     z-index: 5000;
-    box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
     transition: right 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
     overflow-y: auto;
     display: flex;
     flex-direction: column;
 }
+
 .settings-drawer.active {
     right: 0;
 }
@@ -1375,21 +1401,38 @@ body {
 }
 
 @keyframes fadeInTab {
-    0% { opacity: 0; transform: translateY(10px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Tactile Button Feedback (Micro-interaction) */
-.active-scale:active, .btn:active, .action-btn:active {
+.active-scale:active,
+.btn:active,
+.action-btn:active {
     transform: scale(0.95);
     transition: transform 0.1s ease;
 }
 
 /* Post Entrance Animation */
 @keyframes slideUpFadeIn {
-    0% { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
+
 .post-item {
     animation: slideUpFadeIn 0.4s ease-out forwards;
 }
@@ -1408,6 +1451,7 @@ body {
     stroke: #f5c33b;
     animation: heartBeat 0.3s ease-in-out;
 }
+
 .fb-interaction-btn.favorited {
     color: #f5c33b;
 }
@@ -1428,7 +1472,7 @@ body {
     width: fit-content;
     margin: 0 auto 15px auto;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     font-size: 0.9rem;
     font-weight: bold;
     transition: transform 0.2s, opacity 0.2s;
@@ -1440,8 +1484,15 @@ body {
 }
 
 @keyframes slideDown {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* Multi-Image Grid Layouts */
@@ -1488,6 +1539,7 @@ body {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 250px 150px;
 }
+
 .grid-3-landscape .img-0 {
     grid-column: span 2;
 }
@@ -1497,6 +1549,7 @@ body {
     grid-template-columns: 2fr 1fr;
     grid-template-rows: 175px 175px;
 }
+
 .grid-3-portrait .img-0 {
     grid-row: span 2;
 }
@@ -1507,18 +1560,22 @@ body {
     gap: 8px;
     width: 100%;
 }
+
 .preview-grid-1 {
     grid-template-columns: 1fr;
     grid-template-rows: 200px;
 }
+
 .preview-grid-2 {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: 150px;
 }
+
 .preview-grid-3 {
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: 110px;
 }
+
 .preview-images-container .post-grid-img {
     border-radius: 8px;
     border: 1px solid var(--border-color);
@@ -1536,7 +1593,7 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(255, 255, 255, 0.85);
-    color: var(--primary-color);
+    color: #62686f;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1544,7 +1601,7 @@ body {
     font-weight: bold;
     border-radius: 8px;
     pointer-events: none;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* =========================================
@@ -1553,19 +1610,22 @@ body {
 
 /* Skeleton Loading Animation */
 @keyframes shimmer {
-    0% { background-position: -1000px 0; }
-    100% { background-position: 1000px 0; }
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
 }
 
 .skeleton {
     background: #f6f7f8;
-    background-image: linear-gradient(
-        to right,
-        #f6f7f8 0%,
-        #edeef1 20%,
-        #f6f7f8 40%,
-        #f6f7f8 100%
-    );
+    background-image: linear-gradient(to right,
+            #f6f7f8 0%,
+            #edeef1 20%,
+            #f6f7f8 40%,
+            #f6f7f8 100%);
     background-repeat: no-repeat;
     background-size: 1000px 100%;
     animation: shimmer 2s infinite linear forwards;
@@ -1573,13 +1633,11 @@ body {
 
 body.dark-mode .skeleton {
     background: #2a2a2a;
-    background-image: linear-gradient(
-        to right,
-        #2a2a2a 0%,
-        #333333 20%,
-        #2a2a2a 40%,
-        #2a2a2a 100%
-    );
+    background-image: linear-gradient(to right,
+            #2a2a2a 0%,
+            #333333 20%,
+            #2a2a2a 40%,
+            #2a2a2a 100%);
 }
 
 .skeleton-avatar {
@@ -1593,9 +1651,18 @@ body.dark-mode .skeleton {
     margin-bottom: 8px;
     border-radius: 4px;
 }
-.skeleton-text.short { width: 40%; }
-.skeleton-text.medium { width: 70%; }
-.skeleton-text.full { width: 100%; }
+
+.skeleton-text.short {
+    width: 40%;
+}
+
+.skeleton-text.medium {
+    width: 70%;
+}
+
+.skeleton-text.full {
+    width: 100%;
+}
 
 .skeleton-image {
     width: 100%;
@@ -1609,12 +1676,14 @@ body.dark-mode .skeleton {
     padding: 15px;
     border-bottom: 1px solid var(--border-color);
 }
+
 .skeleton-header {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 15px;
 }
+
 .skeleton-header-info {
     flex: 1;
 }
@@ -1624,10 +1693,12 @@ body.dark-mode .skeleton {
     transition: filter 0.5s ease-in-out, opacity 0.5s ease-in-out;
     opacity: 0;
 }
+
 .progressive-img.loaded {
     filter: blur(0);
     opacity: 1;
 }
+
 .progressive-img.blur {
     filter: blur(10px);
     opacity: 1;
@@ -1656,6 +1727,7 @@ body.dark-mode .skeleton {
     padding: 15px;
     border-bottom: 1px solid var(--border-color);
 }
+
 .notifications-header h2 {
     margin: 0;
     font-size: 1.5rem;
@@ -1671,26 +1743,32 @@ body.dark-mode .skeleton {
     cursor: pointer;
     transition: background-color 0.2s;
 }
+
 .notification-item.unread {
     background-color: rgba(69, 189, 98, 0.1);
 }
+
 .notification-item:hover {
     background-color: var(--border-color);
 }
+
 .notification-avatar {
     width: 50px;
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
 }
+
 .notification-content {
     flex: 1;
 }
+
 .notification-text {
     margin: 0 0 5px 0;
     font-size: 0.95rem;
     color: var(--text-color);
 }
+
 .notification-time {
     margin: 0;
     font-size: 0.8rem;
@@ -1699,16 +1777,21 @@ body.dark-mode .skeleton {
 
 /* --- Lightbox System --- */
 body.modal-open {
-    overflow: hidden; /* Lock background scroll */
+    overflow: hidden;
+    /* Lock background scroll */
 }
 
 .image-lightbox-modal {
-    background-color: transparent !important; /* Managed by overlay */
+    background-color: transparent !important;
+    /* Managed by overlay */
     display: none;
     align-items: center;
     justify-content: center;
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .image-lightbox-modal.active {
@@ -1717,7 +1800,10 @@ body.modal-open {
 
 .lightbox-overlay {
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-color: rgba(0, 0, 0, 0);
     transition: background-color 0.3s ease;
     z-index: 1;
@@ -1729,7 +1815,9 @@ body.modal-open {
 
 .lightbox-header {
     position: absolute;
-    top: 0; left: 0; right: 0;
+    top: 0;
+    left: 0;
+    right: 0;
     height: 60px;
     display: flex;
     justify-content: flex-end;
@@ -1749,7 +1837,7 @@ body.modal-open {
     font-size: 35px;
     font-weight: bold;
     cursor: pointer;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .lightbox-content {
@@ -1773,13 +1861,21 @@ body.modal-open {
 /* --- Story UX Additions --- */
 .story-tap-zone {
     position: absolute;
-    top: 60px; /* Below header */
-    bottom: 80px; /* Above actions */
+    top: 60px;
+    /* Below header */
+    bottom: 80px;
+    /* Above actions */
     width: 30%;
     z-index: 3001;
 }
-.story-tap-zone.left { left: 0; }
-.story-tap-zone.right { right: 0; }
+
+.story-tap-zone.left {
+    left: 0;
+}
+
+.story-tap-zone.right {
+    right: 0;
+}
 
 /* Global Story Ring Styles */
 .story-ring-wrapper {
@@ -1787,7 +1883,8 @@ body.modal-open {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    padding: 2px; /* Gap between ring and image */
+    padding: 2px;
+    /* Gap between ring and image */
     cursor: pointer;
     background: transparent;
 }
@@ -1804,20 +1901,27 @@ body.modal-open {
 
 /* No Story */
 .story-ring-wrapper.none {
-    padding: 0; /* Remove gap */
+    padding: 0;
+    /* Remove gap */
 }
 
 /* Ensure the avatar inside the wrapper has white border to create the cutout effect */
 .story-ring-wrapper.unseen .avatar,
 .story-ring-wrapper.seen .avatar {
-    border: 2px solid white; /* Matches page background */
+    border: 2px solid white;
+    /* Matches page background */
     margin: 0;
 }
 
 /* --- Comment Highlight Animation --- */
 @keyframes highlight-fade {
-    0% { background-color: rgba(29, 155, 240, 0.3); }
-    100% { background-color: transparent; }
+    0% {
+        background-color: rgba(29, 155, 240, 0.3);
+    }
+
+    100% {
+        background-color: transparent;
+    }
 }
 
 .highlight-fade {
@@ -1831,16 +1935,19 @@ body.modal-open {
 /* The outer viewport (window) */
 .swipe-container {
     overflow-x: hidden;
-    overflow-y: hidden; /* Slides handle their own vertical scroll */
+    overflow-y: hidden;
+    /* Slides handle their own vertical scroll */
     width: 100%;
-    height: calc(100vh - 125px); /* Header 60 + Bottom Nav 65 */
+    height: calc(100vh - 125px);
+    /* Header 60 + Bottom Nav 65 */
     position: relative;
 }
 
 /* The long canvas holding all 4 screens */
 .swipe-wrapper {
     display: flex;
-    width: 100%; /* Changed from 400% to prevent fractional pixels */
+    width: 100%;
+    /* Changed from 400% to prevent fractional pixels */
     height: 100%;
     will-change: transform;
     /* transition is applied dynamically in JS for snaps */
@@ -1848,7 +1955,8 @@ body.modal-open {
 
 /* Individual screens */
 .swipe-slide {
-    width: 100%; /* Changed from 25% */
+    width: 100%;
+    /* Changed from 25% */
     height: 100%;
     flex: 0 0 100%;
     overflow-y: auto;
@@ -1856,7 +1964,7 @@ body.modal-open {
     /* iOS smooth scrolling */
     -webkit-overflow-scrolling: touch;
     /* Optional: padding bottom so content isn't hidden by nav */
-    padding-bottom: 80px; 
+    padding-bottom: 80px;
 }
 
 /* --- Search Engine & Suggestions --- */
