@@ -16,6 +16,7 @@ const Story = require('./models/Story');
 const StoryLike = require('./models/StoryLike');
 const Favorite = require('./models/Favorite');
 const Notification = require('./models/Notification');
+const Follow = require('./models/Follow');
 
 const http = require('http');
 const { Server } = require("socket.io");
@@ -781,7 +782,7 @@ app.get('/api/posts/:id/comments', async (req, res) => {
 // Get all users
 app.get('/api/users', async (req, res) => {
     try {
-        const users = await User.find().select('id username photo_url bio last_active');
+        const users = await User.find().select('id username photo_url bio last_active follower_count following_count');
         const mappedUsers = users.map(u => ({
             ...u.toObject({ virtuals: true }),
             is_active: u.last_active ? (Date.now() - new Date(u.last_active).getTime() < 300000) : false
@@ -795,13 +796,96 @@ app.get('/api/users', async (req, res) => {
 // 9. Get User Profile
 app.get('/api/users/:id', async (req, res) => {
     try {
-        const user = await User.findById(req.params.id).select('id username photo_url cover_url bio last_active');
+        const user = await User.findById(req.params.id).select('id username photo_url cover_url bio last_active follower_count following_count');
         const posts_count = await Post.countDocuments({ user_id: req.params.id });
         const mappedUser = {
             ...user.toObject({ virtuals: true }),
             is_active: user.last_active ? (Date.now() - new Date(user.last_active).getTime() < 300000) : false
         };
         res.json({ user: mappedUser, posts_count });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Follow Feature
+const followRateLimits = new Map();
+
+app.post('/api/users/:id/follow', async (req, res) => {
+    const { follower_id } = req.body;
+    const following_id = req.params.id;
+
+    if (!follower_id || follower_id === following_id) return res.status(400).json({ error: 'Invalid follow request' });
+
+    // Anti-Spam Rate Limiting (max 10 requests per minute)
+    const now = Date.now();
+    const rateLimitData = followRateLimits.get(follower_id) || { count: 0, lastReq: now };
+    if (now - rateLimitData.lastReq > 60000) {
+        rateLimitData.count = 1;
+        rateLimitData.lastReq = now;
+    } else {
+        rateLimitData.count += 1;
+        if (rateLimitData.count > 10) {
+            return res.status(429).json({ error: 'Too fast, please slow down' });
+        }
+    }
+    followRateLimits.set(follower_id, rateLimitData);
+
+    try {
+        const existingFollow = await Follow.findOne({ follower_id, following_id });
+        let action = '';
+
+        if (existingFollow) {
+            await Follow.findByIdAndDelete(existingFollow._id);
+            await User.findByIdAndUpdate(follower_id, { $inc: { following_count: -1 } });
+            await User.findByIdAndUpdate(following_id, { $inc: { follower_count: -1 } });
+            action = 'unfollowed';
+        } else {
+            await new Follow({ follower_id, following_id }).save();
+            await User.findByIdAndUpdate(follower_id, { $inc: { following_count: 1 } });
+            await User.findByIdAndUpdate(following_id, { $inc: { follower_count: 1 } });
+            
+            // Create notification
+            await new Notification({ receiver_id: following_id, actor_id: follower_id, type: 'follow' }).save();
+            
+            action = 'followed';
+        }
+
+        const isMutual = await Follow.findOne({ follower_id: following_id, following_id: follower_id });
+        res.json({ success: true, action, isMutual: !!isMutual });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/users/:id/follow-status', async (req, res) => {
+    const { follower_id } = req.query;
+    if (!follower_id) return res.status(400).json({ error: 'follower_id required' });
+    const following_id = req.params.id;
+
+    try {
+        const isFollowing = await Follow.findOne({ follower_id, following_id });
+        const isMutual = isFollowing && await Follow.findOne({ follower_id: following_id, following_id: follower_id });
+        
+        let status = 'Not Following';
+        if (isMutual) status = 'Friends';
+        else if (isFollowing) status = 'Following';
+        
+        res.json({ status });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/users/:id/follow-map', async (req, res) => {
+    try {
+        const following = await Follow.find({ follower_id: req.params.id }).select('following_id');
+        const followers = await Follow.find({ following_id: req.params.id }).select('follower_id');
+        
+        res.json({
+            following: following.map(f => f.following_id.toString()),
+            followers: followers.map(f => f.follower_id.toString())
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

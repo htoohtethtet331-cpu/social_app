@@ -1,5 +1,7 @@
 const API_BASE_URL = '/api'; 
 let currentUser = null;
+let currentProfileUserId = null;
+let currentUserFollows = { following: [], followers: [] };
 window.activeStoryUsers = {};
 
 // Initialize Telegram Web App
@@ -35,6 +37,15 @@ async function initApp() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Auth failed');
         currentUser = data.user;
+        
+        try {
+            const followMapRes = await fetch(`${API_BASE_URL}/users/${currentUser.id}/follow-map`);
+            if (followMapRes.ok) {
+                currentUserFollows = await followMapRes.json();
+            }
+        } catch (e) {
+            console.error('Error fetching follow map', e);
+        }
         
         if (!currentUser.photo_url) {
             showPhotoModal();
@@ -163,7 +174,7 @@ function setupUI() {
 
     postImageInput.onchange = (e) => {
         if (e.target.files && e.target.files.length > 0) {
-            const files = Array.from(e.target.files).slice(0, 3); // Max 3
+            const files = Array.from(e.target.files);
             
             const img = new Image();
             img.onload = () => {
@@ -274,9 +285,129 @@ function setupUI() {
         if (isUsers) {
             loadAllUsers(true);
         }
-    }, 30000); // 30 seconds
+    }, 15000); // Poll every 15s
+}
 
-    // Initialize Socket.io
+// --- Follow Feature ---
+async function toggleFollow(targetId, btnElement) {
+    if (!currentUser) return;
+    
+    const isFollowingNow = currentUserFollows.following.includes(targetId);
+    
+    // Optimistic UI update
+    let previousState = {
+        class: btnElement.className,
+        text: btnElement.querySelector('#follow-btn-text') ? btnElement.querySelector('#follow-btn-text').innerText : btnElement.innerText
+    };
+    
+    let isMutualIfFollow = currentUserFollows.followers.includes(targetId);
+    
+    if (isFollowingNow) {
+        // Optimistic Unfollow
+        currentUserFollows.following = currentUserFollows.following.filter(id => id !== targetId);
+        updateFollowButtonUI(btnElement, false, false);
+        if (currentProfileUserId === targetId) {
+            let el = document.getElementById('profile-stats-followers');
+            el.innerText = Math.max(0, parseInt(el.innerText) - 1);
+        }
+    } else {
+        // Optimistic Follow
+        currentUserFollows.following.push(targetId);
+        updateFollowButtonUI(btnElement, true, isMutualIfFollow);
+        if (currentProfileUserId === targetId) {
+            let el = document.getElementById('profile-stats-followers');
+            el.innerText = parseInt(el.innerText) + 1;
+        }
+    }
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/users/${targetId}/follow`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ follower_id: currentUser.id })
+        });
+        const data = await res.json();
+        
+        if (!res.ok) throw new Error(data.error || 'Failed to toggle follow');
+        
+        // Sync with actual server state
+        if (data.action === 'followed') {
+            if (!currentUserFollows.following.includes(targetId)) currentUserFollows.following.push(targetId);
+            updateFollowButtonUI(btnElement, true, data.isMutual);
+        } else {
+            currentUserFollows.following = currentUserFollows.following.filter(id => id !== targetId);
+            updateFollowButtonUI(btnElement, false, false);
+        }
+        
+    } catch (e) {
+        console.error(e);
+        // Rollback
+        if (isFollowingNow) {
+            if (!currentUserFollows.following.includes(targetId)) currentUserFollows.following.push(targetId);
+            if (currentProfileUserId === targetId) {
+                let el = document.getElementById('profile-stats-followers');
+                el.innerText = parseInt(el.innerText) + 1;
+            }
+        } else {
+            currentUserFollows.following = currentUserFollows.following.filter(id => id !== targetId);
+            if (currentProfileUserId === targetId) {
+                let el = document.getElementById('profile-stats-followers');
+                el.innerText = Math.max(0, parseInt(el.innerText) - 1);
+            }
+        }
+        
+        btnElement.className = previousState.class;
+        if (btnElement.querySelector('#follow-btn-text')) {
+            btnElement.querySelector('#follow-btn-text').innerText = previousState.text;
+        } else {
+            btnElement.innerText = previousState.text;
+        }
+        
+        if (e.message.includes('Too fast')) {
+            // Provide visual feedback for rate limiting
+            const originalText = btnElement.querySelector('#follow-btn-text') ? btnElement.querySelector('#follow-btn-text').innerText : btnElement.innerText;
+            if (btnElement.querySelector('#follow-btn-text')) {
+                btnElement.querySelector('#follow-btn-text').innerText = 'Slow down';
+            } else {
+                btnElement.innerText = 'Slow down';
+            }
+            setTimeout(() => {
+                if (btnElement.querySelector('#follow-btn-text')) {
+                    btnElement.querySelector('#follow-btn-text').innerText = originalText;
+                } else {
+                    btnElement.innerText = originalText;
+                }
+            }, 2000);
+        }
+    }
+}
+
+function updateFollowButtonUI(btn, isFollowing, isMutual) {
+    let btnClass = 'primary-btn';
+    let btnText = 'Follow';
+    
+    if (isMutual) {
+        btnClass = 'secondary-btn';
+        btnText = 'Friends';
+    } else if (isFollowing) {
+        btnClass = 'secondary-btn';
+        btnText = 'Following';
+    }
+    
+    if (btn.classList.contains('follow-btn-small')) {
+        btn.className = `follow-btn-small btn ${btnClass}`;
+        btn.innerText = btnText;
+    } else {
+        btn.className = `fb-action-btn ${btnClass === 'primary-btn' ? 'primary' : 'secondary'}`;
+        const span = btn.querySelector('#follow-btn-text');
+        if (span) span.innerText = btnText;
+        
+        const svg = btn.querySelector('#follow-icon-svg');
+        if (svg) {
+            svg.style.display = isFollowing || isMutual ? 'none' : 'block';
+        }
+    }
+} // Initialize Socket.io
     initSocket();
 }
 
@@ -668,16 +799,30 @@ async function loadAllUsers(silent = false) {
                     const photoUrl = user.photo_url || 'https://via.placeholder.com/150';
                     const bio = user.bio || 'No bio available';
                     
+                    const isMutual = currentUserFollows.following.includes(user.id) && currentUserFollows.followers.includes(user.id);
+                    const isFollowing = currentUserFollows.following.includes(user.id);
+                    
+                    let followBtnHtml = '';
+                    if (user.id !== currentUser.id) {
+                        let btnClass = 'primary-btn';
+                        let btnText = 'Follow';
+                        if (isMutual) { btnClass = 'secondary-btn'; btnText = 'Friends'; }
+                        else if (isFollowing) { btnClass = 'secondary-btn'; btnText = 'Following'; }
+            
+                        followBtnHtml = `<button class="follow-btn-small btn ${btnClass}" id="follow-user-${user.id}" onclick="event.stopPropagation(); toggleFollow('${user.id}', this)" style="padding: 6px 12px; border-radius: 16px; font-size: 0.9rem;">${btnText}</button>`;
+                    }
+                    
                     const userHtml = `
                         <div class="user-list-item" id="user-item-${user.id}" onclick="switchTab('profile', '${user.id}');">
                             <div class="avatar-wrapper">
                                 <img src="${photoUrl}" alt="${user.username}" class="user-list-avatar" onerror="handleImageError(this)">
                                 ${isActive ? '<div class="active-dot"></div>' : ''}
                             </div>
-                            <div class="user-list-info">
+                            <div class="user-list-info" style="flex: 1;">
                                 <h3 class="user-list-name">${user.username}</h3>
                                 <p class="user-list-bio">${bio}</p>
                             </div>
+                            ${followBtnHtml}
                         </div>
                     `;
                     container.insertAdjacentHTML('beforeend', userHtml);
@@ -1218,6 +1363,7 @@ async function showUserProfile(userId) {
             snapToCurrentTab();
         }
         isProfileLoaded = true;
+        currentProfileUserId = userId;
         
         const profileSection = document.getElementById('user-profile-section');
         const userPostsFeed = document.getElementById('user-posts-feed');
@@ -1253,10 +1399,14 @@ async function showUserProfile(userId) {
             document.getElementById('profile-banner-avatar').src = getAvatarUrl(userData.user.photo_url);
             document.getElementById('profile-banner-cover').src = userData.user.cover_url ? userData.user.cover_url : 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="600" height="200"%3E%3Crect width="100%25" height="100%25" fill="%23cccccc"/%3E%3C/svg%3E';
             document.getElementById('profile-banner-name').innerText = userData.user.username;
+            document.getElementById('profile-stats-followers').innerText = userData.user.follower_count || 0;
+            document.getElementById('profile-stats-following').innerText = userData.user.following_count || 0;
             document.getElementById('profile-banner-bio').innerText = userData.user.bio || 'No bio yet.';
             
             const isActive = userData.user.is_active;
             document.getElementById('profile-banner-active-dot').style.display = isActive ? 'block' : 'none';
+            
+            const followBtn = document.getElementById('follow-profile-btn');
             
             if (userId === currentUser.id) {
                 document.getElementById('edit-profile-btn').style.display = 'flex';
@@ -1264,12 +1414,20 @@ async function showUserProfile(userId) {
                 document.getElementById('add-story-btn').style.display = 'flex';
                 document.getElementById('cover-camera-btn').style.display = 'flex';
                 document.getElementById('avatar-camera-btn').style.display = 'flex';
+                if (followBtn) followBtn.style.display = 'none';
             } else {
                 document.getElementById('edit-profile-btn').style.display = 'none';
                 document.getElementById('view-archive-btn').style.display = 'none';
                 document.getElementById('add-story-btn').style.display = 'none';
                 document.getElementById('cover-camera-btn').style.display = 'none';
                 document.getElementById('avatar-camera-btn').style.display = 'none';
+                
+                if (followBtn) {
+                    followBtn.style.display = 'flex';
+                    const isMutual = currentUserFollows.followers.includes(userId) && currentUserFollows.following.includes(userId);
+                    const isFollowing = currentUserFollows.following.includes(userId);
+                    updateFollowButtonUI(followBtn, isFollowing, isMutual);
+                }
             }
         }
 

@@ -6,6 +6,8 @@ const userSchema = new mongoose.Schema({
   photo_url: String,
   cover_url: String,
   bio: String,
+  follower_count: { type: Number, default: 0 },
+  following_count: { type: Number, default: 0 },
   last_active: { type: Date, default: Date.now }
 });
 
