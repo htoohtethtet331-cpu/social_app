@@ -851,13 +851,13 @@ function createPostHtml(post, searchQuery = '') {
                     ${post.image_urls.slice(0, 2).map((url, i) => {
                         let overlayHtml = '';
                         if (i === 1 && post.image_urls.length > 2) {
-                            overlayHtml = \`<div class="more-images-overlay">+\${post.image_urls.length - 2}</div>\`;
+                            overlayHtml = `<div class="more-images-overlay">+${post.image_urls.length - 2}</div>`;
                         }
                         const urlsJson = encodeURIComponent(JSON.stringify(post.image_urls));
-                        return \`<div style="position: relative; width: 100%; height: 100%; cursor: pointer;" onclick="viewFullScreenGallery(event, '\${urlsJson}', \${i})">
-                            \${createProgressiveImageHtml(url, \`post-grid-img img-\${i}\`, '')}
-                            \${overlayHtml}
-                        </div>\`;
+                        return `<div style="position: relative; width: 100%; height: 100%; cursor: pointer;" onclick="viewFullScreenGallery(event, '${urlsJson}', ${i})">
+                            ${createProgressiveImageHtml(url, `post-grid-img img-${i}`, '')}
+                            ${overlayHtml}
+                        </div>`;
                     }).join('')}
                 </div>
             ` : (post.image_url ? createProgressiveImageHtml(post.image_url, 'post-image', `onclick="viewFullScreenGallery(event, '${encodeURIComponent(JSON.stringify([post.image_url]))}', 0)"`) : '')}
