@@ -1440,7 +1440,8 @@ async function showUserProfile(userId) {
             document.getElementById('profile-stats-followers').innerText = userData.user.follower_count || 0;
             document.getElementById('profile-stats-following').innerText = userData.user.following_count || 0;
             document.getElementById('profile-stats-likes').innerText = userData.likes_count || 0;
-            document.getElementById('profile-banner-bio').innerText = userData.user.bio || 'No bio yet.';
+            const bioEl = document.getElementById('profile-banner-bio');
+            bioEl.innerText = userData.user.bio || 'No bio yet.';
             
             const isActive = userData.user.is_active;
             document.getElementById('profile-banner-active-dot').style.display = isActive ? 'block' : 'none';
@@ -1449,14 +1450,16 @@ async function showUserProfile(userId) {
             const otherUserActions = document.getElementById('other-user-actions');
             
             if (userId === currentUser.id) {
-                document.getElementById('edit-profile-btn').style.display = 'flex';
+                bioEl.onclick = openBioModal;
+                bioEl.style.cursor = 'pointer';
                 document.getElementById('view-archive-btn').style.display = 'flex';
                 document.getElementById('add-story-btn').style.display = 'flex';
                 document.getElementById('cover-camera-btn').style.display = 'flex';
                 document.getElementById('avatar-camera-btn').style.display = 'flex';
                 if (otherUserActions) otherUserActions.style.display = 'none';
             } else {
-                document.getElementById('edit-profile-btn').style.display = 'none';
+                bioEl.onclick = null;
+                bioEl.style.cursor = 'default';
                 document.getElementById('view-archive-btn').style.display = 'none';
                 document.getElementById('add-story-btn').style.display = 'none';
                 document.getElementById('cover-camera-btn').style.display = 'none';
