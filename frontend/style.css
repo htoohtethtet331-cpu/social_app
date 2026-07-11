@@ -653,7 +653,7 @@ body {
     flex-grow: 1;
     overflow-y: auto;
     padding: 15px;
-    background: #f0f2f5;
+    background: var(--bg-color);
 }
 
 .sheet-footer {
