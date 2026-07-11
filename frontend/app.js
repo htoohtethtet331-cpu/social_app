@@ -2688,3 +2688,70 @@ async function fetchAndRenderUsersList(isInitial) {
         isFetchingUsersList = false;
     }
 }
+
+// --- Users List Modal Swipe-to-Close Logic ---
+let ulStartY = 0;
+let ulCurrentY = 0;
+let ulIsDragging = false;
+let ulStartScrollTop = 0;
+const ulModal = document.getElementById('users-list-modal');
+const ulModalContent = ulModal.querySelector('.modal-content');
+
+function ulHandleTouchStart(e) {
+    ulStartY = e.touches[0].clientY;
+    ulCurrentY = ulStartY;
+    ulIsDragging = false;
+    
+    const container = e.target.closest('#users-list-container');
+    ulStartScrollTop = container ? container.scrollTop : 0;
+    
+    ulModalContent.style.transition = 'none';
+}
+
+function ulHandleTouchMove(e) {
+    ulCurrentY = e.touches[0].clientY;
+    const diff = ulCurrentY - ulStartY;
+    
+    if (ulStartScrollTop === 0 && diff > 0) {
+        ulIsDragging = true;
+        ulModalContent.style.transform = `translateY(${diff}px)`;
+        if (e.cancelable) e.preventDefault();
+    }
+}
+
+function ulHandleTouchEnd() {
+    if (!ulIsDragging) return;
+    ulIsDragging = false;
+    ulModalContent.style.transition = 'transform 0.3s cubic-bezier(0.1, 0.8, 0.3, 1)';
+    const diff = ulCurrentY - ulStartY;
+    
+    if (diff > 100) { // Dragged down enough
+        ulModal.classList.remove('active');
+        setTimeout(() => { ulModalContent.style.transform = ''; }, 300);
+    } else { // Snap back
+        ulModalContent.style.transform = '';
+    }
+}
+
+// Attach events when the script loads
+const ulContainer = ulModal.querySelector('#users-list-container');
+const ulHeader = ulModal.querySelector('.bottom-sheet-handle').parentElement;
+
+ulHeader.addEventListener('touchstart', ulHandleTouchStart, {passive: true});
+ulHeader.addEventListener('touchmove', (e) => {
+    // If touched on the handle/header, always allow dragging down
+    if (e.target.closest('#users-list-container')) return; 
+    ulCurrentY = e.touches[0].clientY;
+    const diff = ulCurrentY - ulStartY;
+    if (diff > 0) {
+        ulIsDragging = true;
+        ulModalContent.style.transform = `translateY(${diff}px)`;
+        if (e.cancelable) e.preventDefault();
+    }
+}, {passive: false});
+ulHeader.addEventListener('touchend', ulHandleTouchEnd);
+
+ulContainer.addEventListener('touchstart', ulHandleTouchStart, {passive: true});
+ulContainer.addEventListener('touchmove', ulHandleTouchMove, {passive: false});
+ulContainer.addEventListener('touchend', ulHandleTouchEnd);
+
