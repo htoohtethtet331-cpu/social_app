@@ -1049,8 +1049,8 @@ function createPostHtml(post, searchQuery = '') {
                     <svg viewBox="0 0 24 24" width="20" height="20" class="heart-icon"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                     <span id="like-count-${post.id}" onclick="event.stopPropagation(); viewPostLikes('${post.id}')">${post.like_count || 0}</span>
                 </button>
-                <button class="fb-interaction-btn" onclick="openCommentsBottomSheet('${post.id}')" style="display: flex; gap: 5px; align-items: center;">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
+                <button class="fb-interaction-btn comment-btn" data-post-id="${post.id}" style="display: flex; gap: 5px; align-items: center;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="pointer-events: none;"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
                     <span id="comment-count-${post.id}">${post.comment_count || 0}</span>
                 </button>
                 <button class="fb-interaction-btn fav-btn ${post.has_favorited ? 'favorited' : ''}" id="fav-btn-${post.id}" onclick="toggleFavorite('${post.id}')" style="display: flex; gap: 5px; align-items: center;">
@@ -1204,6 +1204,7 @@ function renderCommentBubble(c) {
 }
 
 async function openCommentsBottomSheet(postId) {
+    if (!postId) return;
     currentCommentPostId = postId;
     cancelReply();
     sheetOverlay.style.display = 'flex';
@@ -2758,3 +2759,11 @@ ulContainer.addEventListener('touchstart', ulHandleTouchStart, {passive: true});
 ulContainer.addEventListener('touchmove', ulHandleTouchMove, {passive: false});
 ulContainer.addEventListener('touchend', ulHandleTouchEnd);
 
+// Event Delegation for Comment Buttons
+document.addEventListener('click', (e) => {
+    const commentBtn = e.target.closest('.comment-btn');
+    if (commentBtn) {
+        const postId = commentBtn.getAttribute('data-post-id');
+        openCommentsBottomSheet(postId);
+    }
+});
