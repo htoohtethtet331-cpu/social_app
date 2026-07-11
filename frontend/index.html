@@ -34,7 +34,7 @@
         <!-- Main Content -->
         <main class="app-main swipe-container" id="swipe-container">
             <!-- Create Post Modal -->
-            <div id="create-post-modal" class="modal bottom-sheet" style="z-index: 4000;">
+            <div id="create-post-modal" class="modal bottom-sheet" style="z-index: 4000;" onclick="if(event.target === this) this.classList.remove('active')">
                 <div class="modal-content" style="padding: 0;">
                     <div class="fb-modal-header">
                         <div style="width: 36px;"></div>
@@ -213,7 +213,7 @@
     </div>
 
     <!-- Photo Upload Modal -->
-    <div id="photo-modal" class="modal">
+    <div id="photo-modal" class="modal" onclick="if(event.target === this) this.classList.remove('active')">
         <div class="modal-content text-center">
             <h2 style="margin-bottom: 10px;">Welcome! 👋</h2>
             <p class="text-muted">Upload a profile photo to make your profile stand out, or skip for now.</p>
@@ -236,7 +236,7 @@
     </div>
 
     <!-- Edit Bio Modal -->
-    <div id="bio-modal" class="modal">
+    <div id="bio-modal" class="modal" onclick="if(event.target === this) this.classList.remove('active')">
         <div class="modal-content">
             <h2>Edit Bio</h2>
             <form id="bio-form">
@@ -313,7 +313,7 @@
         </div>
         
         <!-- Story Likes Modal -->
-        <div class="modal bottom-sheet" id="story-likes-modal" style="z-index: 4000;">
+        <div class="modal bottom-sheet" id="story-likes-modal" style="z-index: 4000;" onclick="if(event.target === this) this.classList.remove('active')">
             <div class="modal-content" style="max-height: 60vh; display: flex; flex-direction: column; padding: 0;">
                 <div class="fb-modal-header">
                     <div style="width: 36px;"></div> <!-- Spacer -->
@@ -329,7 +329,7 @@
         </div>
         
         <!-- Story Viewers Modal -->
-        <div class="modal bottom-sheet" id="story-viewers-modal" style="z-index: 4000;">
+        <div class="modal bottom-sheet" id="story-viewers-modal" style="z-index: 4000;" onclick="if(event.target === this) this.classList.remove('active')">
             <div class="modal-content" style="max-height: 60vh; display: flex; flex-direction: column; padding: 0;">
                 <div class="fb-modal-header">
                     <div style="width: 36px;"></div> <!-- Spacer -->
@@ -345,7 +345,7 @@
         </div>
         
         <!-- Archive Modal -->
-        <div id="archive-modal" class="modal" style="z-index: 5000; background: var(--bg-color);">
+        <div id="archive-modal" class="modal" style="z-index: 5000; background: var(--bg-color);" onclick="if(event.target === this) this.classList.remove('active')">
             <div class="fb-modal-header" style="position: sticky; top: 0; background: var(--bg-color); z-index: 10;">
                 <div style="width: 36px;"></div>
                 <h2>Story Archive</h2>
@@ -359,7 +359,7 @@
         </div>
         
         <!-- Post Likes Modal -->
-        <div class="modal bottom-sheet" id="post-likes-modal" style="z-index: 4000;">
+        <div class="modal bottom-sheet" id="post-likes-modal" style="z-index: 4000;" onclick="if(event.target === this) this.classList.remove('active')">
             <div class="modal-content" style="max-height: 60vh; display: flex; flex-direction: column; padding: 0;">
                 <div class="fb-modal-header">
                     <div style="width: 36px;"></div> <!-- Spacer -->
@@ -375,7 +375,7 @@
         </div>
         
         <!-- Full Screen Image Viewer Modal -->
-        <div class="modal image-lightbox-modal" id="image-viewer-modal" style="z-index: 5000;">
+        <div class="modal image-lightbox-modal" id="image-viewer-modal" style="z-index: 5000;" onclick="if(event.target === this) this.classList.remove('active')">
             <div class="lightbox-overlay" id="lightbox-overlay" onclick="closeFullScreenImage()"></div>
             <div class="lightbox-header">
                 <span class="lightbox-close" id="lightbox-close" onclick="closeFullScreenImage()">&times;</span>
