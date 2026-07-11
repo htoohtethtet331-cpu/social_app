@@ -288,8 +288,36 @@ function setupUI() {
         }
     }, 15000); // Poll every 15s
 
+    // Initialize Privacy Setting
+    if (currentUser && currentUser.is_private) {
+        const privacyToggle = document.getElementById('privacy-toggle');
+        if (privacyToggle) privacyToggle.checked = true;
+    }
+
     // Initialize Socket.io
     initSocket();
+}
+
+async function togglePrivacy(isPrivate) {
+    if (!currentUser) return;
+    try {
+        const res = await fetch(`${API_BASE_URL}/users/${currentUser.id}/privacy`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_private: isPrivate })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            currentUser.is_private = data.is_private;
+        } else {
+            throw new Error(data.error);
+        }
+    } catch(err) {
+        console.error('Error toggling privacy', err);
+        alert('Failed to update privacy settings');
+        const toggle = document.getElementById('privacy-toggle');
+        if (toggle) toggle.checked = !isPrivate;
+    }
 }
 
 // --- Follow Feature ---
@@ -309,7 +337,7 @@ async function toggleFollow(targetId, btnElement) {
     if (isFollowingNow) {
         // Optimistic Unfollow
         currentUserFollows.following = currentUserFollows.following.filter(id => id !== targetId);
-        updateFollowButtonUI(btnElement, false, false);
+        updateFollowButtonUI(btnElement, false, false, currentUserFollows.followers.includes(targetId));
         if (currentProfileUserId === targetId) {
             let el = document.getElementById('profile-stats-followers');
             el.innerText = Math.max(0, parseInt(el.innerText) - 1);
@@ -317,7 +345,7 @@ async function toggleFollow(targetId, btnElement) {
     } else {
         // Optimistic Follow
         currentUserFollows.following.push(targetId);
-        updateFollowButtonUI(btnElement, true, isMutualIfFollow);
+        updateFollowButtonUI(btnElement, true, isMutualIfFollow, currentUserFollows.followers.includes(targetId));
         if (currentProfileUserId === targetId) {
             let el = document.getElementById('profile-stats-followers');
             el.innerText = parseInt(el.innerText) + 1;
@@ -347,17 +375,19 @@ async function toggleFollow(targetId, btnElement) {
         console.error(e);
         // Rollback
         if (isFollowingNow) {
-            if (!currentUserFollows.following.includes(targetId)) currentUserFollows.following.push(targetId);
+            currentUserFollows.following.push(targetId); // Revert unfollow
             if (currentProfileUserId === targetId) {
                 let el = document.getElementById('profile-stats-followers');
                 el.innerText = parseInt(el.innerText) + 1;
             }
+            updateFollowButtonUI(btnElement, true, false, currentUserFollows.followers.includes(targetId));
         } else {
-            currentUserFollows.following = currentUserFollows.following.filter(id => id !== targetId);
+            currentUserFollows.following = currentUserFollows.following.filter(id => id !== targetId); // Revert follow
             if (currentProfileUserId === targetId) {
                 let el = document.getElementById('profile-stats-followers');
                 el.innerText = Math.max(0, parseInt(el.innerText) - 1);
             }
+            updateFollowButtonUI(btnElement, false, false, currentUserFollows.followers.includes(targetId));
         }
         
         btnElement.className = previousState.class;
@@ -386,7 +416,7 @@ async function toggleFollow(targetId, btnElement) {
     }
 }
 
-function updateFollowButtonUI(btn, isFollowing, isMutual) {
+function updateFollowButtonUI(btn, isFollowing, isMutual, isFollower = false) {
     let btnClass = 'primary-btn';
     let btnText = 'Follow';
     
@@ -396,6 +426,9 @@ function updateFollowButtonUI(btn, isFollowing, isMutual) {
     } else if (isFollowing) {
         btnClass = 'secondary-btn';
         btnText = 'Following';
+    } else if (isFollower) {
+        btnClass = 'primary-btn';
+        btnText = 'Follow Back';
     }
     
     if (btn.classList.contains('follow-btn-small')) {
@@ -2508,28 +2541,90 @@ async function performSearch(query) {
 }
 
 // --- Followers / Following List Feature ---
+let currentUsersListType = '';
+let currentUsersListId = '';
+let currentUsersListCursor = null;
+let isFetchingUsersList = false;
+let hasMoreUsersList = true;
+
 async function openUsersListModal(type, userId) {
     if (!userId) return;
     const modal = document.getElementById('users-list-modal');
     const container = document.getElementById('users-list-container');
     const title = document.getElementById('users-list-title');
     
+    currentUsersListType = type;
+    currentUsersListId = userId;
+    currentUsersListCursor = null;
+    isFetchingUsersList = false;
+    hasMoreUsersList = true;
+    
     title.innerText = type === 'followers' ? 'Followers' : 'Following';
     container.innerHTML = '<p class="loading-text" style="text-align:center;">Loading...</p>';
     modal.classList.add('active');
     
+    if (!container.hasAttribute('data-scroll-listener')) {
+        container.addEventListener('scroll', handleUsersListScroll);
+        container.setAttribute('data-scroll-listener', 'true');
+    }
+    
+    await fetchAndRenderUsersList(true);
+}
+
+async function handleUsersListScroll() {
+    const container = document.getElementById('users-list-container');
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50) {
+        if (!isFetchingUsersList && hasMoreUsersList) {
+            await fetchAndRenderUsersList(false);
+        }
+    }
+}
+
+async function fetchAndRenderUsersList(isInitial) {
+    if (isFetchingUsersList || !hasMoreUsersList) return;
+    isFetchingUsersList = true;
+    
+    const container = document.getElementById('users-list-container');
+    
     try {
-        const res = await fetch(`${API_BASE_URL}/users/${userId}/${type}`);
+        let url = `${API_BASE_URL}/users/${currentUsersListId}/${currentUsersListType}?current_user_id=${currentUser ? currentUser.id : ''}`;
+        if (currentUsersListCursor) {
+            url += `&cursor=${currentUsersListCursor}`;
+        }
+        
+        const res = await fetch(url);
         const data = await res.json();
         
-        if (!data.users || data.users.length === 0) {
-            container.innerHTML = `<p class="loading-text" style="text-align:center;">No ${type} yet.</p>`;
+        if (!res.ok) {
+            if (data.is_private) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding: 30px 20px;">
+                        <svg viewBox="0 0 24 24" width="48" height="48" fill="var(--text-color)" style="opacity:0.5; margin-bottom: 10px;">
+                            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+                        </svg>
+                        <p style="font-weight:bold; color: var(--text-color); margin: 0;">This account is private</p>
+                        <p style="font-size:0.9rem; color: #65676b; margin-top:5px;">Follow this account to see their ${currentUsersListType}.</p>
+                    </div>`;
+                hasMoreUsersList = false;
+                isFetchingUsersList = false;
+                return;
+            }
+            throw new Error(data.error || 'Failed to load');
+        }
+        
+        if (isInitial && (!data.users || data.users.length === 0)) {
+            container.innerHTML = `<p class="loading-text" style="text-align:center;">No ${currentUsersListType} yet.</p>`;
+            hasMoreUsersList = false;
+            isFetchingUsersList = false;
             return;
         }
         
-        container.innerHTML = data.users.map(user => {
+        if (isInitial) container.innerHTML = '';
+        
+        const html = data.users.map(user => {
             const isFollowing = currentUserFollows.following.includes(user._id || user.id);
-            const isMutual = currentUserFollows.followers.includes(user._id || user.id) && isFollowing;
+            const isFollower = currentUserFollows.followers.includes(user._id || user.id);
+            const isMutual = isFollowing && isFollower;
             let followBtnHtml = '';
             
             if (currentUser && currentUser.id !== (user._id || user.id)) {
@@ -2537,6 +2632,7 @@ async function openUsersListModal(type, userId) {
                 let btnText = 'Follow';
                 if (isMutual) { btnClass = 'secondary-btn'; btnText = 'Friends'; }
                 else if (isFollowing) { btnClass = 'secondary-btn'; btnText = 'Following'; }
+                else if (isFollower) { btnClass = 'primary-btn'; btnText = 'Follow Back'; }
                 
                 followBtnHtml = `<button class="follow-btn-small btn ${btnClass}" onclick="event.stopPropagation(); toggleFollow('${user._id || user.id}', this)" style="padding: 6px 12px; border-radius: 16px; font-size: 0.9rem;">${btnText}</button>`;
             }
@@ -2555,8 +2651,20 @@ async function openUsersListModal(type, userId) {
                 </div>
             `;
         }).join('');
+        
+        container.insertAdjacentHTML('beforeend', html);
+        
+        if (data.nextCursor) {
+            currentUsersListCursor = data.nextCursor;
+        } else {
+            hasMoreUsersList = false;
+        }
     } catch(err) {
         console.error(err);
-        container.innerHTML = '<p class="loading-text" style="text-align:center; color: var(--like-color);">Error loading users.</p>';
+        if (isInitial) {
+            container.innerHTML = '<p class="loading-text" style="text-align:center; color: var(--like-color);">Error loading users.</p>';
+        }
+    } finally {
+        isFetchingUsersList = false;
     }
 }

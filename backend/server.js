@@ -882,9 +882,31 @@ app.get('/api/users/:id/follow-status', async (req, res) => {
 
 app.get('/api/users/:id/followers', async (req, res) => {
     try {
-        const follows = await Follow.find({ following_id: req.params.id }).populate('follower_id', 'username photo_url bio last_active');
+        const targetUser = await User.findById(req.params.id);
+        if (!targetUser) return res.status(404).json({ error: 'User not found' });
+        
+        const viewerId = req.query.current_user_id;
+        if (targetUser.is_private && viewerId !== req.params.id) {
+            const isFollowing = viewerId ? await Follow.findOne({ follower_id: viewerId, following_id: req.params.id }) : null;
+            if (!isFollowing) {
+                return res.status(403).json({ error: 'Account is private', is_private: true });
+            }
+        }
+
+        const limit = 20;
+        const query = { following_id: req.params.id };
+        if (req.query.cursor) {
+            query._id = { $lt: req.query.cursor };
+        }
+
+        const follows = await Follow.find(query)
+            .sort({ _id: -1 })
+            .limit(limit)
+            .populate('follower_id', 'username photo_url bio last_active is_private');
+            
+        const nextCursor = follows.length === limit ? follows[follows.length - 1]._id : null;
         const users = follows.map(f => f.follower_id).filter(Boolean);
-        res.json({ users });
+        res.json({ users, nextCursor });
     } catch(err) {
         res.status(500).json({ error: err.message });
     }
@@ -892,9 +914,31 @@ app.get('/api/users/:id/followers', async (req, res) => {
 
 app.get('/api/users/:id/following', async (req, res) => {
     try {
-        const follows = await Follow.find({ follower_id: req.params.id }).populate('following_id', 'username photo_url bio last_active');
+        const targetUser = await User.findById(req.params.id);
+        if (!targetUser) return res.status(404).json({ error: 'User not found' });
+        
+        const viewerId = req.query.current_user_id;
+        if (targetUser.is_private && viewerId !== req.params.id) {
+            const isFollowing = viewerId ? await Follow.findOne({ follower_id: viewerId, following_id: req.params.id }) : null;
+            if (!isFollowing) {
+                return res.status(403).json({ error: 'Account is private', is_private: true });
+            }
+        }
+
+        const limit = 20;
+        const query = { follower_id: req.params.id };
+        if (req.query.cursor) {
+            query._id = { $lt: req.query.cursor };
+        }
+
+        const follows = await Follow.find(query)
+            .sort({ _id: -1 })
+            .limit(limit)
+            .populate('following_id', 'username photo_url bio last_active is_private');
+            
+        const nextCursor = follows.length === limit ? follows[follows.length - 1]._id : null;
         const users = follows.map(f => f.following_id).filter(Boolean);
-        res.json({ users });
+        res.json({ users, nextCursor });
     } catch(err) {
         res.status(500).json({ error: err.message });
     }
@@ -910,6 +954,21 @@ app.get('/api/users/:id/follow-map', async (req, res) => {
             followers: followers.map(f => f.follower_id.toString())
         });
     } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Toggle Privacy
+app.put('/api/users/:id/privacy', async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        
+        user.is_private = req.body.is_private;
+        await user.save();
+        
+        res.json({ message: 'Privacy updated', is_private: user.is_private });
+    } catch(err) {
         res.status(500).json({ error: err.message });
     }
 });
