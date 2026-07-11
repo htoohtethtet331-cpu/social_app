@@ -1057,12 +1057,13 @@ async function openCommentsBottomSheet(postId) {
 }
 
 function closeCommentsBottomSheet() {
+    sheet.style.transform = ''; // reset inline transform immediately so CSS class takes over
     sheet.classList.remove('open');
     setTimeout(() => {
         sheetOverlay.style.display = 'none';
+        sheetCommentsList.innerHTML = '';
         currentCommentPostId = null;
         cancelReply();
-        sheet.style.transform = ''; // reset drag
     }, 300);
 }
 
