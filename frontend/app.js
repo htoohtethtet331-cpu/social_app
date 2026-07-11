@@ -147,9 +147,7 @@ function loadHighResImage(img) {
 
 function setupUI() {
     
-    const profileImg = document.getElementById('profile-photo');
-    profileImg.src = getAvatarUrl(currentUser.photo_url);
-    profileImg.style.display = 'block';
+    // removed profileImg
 
     const formAvatar = document.getElementById('form-avatar');
     if (formAvatar) formAvatar.src = getAvatarUrl(currentUser.photo_url);
