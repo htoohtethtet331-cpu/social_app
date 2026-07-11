@@ -319,8 +319,8 @@ function initSocket() {
     socket.on(`new_notification_${currentUser.id}`, (notif) => {
         unreadNotificationsCount++;
         updateNotificationBadge();
-        // If we are currently on the notifications tab, reload it
-        if (document.getElementById('nav-notifications') && document.getElementById('nav-notifications').classList.contains('active')) {
+        // If we are currently on the notifications drawer, reload it
+        if (document.getElementById('notifications-drawer') && document.getElementById('notifications-drawer').classList.contains('active')) {
             loadNotifications();
             markNotificationsRead();
         }
@@ -458,7 +458,7 @@ function showNewPosts() {
 
 // Swipeable Carousel Physics & State
 let currentTabIndex = 0; // 0: Home, 1: Users, 2: Profile, 3: Notifications
-const tabs = ['home', 'users', 'profile', 'notifications'];
+const tabs = ['home', 'users', 'profile', 'settings'];
 let isUsersLoaded = false;
 let isNotificationsLoaded = false;
 
@@ -585,10 +585,6 @@ function triggerLazyLoad() {
     if (activeTabName === 'users' && !isUsersLoaded) {
         loadAllUsers();
         isUsersLoaded = true;
-    } else if (activeTabName === 'notifications' && !isNotificationsLoaded) {
-        loadNotifications();
-        markNotificationsRead();
-        isNotificationsLoaded = true;
     }
 }
 
@@ -605,16 +601,22 @@ function switchTab(tabName, userId = null) {
     }
 }
 
-// Settings Drawer Logic
-function toggleSettingsDrawer() {
-    const drawer = document.getElementById('settings-drawer');
-    const backdrop = document.getElementById('settings-backdrop');
+// Notifications Drawer Logic
+function toggleNotificationsDrawer() {
+    const drawer = document.getElementById('notifications-drawer');
+    const backdrop = document.getElementById('notifications-backdrop');
     if (drawer.classList.contains('active')) {
         drawer.classList.remove('active');
         backdrop.classList.remove('active');
     } else {
         drawer.classList.add('active');
         backdrop.classList.add('active');
+        
+        if (!isNotificationsLoaded) {
+            loadNotifications();
+            markNotificationsRead();
+            isNotificationsLoaded = true;
+        }
     }
 }
 

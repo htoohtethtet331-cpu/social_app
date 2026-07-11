@@ -6,7 +6,7 @@
     <title>Telegram Web App</title>
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css?v=42">
+    <link rel="stylesheet" href="style.css?v=43">
     <script>
         const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2RkZCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzkiIHI9IjE4IiBmaWxsPSIjOTk5Ii8+PHBhdGggZD0iTTIyLDgwIGEzMCwyMCAwIDAsMSw1NiwwIHoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=';
         window.handleImageError = function(img) {
@@ -24,7 +24,10 @@
                 <h1 style="margin: 0; color: var(--primary-color); font-size: 1.5rem; font-weight: bold;">WYU-Math</h1>
             </div>
             <div class="user-info" style="display: flex; gap: 15px; align-items: center;">
-                <svg onclick="toggleSettingsDrawer()" viewBox="0 0 24 24" fill="currentColor" width="28" height="28" style="cursor: pointer; color: var(--text-color);"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                <div style="position: relative;" onclick="toggleNotificationsDrawer()">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28" style="cursor: pointer; color: var(--text-color);"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
+                    <span class="notification-badge" id="nav-notification-badge" style="display: none; position: absolute; top: -5px; right: -5px;">0</span>
+                </div>
             </div>
         </header>
 
@@ -145,67 +148,67 @@
                     <!-- User's posts will be injected here -->
                 </div>
             </section>
-<section class="notifications-section swipe-slide" id="notifications-section" >
-                <div class="notifications-header">
-                    <h2>Notifications</h2>
+            <section class="settings-section swipe-slide" id="settings-section" >
+                <div class="fb-profile-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding: 10px 20px;">
+                    <h2 style="margin:0;">Settings</h2>
                 </div>
-                <div id="notifications-feed" style="padding-bottom: 20px;">
-                    <!-- Skeletons initially or loading -->
-                    <p class="loading-text">Loading notifications...</p>
+                <div id="settings-menu" style="padding: 10px 0; padding-bottom: 30px;">
+                    <div class="settings-section-title">Preferences</div>
+                    <div class="settings-card">
+                        <div class="settings-row" style="cursor: default;">
+                            <div class="settings-icon-wrapper" style="background: rgba(29, 155, 240, 0.1); color: #1d9bf0;">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm1-17.93c3.94.49 7 3.85 7 7.93s-3.05 7.44-7 7.93V4.07z"/></svg>
+                            </div>
+                            <div class="settings-info">
+                                <h4>Theme</h4>
+                                <p>Appearance mode</p>
+                            </div>
+                            <div class="settings-action">
+                                <div class="theme-segmented-control">
+                                    <div id="light-mode-btn" class="theme-segment active" onclick="setTheme('light')">Light</div>
+                                    <div id="dark-mode-btn" class="theme-segment" onclick="setTheme('dark')">Dark</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section-title">Activity</div>
+                    <div class="settings-card">
+                        <div class="settings-row" onclick="showFavorites()">
+                            <div class="settings-icon-wrapper" style="background: rgba(245, 195, 59, 0.1); color: #f5c33b;">
+                                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                            </div>
+                            <div class="settings-info">
+                                <h4>My Favorites</h4>
+                                <p>View saved posts</p>
+                            </div>
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="var(--secondary-color)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="favorites-container" style="display: none;">
+                    <div style="padding: 10px 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="hideFavorites()">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                        <h3 style="margin:0;">Back to Settings</h3>
+                    </div>
+                    <div id="favorites-feed" class="post-feed" style="padding-bottom: 80px;"></div>
                 </div>
             </section>
             </div>
         </main>
     </div>
     
-    <!-- Settings Drawer -->
-    <div id="settings-backdrop" class="drawer-backdrop" onclick="toggleSettingsDrawer()"></div>
-    <div class="settings-drawer" id="settings-drawer">
+    <!-- Notifications Drawer -->
+    <div id="notifications-backdrop" class="drawer-backdrop" onclick="toggleNotificationsDrawer()"></div>
+    <div class="settings-drawer" id="notifications-drawer">
         <div class="fb-profile-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding: 10px 20px;">
-            <h2 style="margin:0;">Settings</h2>
-            <button type="button" class="fb-close-btn" onclick="toggleSettingsDrawer()" style="background:none; border:none; font-size: 24px; cursor: pointer;">&times;</button>
+            <h2 style="margin:0;">Notifications</h2>
+            <button type="button" class="fb-close-btn" onclick="toggleNotificationsDrawer()" style="background:none; border:none; font-size: 24px; cursor: pointer;">&times;</button>
         </div>
-        <div id="settings-menu" style="padding: 10px 0; padding-bottom: 30px;">
-            <div class="settings-section-title">Preferences</div>
-            <div class="settings-card">
-                <div class="settings-row" style="cursor: default;">
-                    <div class="settings-icon-wrapper" style="background: rgba(29, 155, 240, 0.1); color: #1d9bf0;">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10zm1-17.93c3.94.49 7 3.85 7 7.93s-3.05 7.44-7 7.93V4.07z"/></svg>
-                    </div>
-                    <div class="settings-info">
-                        <h4>Theme</h4>
-                        <p>Appearance mode</p>
-                    </div>
-                    <div class="settings-action">
-                        <div class="theme-segmented-control">
-                            <div id="light-mode-btn" class="theme-segment active" onclick="setTheme('light')">Light</div>
-                            <div id="dark-mode-btn" class="theme-segment" onclick="setTheme('dark')">Dark</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="settings-section-title">Activity</div>
-            <div class="settings-card">
-                <div class="settings-row" onclick="showFavorites()">
-                    <div class="settings-icon-wrapper" style="background: rgba(245, 195, 59, 0.1); color: #f5c33b;">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-                    </div>
-                    <div class="settings-info">
-                        <h4>My Favorites</h4>
-                        <p>View saved posts</p>
-                    </div>
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="var(--secondary-color)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-                </div>
-            </div>
-        </div>
-        
-        <div id="favorites-container" style="display: none;">
-            <div style="padding: 10px 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="hideFavorites()">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-                <h3 style="margin:0;">Back to Settings</h3>
-            </div>
-            <div id="favorites-feed" class="post-feed" style="padding-bottom: 80px;"></div>
+        <div id="notifications-feed" style="padding: 10px 20px 20px 20px;">
+            <!-- Skeletons initially or loading -->
+            <p class="loading-text">Loading notifications...</p>
         </div>
     </div>
 
@@ -405,15 +408,14 @@
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                 <span>Profile</span>
             </div>
-            <div class="nav-item" id="nav-notifications" style="position: relative;">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></svg>
-                <span class="notification-badge" id="nav-notification-badge" style="display: none;">0</span>
-                <span>Notifications</span>
+            <div class="nav-item" id="nav-settings">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                <span>Settings</span>
             </div>
         </nav>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=42"></script>
+    <script src="app.js?v=43"></script>
 </body>
 </html>
