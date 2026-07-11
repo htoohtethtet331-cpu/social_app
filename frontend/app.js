@@ -1212,7 +1212,7 @@ async function openCommentsBottomSheet(postId) {
         sheet.classList.add('open');
     }, 10);
 
-    sheetCommentsList.innerHTML = '<p class="loading-text">Loading comments...</p>';
+    sheetCommentsList.innerHTML = '<div class="cat-loader-container"><div class="cat"><div class="cat__body"></div><div class="cat__body"></div><div class="cat__tail"></div><div class="cat__head"></div></div></div>';
     
     try {
         const res = await fetch(`${API_BASE_URL}/posts/${postId}/comments`);
@@ -2522,7 +2522,7 @@ async function performSearch(query) {
     document.getElementById('search-input').value = query; // update input box if clicked from suggest
     document.getElementById('search-suggestions').style.display = 'none';
     
-    feed.innerHTML = '<p class="loading-text">Searching...</p>';
+    feed.innerHTML = '<div class="cat-loader-container"><div class="cat"><div class="cat__body"></div><div class="cat__body"></div><div class="cat__tail"></div><div class="cat__head"></div></div></div>';
     
     try {
         const res = await fetch(`${API_BASE_URL}/posts/search?q=${encodeURIComponent(query)}&current_user_id=${currentUser.id}`);
@@ -2568,7 +2568,7 @@ async function openUsersListModal(type, userId) {
     hasMoreUsersList = true;
     
     title.innerText = type === 'followers' ? 'Followers' : 'Following';
-    container.innerHTML = '<p class="loading-text" style="text-align:center;">Loading...</p>';
+    container.innerHTML = '<div class="cat-loader-container"><div class="cat"><div class="cat__body"></div><div class="cat__body"></div><div class="cat__tail"></div><div class="cat__head"></div></div></div>';
     
     // FORCE inline styles to bypass aggressive index.html caching on mobile
     modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
