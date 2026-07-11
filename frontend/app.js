@@ -1,6 +1,7 @@
 const API_BASE_URL = '/api'; 
 let currentUser = null;
 let currentProfileUserId = null;
+let currentProfileUsername = null;
 let currentUserFollows = { following: [], followers: [] };
 window.activeStoryUsers = {};
 
@@ -1400,14 +1401,17 @@ async function showUserProfile(userId) {
             document.getElementById('profile-banner-avatar').src = getAvatarUrl(userData.user.photo_url);
             document.getElementById('profile-banner-cover').src = userData.user.cover_url ? userData.user.cover_url : 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="600" height="200"%3E%3Crect width="100%25" height="100%25" fill="%23cccccc"/%3E%3C/svg%3E';
             document.getElementById('profile-banner-name').innerText = userData.user.username;
+            currentProfileUsername = userData.user.username;
             document.getElementById('profile-stats-followers').innerText = userData.user.follower_count || 0;
             document.getElementById('profile-stats-following').innerText = userData.user.following_count || 0;
+            document.getElementById('profile-stats-likes').innerText = userData.likes_count || 0;
             document.getElementById('profile-banner-bio').innerText = userData.user.bio || 'No bio yet.';
             
             const isActive = userData.user.is_active;
             document.getElementById('profile-banner-active-dot').style.display = isActive ? 'block' : 'none';
             
             const followBtn = document.getElementById('follow-profile-btn');
+            const otherUserActions = document.getElementById('other-user-actions');
             
             if (userId === currentUser.id) {
                 document.getElementById('edit-profile-btn').style.display = 'flex';
@@ -1415,13 +1419,15 @@ async function showUserProfile(userId) {
                 document.getElementById('add-story-btn').style.display = 'flex';
                 document.getElementById('cover-camera-btn').style.display = 'flex';
                 document.getElementById('avatar-camera-btn').style.display = 'flex';
-                if (followBtn) followBtn.style.display = 'none';
+                if (otherUserActions) otherUserActions.style.display = 'none';
             } else {
                 document.getElementById('edit-profile-btn').style.display = 'none';
                 document.getElementById('view-archive-btn').style.display = 'none';
                 document.getElementById('add-story-btn').style.display = 'none';
                 document.getElementById('cover-camera-btn').style.display = 'none';
                 document.getElementById('avatar-camera-btn').style.display = 'none';
+                
+                if (otherUserActions) otherUserActions.style.display = 'flex';
                 
                 if (followBtn) {
                     followBtn.style.display = 'flex';

@@ -197,23 +197,41 @@
                             </div>
 
                             <h2 id="profile-banner-name" class="fb-profile-name">User Name</h2>
-                            <p class="fb-profile-stats">
-                                <strong><span id="profile-stats-posts">0</span></strong> posts
-                                <span style="margin: 0 8px; color: #888;">•</span>
-                                <strong><span id="profile-stats-followers">0</span></strong> followers
-                                <span style="margin: 0 8px; color: #888;">•</span>
-                                <strong><span id="profile-stats-following">0</span></strong> following
-                            </p>
+                            <div class="profile-stats-grid">
+                                <div class="stat-box">
+                                    <div class="stat-number" id="profile-stats-following">0</div>
+                                    <div class="stat-label">Following</div>
+                                </div>
+                                <div class="stat-divider"></div>
+                                <div class="stat-box">
+                                    <div class="stat-number" id="profile-stats-followers">0</div>
+                                    <div class="stat-label">Followers</div>
+                                </div>
+                                <div class="stat-divider"></div>
+                                <div class="stat-box">
+                                    <div class="stat-number" id="profile-stats-likes">0</div>
+                                    <div class="stat-label">Likes</div>
+                                </div>
+                            </div>
                             <p id="profile-banner-bio" class="fb-profile-bio"></p>
 
                             <div class="fb-profile-actions">
-                                <button id="follow-profile-btn" class="fb-action-btn primary" style="display: none;"
-                                    onclick="toggleFollow(currentProfileUserId, this)">
-                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" id="follow-icon-svg" style="display:none;">
-                                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
-                                    </svg>
-                                    <span id="follow-btn-text">Follow</span>
-                                </button>
+                                <div id="other-user-actions" style="display: none; width: 100%; gap: 10px;">
+                                    <button id="follow-profile-btn" class="fb-action-btn primary" style="flex: 1;"
+                                        onclick="toggleFollow(currentProfileUserId, this)">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" id="follow-icon-svg" style="display:none;">
+                                            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                                        </svg>
+                                        <span id="follow-btn-text">Follow</span>
+                                    </button>
+                                    <button id="message-profile-btn" class="fb-action-btn secondary" style="flex: 1;"
+                                        onclick="window.open('https://t.me/' + currentProfileUsername, '_blank')">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-right: 5px;">
+                                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                                        </svg>
+                                        Message
+                                    </button>
+                                </div>
                                 <button id="add-story-btn" class="fb-action-btn primary" style="display: none;"
                                     onclick="document.getElementById('story-upload').click()">
                                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">

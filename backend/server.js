@@ -797,12 +797,15 @@ app.get('/api/users', async (req, res) => {
 app.get('/api/users/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id).select('id username photo_url cover_url bio last_active follower_count following_count');
-        const posts_count = await Post.countDocuments({ user_id: req.params.id });
+        const posts = await Post.find({ user_id: req.params.id });
+        const posts_count = posts.length;
+        const likes_count = posts.reduce((acc, post) => acc + (post.likes ? post.likes.length : 0), 0);
+        
         const mappedUser = {
             ...user.toObject({ virtuals: true }),
             is_active: user.last_active ? (Date.now() - new Date(user.last_active).getTime() < 300000) : false
         };
-        res.json({ user: mappedUser, posts_count });
+        res.json({ user: mappedUser, posts_count, likes_count });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
