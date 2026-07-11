@@ -1045,18 +1045,18 @@ function createPostHtml(post, searchQuery = '') {
             ` : (post.image_url ? createProgressiveImageHtml(post.image_url, 'post-image', `onclick="viewFullScreenGallery(event, '${encodeURIComponent(JSON.stringify([post.image_url]))}', 0)"`) : '')}
             
             <div class="post-actions-fb" style="padding-top: 10px;">
-                <button class="fb-interaction-btn heart-btn ${post.has_liked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')" style="display: flex; gap: 5px; align-items: center;">
+                <div role="button" class="fb-interaction-btn heart-btn ${post.has_liked ? 'liked' : ''}" id="like-btn-${post.id}" onclick="toggleLike('${post.id}')" style="display: flex; gap: 5px; align-items: center;">
                     <svg viewBox="0 0 24 24" width="20" height="20" class="heart-icon"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                     <span id="like-count-${post.id}" onclick="event.stopPropagation(); viewPostLikes('${post.id}')">${post.like_count || 0}</span>
-                </button>
-                <button class="fb-interaction-btn comment-btn" data-post-id="${post.id}" style="display: flex; gap: 5px; align-items: center;">
+                </div>
+                <div role="button" class="fb-interaction-btn comment-btn" data-post-id="${post.id}" style="display: flex; gap: 5px; align-items: center;">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="pointer-events: none;"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18z"/></svg>
                     <span id="comment-count-${post.id}">${post.comment_count || 0}</span>
-                </button>
-                <button class="fb-interaction-btn fav-btn ${post.has_favorited ? 'favorited' : ''}" id="fav-btn-${post.id}" onclick="toggleFavorite('${post.id}')" style="display: flex; gap: 5px; align-items: center;">
+                </div>
+                <div role="button" class="fb-interaction-btn fav-btn ${post.has_favorited ? 'favorited' : ''}" id="fav-btn-${post.id}" onclick="toggleFavorite('${post.id}')" style="display: flex; gap: 5px; align-items: center;">
                     <svg viewBox="0 0 24 24" width="20" height="20" class="fav-icon"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
                     <span>Favorite</span>
-                </button>
+                </div>
             </div>
         </div>
     `;

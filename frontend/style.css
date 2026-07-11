@@ -586,10 +586,14 @@ body {
     align-items: center;
     justify-content: center;
     gap: 5px;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
 }
 
-.fb-interaction-btn:hover {
-    background-color: #f0f2f5;
+@media (hover: hover) {
+    .fb-interaction-btn:hover {
+        background-color: var(--border-color);
+    }
 }
 
 .fb-interaction-btn.liked {
