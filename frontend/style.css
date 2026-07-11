@@ -2127,3 +2127,7 @@ body.modal-open {
   from { transform: rotate(720deg); }
   to { transform: none; }
 }
+
+[data-theme="dark"] .cat {
+  filter: invert(1) hue-rotate(180deg) brightness(1.2);
+}
