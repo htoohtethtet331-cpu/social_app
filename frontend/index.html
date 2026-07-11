@@ -585,7 +585,7 @@
         </div>
 
         <!-- Users List Modal -->
-        <div class="modal bottom-sheet" id="users-list-modal" onclick="if(event.target === this) this.classList.remove('active')" style="z-index: 5000;">
+        <div class="modal bottom-sheet" id="users-list-modal" onclick="if(event.target === this) this.classList.remove('active')" style="z-index: 5000; background-color: rgba(0, 0, 0, 0.5) !important;">
             <div class="modal-content" style="max-height: 80vh; display: flex; flex-direction: column; padding: 0;">
                 <div class="bottom-sheet-handle"></div>
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--border-color);">
@@ -596,7 +596,7 @@
                         </svg>
                     </button>
                 </div>
-                <div id="users-list-container" style="overflow-y: auto; flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 10px;">
+                <div id="users-list-container" style="overflow-y: auto; flex: 1 1 auto; min-height: 150px; padding: 10px; display: flex; flex-direction: column; gap: 10px;">
                     <!-- Users will go here -->
                 </div>
             </div>
