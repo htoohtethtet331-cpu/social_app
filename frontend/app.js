@@ -2570,6 +2570,8 @@ async function openUsersListModal(type, userId) {
     title.innerText = type === 'followers' ? 'Followers' : 'Following';
     container.innerHTML = '<p class="loading-text" style="text-align:center;">Loading...</p>';
     modal.classList.add('active');
+    console.log("Modal classes after add:", modal.className);
+    console.log("Modal display style:", window.getComputedStyle(modal).display);
     
     if (!container.hasAttribute('data-scroll-listener')) {
         container.addEventListener('scroll', handleUsersListScroll);

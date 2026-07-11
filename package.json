@@ -6,5 +6,8 @@
   "scripts": {
     "start": "node backend/server.js",
     "install": "cd backend && npm install"
+  },
+  "dependencies": {
+    "jsdom": "^29.1.1"
   }
 }

@@ -493,9 +493,10 @@
             <span id="story-like-count"
                 style="color: white; font-weight: bold; text-shadow: 0 0 5px rgba(0,0,0,0.5); cursor: pointer; display: none;"></span>
         </div>
+    </div> <!-- Close story-viewer-modal -->
 
-        <!-- Story Likes Modal -->
-        <div class="modal bottom-sheet" id="story-likes-modal" style="z-index: 4000;"
+    <!-- Story Likes Modal -->
+    <div class="modal bottom-sheet" id="story-likes-modal" style="z-index: 4000;"
             onclick="if(event.target === this) this.classList.remove('active')">
             <div class="modal-content" style="max-height: 60vh; display: flex; flex-direction: column; padding: 0;">
                 <div class="fb-modal-header">
@@ -601,7 +602,6 @@
             </div>
         </div>
 
-    </div>
     <div class="bottom-nav-container">
         <nav class="bottom-nav-bar" id="bottom-nav">
             <div class="nav-item active" id="nav-home" onclick="switchTab('home')">
