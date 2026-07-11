@@ -11,10 +11,10 @@ mongoose.connect(process.env.MONGODB_URI)
 async function migrate() {
     try {
         console.log('Starting like migration...');
-        // Find all likes
+
         const likes = await Like.find();
         console.log(`Found ${likes.length} likes in Like collection.`);
-        
+
         let count = 0;
         for (let like of likes) {
             const post = await Post.findById(like.post_id);

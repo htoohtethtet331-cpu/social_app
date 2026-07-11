@@ -225,7 +225,7 @@ function setupUI() {
         formData.append('user_id', currentUser.id);
         if (content) formData.append('content', content);
         if (files.length > 0) {
-            Array.from(files).slice(0, 3).forEach(file => {
+            Array.from(files).forEach(file => {
                 formData.append('images', file);
             });
             formData.append('layout_type', currentLayoutType);
@@ -1251,7 +1251,7 @@ async function showUserProfile(userId) {
         
         if (userData.user) {
             document.getElementById('profile-banner-avatar').src = getAvatarUrl(userData.user.photo_url);
-            document.getElementById('profile-banner-cover').src = userData.user.cover_url ? userData.user.cover_url : 'https://via.placeholder.com/600x200?text=No+Cover+Photo';
+            document.getElementById('profile-banner-cover').src = userData.user.cover_url ? userData.user.cover_url : 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="600" height="200"%3E%3Crect width="100%25" height="100%25" fill="%23cccccc"/%3E%3C/svg%3E';
             document.getElementById('profile-banner-name').innerText = userData.user.username;
             document.getElementById('profile-banner-bio').innerText = userData.user.bio || 'No bio yet.';
             

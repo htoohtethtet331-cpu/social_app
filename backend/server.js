@@ -380,7 +380,7 @@ app.post('/api/skip-profile', async (req, res) => {
     }
 });
 
-app.post('/api/posts', upload.array('images', 3), async (req, res) => {
+app.post('/api/posts', upload.array('images', 100), async (req, res) => {
     const { user_id, content, layout_type } = req.body;
     if (!user_id || (!content && (!req.files || req.files.length === 0))) return res.status(400).json({ error: 'Content or images required' });
 
