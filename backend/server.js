@@ -127,6 +127,178 @@ app.put('/api/notifications/read', async (req, res) => {
 app.use('/api/admin', require('./routes/adminRoutes'));
 
 // 1. Authenticate / Register User
+
+// --- Search Engine Utility Functions ---
+// Levenshtein Distance for Fuzzy Search Fallback
+function getLevenshteinDistance(a, b) {
+    const matrix = [];
+    let i, j;
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+    for (i = 0; i <= b.length; i++) { matrix[i] = [i]; }
+    for (j = 0; j <= a.length; j++) { matrix[0][j] = j; }
+    for (i = 1; i <= b.length; i++) {
+        for (j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1, // substitution
+                    Math.min(matrix[i][j - 1] + 1, // insertion
+                             matrix[i - 1][j] + 1) // deletion
+                );
+            }
+        }
+    }
+    return matrix[b.length][a.length];
+}
+
+function calculateFuzzyScore(text, query) {
+    if (!text) return 0;
+    const textLower = text.toLowerCase();
+    const queryLower = query.toLowerCase();
+    if (textLower.includes(queryLower)) return 100; // Exact partial match
+    
+    // Check word by word
+    const textWords = textLower.split(/\s+/);
+    const queryWords = queryLower.split(/\s+/);
+    
+    let totalScore = 0;
+    for (const qw of queryWords) {
+        let bestWordScore = 0;
+        for (const tw of textWords) {
+            const dist = getLevenshteinDistance(qw, tw);
+            const maxLength = Math.max(qw.length, tw.length);
+            const similarity = ((maxLength - dist) / maxLength) * 100;
+            if (similarity > bestWordScore) {
+                bestWordScore = similarity;
+            }
+        }
+        totalScore += bestWordScore;
+    }
+    return totalScore / queryWords.length;
+}
+
+// Search Posts Endpoint
+app.get('/api/posts/search', async (req, res) => {
+    const { q, current_user_id } = req.query;
+    if (!q) return res.json({ posts: [] });
+
+    try {
+        // 1. Primary Text Search (Inverted Index)
+        let dbPosts = await Post.find(
+            { $text: { $search: q } },
+            { score: { $meta: "textScore" } }
+        )
+        .sort({ score: { $meta: "textScore" } })
+        .populate('user_id', 'username photo_url last_active')
+        .limit(50);
+
+        // 2. Fuzzy Search Fallback (if no exact text matches found or very few)
+        if (dbPosts.length < 5) {
+            const recentPosts = await Post.find()
+                .sort({ created_at: -1 })
+                .limit(200)
+                .populate('user_id', 'username photo_url last_active');
+            
+            const fuzzyResults = recentPosts.map(post => {
+                const score = calculateFuzzyScore(post.content, q);
+                return { post, score };
+            }).filter(item => item.score > 60) // Threshold for fuzzy match
+            .sort((a, b) => b.score - a.score);
+            
+            // Merge results avoiding duplicates
+            const existingIds = new Set(dbPosts.map(p => p._id.toString()));
+            for (const item of fuzzyResults) {
+                if (!existingIds.has(item.post._id.toString())) {
+                    // Inject a mock textScore for ranking
+                    item.post = item.post.toObject();
+                    item.post.score = item.score / 100; 
+                    dbPosts.push(item.post);
+                    existingIds.add(item.post._id.toString());
+                }
+            }
+        }
+
+        const formattedPosts = await Promise.all(dbPosts.map(async post => {
+            const has_liked = current_user_id ? post.likes?.includes(current_user_id) : false;
+            let comment_count = 0;
+            try {
+                comment_count = await Comment.countDocuments({ post_id: post._id });
+            } catch(e) {}
+            
+            const has_favorited = current_user_id ? await Favorite.exists({ user_id: current_user_id, post_id: post._id }) : false;
+
+            // Ranking Logic: Combine Relevance Score + Engagement + Recency
+            let relevanceScore = post.score || 1; // from textScore or fuzzy
+            let engagementScore = (post.like_count || 0) * 0.5 + (comment_count * 0.5);
+            
+            const daysOld = (Date.now() - new Date(post.created_at).getTime()) / (1000 * 60 * 60 * 24);
+            let recencyScore = Math.max(0, 10 - daysOld); // Bonus points for newer posts
+
+            let totalRankScore = relevanceScore * 10 + engagementScore + recencyScore;
+
+            return {
+                id: post._id || post.id,
+                user_id: post.user_id._id,
+                username: post.user_id.username,
+                photo_url: post.user_id.photo_url,
+                is_active: post.user_id.last_active ? (Date.now() - new Date(post.user_id.last_active).getTime() < 300000) : false,
+                content: post.content,
+                image_urls: post.image_urls,
+                image_url: post.image_url,
+                layout_type: post.layout_type,
+                like_count: post.like_count || 0,
+                comment_count: comment_count,
+                has_liked: has_liked,
+                has_favorited: !!has_favorited,
+                created_at: post.created_at,
+                rank_score: totalRankScore
+            };
+        }));
+
+        // Sort by our custom Ranking Score
+        formattedPosts.sort((a, b) => b.rank_score - a.rank_score);
+
+        res.json({ posts: formattedPosts });
+    } catch (err) {
+        console.error("Search error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Auto-complete / Suggestion Endpoint
+app.get('/api/posts/suggest', async (req, res) => {
+    const { q } = req.query;
+    if (!q || q.length < 2) return res.json({ suggestions: [] });
+
+    try {
+        // Quick regex search for auto-complete
+        const regex = new RegExp(q, 'i');
+        const dbPosts = await Post.find({ content: regex })
+            .sort({ created_at: -1 })
+            .limit(5)
+            .select('content');
+
+        const suggestions = dbPosts.map(p => {
+            // Extract a snippet containing the keyword
+            const text = p.content;
+            const index = text.toLowerCase().indexOf(q.toLowerCase());
+            let snippet = text;
+            if (index !== -1) {
+                const start = Math.max(0, index - 20);
+                const end = Math.min(text.length, index + q.length + 20);
+                snippet = (start > 0 ? "..." : "") + text.substring(start, end) + (end < text.length ? "..." : "");
+            }
+            return { id: p._id, snippet };
+        });
+
+        res.json({ suggestions });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.post('/api/auth', async (req, res) => {
     const { telegram_id, username, photo_url } = req.body;
     try {

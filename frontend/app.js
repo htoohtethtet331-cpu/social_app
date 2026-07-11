@@ -822,9 +822,16 @@ async function loadActiveStories() {
     } catch(err) { console.error('Failed to load active stories', err); }
 }
 
-function createPostHtml(post) {
+function createPostHtml(post, searchQuery = '') {
     const date = new Date(post.created_at).toLocaleString();
     const isActive = post.is_active;
+
+    let contentHtml = escapeHtml(post.content || '');
+    if (searchQuery) {
+        const safeQuery = escapeHtml(searchQuery).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${safeQuery})`, 'gi');
+        contentHtml = contentHtml.replace(regex, '<span class="highlight-neon">$1</span>');
+    }
 
     return `
         <div class="post-item" id="post-${post.id}">
@@ -838,7 +845,7 @@ function createPostHtml(post) {
                     <span class="post-date">${date}</span>
                 </div>
             </div>
-            <div class="post-body">${escapeHtml(post.content || '')}</div>
+            <div class="post-body">${contentHtml}</div>
             ${post.image_urls && post.image_urls.length > 0 ? `
                 <div class="preview-images-container preview-grid-${post.image_urls.length}">
                     ${post.image_urls.map((url, i) => createProgressiveImageHtml(url, `post-grid-img img-${i}`, `onclick="viewFullScreenImage(event, '${url}')"`)).join('')}
@@ -1966,5 +1973,92 @@ function viewArchivedStory(event, storyId) {
     const story = window.archivedStories.find(s => s.id === storyId);
     if (story) {
         viewFullScreenImage(event, story.media_url);
+    }
+}
+
+// --- Search Logic ---
+function toggleSearch() {
+    const searchContainer = document.getElementById('search-bar-container');
+    const searchInput = document.getElementById('search-input');
+    const suggestions = document.getElementById('search-suggestions');
+    if (searchContainer.style.display === 'none' || searchContainer.style.display === '') {
+        searchContainer.style.display = 'block';
+        searchInput.focus();
+    } else {
+        searchContainer.style.display = 'none';
+        searchInput.value = '';
+        suggestions.style.display = 'none';
+        // Reset to normal feed
+        loadPosts();
+    }
+}
+
+let searchTimeout = null;
+document.getElementById('search-input').addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+    const suggestionsContainer = document.getElementById('search-suggestions');
+    
+    if (searchTimeout) clearTimeout(searchTimeout);
+    
+    if (query.length < 2) {
+        suggestionsContainer.style.display = 'none';
+        if (query.length === 0) loadPosts(); // reset if emptied
+        return;
+    }
+
+    // Debounce API call for 300ms
+    searchTimeout = setTimeout(async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/posts/suggest?q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            
+            if (data.suggestions && data.suggestions.length > 0) {
+                suggestionsContainer.innerHTML = data.suggestions.map(s => 
+                    `<div class="suggestion-item" onclick="performSearch('${query}')">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                        ${s.snippet}
+                    </div>`
+                ).join('');
+                suggestionsContainer.style.display = 'block';
+            } else {
+                suggestionsContainer.innerHTML = `<div class="suggestion-item" style="color: var(--text-muted);">No suggestions found</div>`;
+                suggestionsContainer.style.display = 'block';
+            }
+        } catch (err) {
+            console.error("Suggest error", err);
+        }
+    }, 300);
+});
+
+document.getElementById('search-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const query = e.target.value.trim();
+        if (query) {
+            performSearch(query);
+            document.getElementById('search-suggestions').style.display = 'none';
+        }
+    }
+});
+
+async function performSearch(query) {
+    const feed = document.getElementById('posts-feed');
+    document.getElementById('search-input').value = query; // update input box if clicked from suggest
+    document.getElementById('search-suggestions').style.display = 'none';
+    
+    feed.innerHTML = '<p class="loading-text">Searching...</p>';
+    
+    try {
+        const res = await fetch(`${API_BASE_URL}/posts/search?q=${encodeURIComponent(query)}&current_user_id=${currentUser.id}`);
+        const data = await res.json();
+        
+        if (data.posts && data.posts.length > 0) {
+            feed.innerHTML = `<h3 style="padding: 10px 15px; margin: 0; color: var(--text-color);">Search Results for "${escapeHtml(query)}"</h3>` +
+                             data.posts.map(post => createPostHtml(post, query)).join('');
+        } else {
+            feed.innerHTML = `<p class="loading-text">No results found for "${escapeHtml(query)}". Try different keywords.</p>`;
+        }
+    } catch (e) {
+        feed.innerHTML = '<p class="loading-text">Error during search.</p>';
+        console.error(e);
     }
 }

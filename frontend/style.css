@@ -1847,3 +1847,30 @@ body.modal-open {
     /* Optional: padding bottom so content isn't hidden by nav */
     padding-bottom: 80px; 
 }
+
+/* --- Search Engine & Suggestions --- */
+.suggestion-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    color: var(--text-color);
+    transition: background-color 0.2s;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover {
+    background-color: var(--border-color);
+}
+
+.highlight-neon {
+    color: #fff;
+    background: linear-gradient(90deg, #ff007f, #00f0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 5px rgba(0, 240, 255, 0.5), 0 0 10px rgba(255, 0, 127, 0.5);
+    font-weight: bold;
+    padding: 0 2px;
+}

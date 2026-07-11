@@ -11,6 +11,8 @@ const postSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now }
 });
 
+postSchema.index({ content: 'text' });
+
 postSchema.virtual('id').get(function() { return this._id.toHexString(); });
 postSchema.set('toJSON', { virtuals: true });
 
