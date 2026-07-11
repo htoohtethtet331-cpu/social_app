@@ -793,7 +793,7 @@ function toggleNotificationsDrawer() {
 }
 
 async function loadAllUsers(silent = false) {
-    const container = document.getElementById('users-list-container');
+    const container = document.getElementById('explore-users-list');
     if (!silent) {
         if (!container.innerHTML.includes('user-list-item')) {
             const skeletonHtml = `
@@ -2558,7 +2558,7 @@ async function openUsersListModal(type, userId) {
         console.error("openUsersListModal: modal element not found!");
         return;
     }
-    const container = document.getElementById('users-list-container');
+    const container = modal.querySelector('#users-list-container');
     const title = document.getElementById('users-list-title');
     
     currentUsersListType = type;
@@ -2602,7 +2602,8 @@ async function fetchAndRenderUsersList(isInitial) {
     if (isFetchingUsersList || !hasMoreUsersList) return;
     isFetchingUsersList = true;
     
-    const container = document.getElementById('users-list-container');
+    const modal = document.getElementById('users-list-modal');
+    const container = modal.querySelector('#users-list-container');
     
     try {
         let url = `${API_BASE_URL}/users/${currentUsersListId}/${currentUsersListType}?current_user_id=${currentUser ? currentUser.id : ''}`;
