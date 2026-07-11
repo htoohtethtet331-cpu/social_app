@@ -857,7 +857,7 @@ async function loadAllUsers(silent = false) {
                             </div>
                             <div class="user-list-info" style="flex: 1;">
                                 <h3 class="user-list-name">${user.username}</h3>
-                                <p class="user-list-bio">${bio}</p>
+
                             </div>
                             ${followBtnHtml}
                         </div>
@@ -2665,7 +2665,7 @@ async function fetchAndRenderUsersList(isInitial) {
                     </div>
                     <div class="user-list-info" style="flex: 1;">
                         <h3 class="user-list-name">${user.username}</h3>
-                        <p class="user-list-bio">${user.bio || ''}</p>
+
                     </div>
                     ${followBtnHtml}
                 </div>
