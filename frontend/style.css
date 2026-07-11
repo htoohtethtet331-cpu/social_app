@@ -2079,6 +2079,7 @@ body.modal-open {
   max-width: 5em;
   overflow: hidden;
   background-color: transparent;
+  mix-blend-mode: multiply;
 }
 .cat::before {
   content: "";
@@ -2130,4 +2131,5 @@ body.modal-open {
 
 [data-theme="dark"] .cat {
   filter: invert(1) hue-rotate(180deg) brightness(1.2);
+  mix-blend-mode: screen;
 }
