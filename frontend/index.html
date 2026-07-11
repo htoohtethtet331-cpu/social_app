@@ -198,12 +198,12 @@
 
                             <h2 id="profile-banner-name" class="fb-profile-name">User Name</h2>
                             <div class="profile-stats-grid">
-                                <div class="stat-box">
+                                <div class="stat-box" onclick="openUsersListModal('following', currentProfileUserId)" style="cursor: pointer;">
                                     <div class="stat-number" id="profile-stats-following">0</div>
                                     <div class="stat-label">Following</div>
                                 </div>
                                 <div class="stat-divider"></div>
-                                <div class="stat-box">
+                                <div class="stat-box" onclick="openUsersListModal('followers', currentProfileUserId)" style="cursor: pointer;">
                                     <div class="stat-number" id="profile-stats-followers">0</div>
                                     <div class="stat-label">Followers</div>
                                 </div>
@@ -559,6 +559,24 @@
             </div>
             <div class="lightbox-content" id="lightbox-content">
                 <img id="full-screen-image">
+            </div>
+        </div>
+
+        <!-- Users List Modal -->
+        <div class="modal bottom-sheet-modal" id="users-list-modal" onclick="if(event.target === this) this.classList.remove('active')" style="z-index: 5000;">
+            <div class="modal-content bottom-sheet">
+                <div class="bottom-sheet-handle"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--border-color);">
+                    <h3 id="users-list-title" style="margin: 0; font-size: 1.1rem;">Users</h3>
+                    <button class="icon-btn" onclick="document.getElementById('users-list-modal').classList.remove('active')" style="background: none; border: none; cursor: pointer; color: var(--text-color);">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                            <path d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div id="users-list-container" style="overflow-y: auto; flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Users will go here -->
+                </div>
             </div>
         </div>
 

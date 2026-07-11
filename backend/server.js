@@ -880,6 +880,26 @@ app.get('/api/users/:id/follow-status', async (req, res) => {
     }
 });
 
+app.get('/api/users/:id/followers', async (req, res) => {
+    try {
+        const follows = await Follow.find({ following_id: req.params.id }).populate('follower_id', 'username photo_url bio last_active');
+        const users = follows.map(f => f.follower_id).filter(Boolean);
+        res.json({ users });
+    } catch(err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/users/:id/following', async (req, res) => {
+    try {
+        const follows = await Follow.find({ follower_id: req.params.id }).populate('following_id', 'username photo_url bio last_active');
+        const users = follows.map(f => f.following_id).filter(Boolean);
+        res.json({ users });
+    } catch(err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get('/api/users/:id/follow-map', async (req, res) => {
     try {
         const following = await Follow.find({ follower_id: req.params.id }).select('following_id');
