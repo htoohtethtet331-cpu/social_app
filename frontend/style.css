@@ -2768,3 +2768,53 @@ body.modal-open {
 .ui-switch--pristine *:before {
     transition: none !important;
 }
+
+/* --- App Loaders --- */
+.app-loader-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 2rem 0;
+}
+
+.glass-loader {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.glass-loader svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100px;
+    height: 100px;
+}
+
+.glass-loader svg circle {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 5px;
+    stroke-linecap: round;
+    animation: animate-glass-loader 2s linear infinite;
+}
+
+.glass-loader svg:nth-child(1) circle {
+    filter: blur(5px);
+    stroke: #43acff;
+}
+
+.glass-loader svg:nth-child(2) circle {
+    filter: blur(10px);
+    stroke: #43acff;
+}
+
+@keyframes animate-glass-loader {
+    0% { stroke-dasharray: 295; stroke-dashoffset: 295; }
+    50% { stroke-dasharray: 295; stroke-dashoffset: 0; }
+    100% { stroke-dasharray: 295; stroke-dashoffset: -295; }
+}
+
+body[data-ui-style="glass"] .classic-only-loader { display: none !important; }
+body:not([data-ui-style="glass"]) .glass-only-loader { display: none !important; }

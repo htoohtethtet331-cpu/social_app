@@ -1,4 +1,24 @@
 const API_BASE_URL = '/api'; 
+const APP_LOADER_HTML = `
+<div class="app-loader-wrapper">
+    <div class="classic-only-loader">
+        <div class="cat-loader-container">
+            <div class="cat">
+                <div class="cat__body"></div>
+                <div class="cat__body"></div>
+                <div class="cat__tail"></div>
+                <div class="cat__head"></div>
+            </div>
+        </div>
+    </div>
+    <div class="glass-only-loader">
+        <div class="glass-loader">
+            <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="50"></circle></svg>
+            <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="50"></circle></svg>
+            <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="50"></circle></svg>
+        </div>
+    </div>
+</div>`;
 var currentUser = null;
 var currentProfileUserId = null;
 var currentProfileUsername = null;
@@ -1012,6 +1032,7 @@ window.setUiStyle = function(style) {
     } else {
         themeLink.href = 'classic.css?v=' + Date.now();
     }
+    document.body.dataset.uiStyle = style;
     localStorage.setItem('uiStyle', style);
     
     if (uiStyleSwitch) {
@@ -1355,7 +1376,7 @@ async function openCommentsBottomSheet(postId) {
         sheet.classList.add('open');
     }, 10);
 
-    sheetCommentsList.innerHTML = '<div class="cat-loader-container"><div class="cat"><div class="cat__body"></div><div class="cat__body"></div><div class="cat__tail"></div><div class="cat__head"></div></div></div>';
+    sheetCommentsList.innerHTML = APP_LOADER_HTML;
     
     try {
         const res = await fetch(`${API_BASE_URL}/posts/${postId}/comments`);
@@ -2780,7 +2801,7 @@ async function performSearch(query) {
     document.getElementById('search-input').value = query; // update input box if clicked from suggest
     document.getElementById('search-suggestions').style.display = 'none';
     
-    feed.innerHTML = '<div class="cat-loader-container"><div class="cat"><div class="cat__body"></div><div class="cat__body"></div><div class="cat__tail"></div><div class="cat__head"></div></div></div>';
+    feed.innerHTML = APP_LOADER_HTML;
     
     try {
         const res = await fetch(`${API_BASE_URL}/posts/search?q=${encodeURIComponent(query)}&current_user_id=${currentUser.id}`);
@@ -2832,7 +2853,7 @@ async function openUsersListModal(type, userId) {
     hasMoreUsersList = true;
     
     title.innerText = type === 'followers' ? 'Followers' : 'Following';
-    container.innerHTML = '<div class="cat-loader-container"><div class="cat"><div class="cat__body"></div><div class="cat__body"></div><div class="cat__tail"></div><div class="cat__head"></div></div></div>';
+    container.innerHTML = APP_LOADER_HTML;
     
     // FORCE inline styles to bypass aggressive index.html caching on mobile
     modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
