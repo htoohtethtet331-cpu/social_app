@@ -972,16 +972,19 @@ function showPostsFeed() {
 
 // Theme Functions
 function setTheme(mode) {
-    if (mode === 'dark') {
+    const isDark = mode === 'dark';
+    if (isDark) {
         document.body.classList.add('dark-mode');
-        document.getElementById('dark-mode-btn').classList.replace('secondary-btn', 'primary-btn');
-        document.getElementById('light-mode-btn').classList.replace('primary-btn', 'secondary-btn');
         localStorage.setItem('theme', 'dark');
     } else {
         document.body.classList.remove('dark-mode');
-        document.getElementById('light-mode-btn').classList.replace('secondary-btn', 'primary-btn');
-        document.getElementById('dark-mode-btn').classList.replace('primary-btn', 'secondary-btn');
         localStorage.setItem('theme', 'light');
+    }
+    
+    // Update the switch UI if it exists
+    const themeSwitch = document.getElementById('theme-switch');
+    if (themeSwitch) {
+        themeSwitch.checked = isDark;
     }
 }
 
