@@ -1,0 +1,197 @@
+/* classic.css - Facebook Style UI */
+:root {
+    --classic-body-bg: #f0f2f5;
+    --classic-card-bg: #ffffff;
+    --classic-text: #050505;
+    --classic-border: #ccd0d5;
+    --classic-secondary: #65676b;
+}
+
+body.dark-mode {
+    --classic-body-bg: #18191a;
+    --classic-card-bg: #242526;
+    --classic-text: #e4e6eb;
+    --classic-border: #3e4042;
+    --classic-secondary: #b0b3b8;
+}
+
+body {
+    background: var(--classic-body-bg) !important;
+    color: var(--classic-text) !important;
+}
+
+/* Remove Aurora background */
+body::before {
+    display: none !important;
+}
+
+/* Main UI Containers */
+.post-item,
+.create-post-section,
+.app-header,
+.bottom-nav-bar,
+.comments-sheet,
+.profile-header,
+.settings-drawer {
+    background: var(--classic-card-bg) !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+    color: var(--classic-text) !important;
+}
+
+.post-item {
+    margin-bottom: 10px !important;
+    padding: 12px 16px !important;
+}
+
+.app-header {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    margin-bottom: 10px !important;
+}
+
+.bottom-nav-bar {
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.comments-sheet {
+    border-radius: 16px 16px 0 0 !important; /* Keep top rounded for sheet */
+}
+
+/* Fix Search Bar */
+#search-bar-container {
+    background: var(--classic-card-bg) !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+    margin-bottom: 10px !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+#search-bar-container .search-input-wrapper {
+    background: var(--classic-body-bg) !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+#search-input,
+.comment-input,
+#post-content,
+.profile-edit-input,
+input[type="text"],
+input[type="password"],
+textarea {
+    background: var(--classic-body-bg) !important;
+    color: var(--classic-text) !important;
+    border: none !important;
+    border-radius: 20px !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--classic-secondary) !important;
+}
+
+/* Text and Colors */
+.post-author-name,
+.comment-author-name,
+.glass-title,
+.settings-info h4,
+.user-name,
+.user-display-name,
+.stat-value,
+.profile-bio {
+    color: var(--classic-text) !important;
+}
+
+.post-timestamp,
+.comment-timestamp,
+.nav-btn,
+.stat-label,
+.settings-info p,
+.user-username {
+    color: var(--classic-secondary) !important;
+}
+
+.nav-btn.active {
+    color: var(--primary-color) !important;
+}
+
+/* Secondary Button */
+.secondary-btn {
+    color: var(--classic-text) !important;
+    background: var(--classic-body-bg) !important;
+    border: 1px solid var(--classic-border) !important;
+}
+
+/* Settings Card */
+.settings-card {
+    background: var(--classic-body-bg) !important;
+    border-radius: 12px;
+}
+.settings-row {
+    border-bottom: 1px solid var(--classic-border) !important;
+}
+.settings-row:last-child {
+    border-bottom: none !important;
+}
+
+/* Search Suggestions */
+#search-suggestions {
+    background: var(--classic-card-bg) !important;
+    border: 1px solid var(--classic-border) !important;
+    color: var(--classic-text) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+.suggestion-item {
+    color: var(--classic-text) !important;
+    border-bottom: 1px solid var(--classic-border) !important;
+}
+.suggestion-item:hover {
+    background: var(--classic-body-bg) !important;
+}
+
+/* Notifications */
+.notification-item {
+    background: var(--classic-card-bg) !important;
+    border: none !important;
+    border-bottom: 1px solid var(--classic-border) !important;
+    margin-bottom: 0 !important;
+    border-radius: 0 !important;
+}
+
+/* Modals */
+.modal-content,
+.dropdown-menu {
+    background: var(--classic-card-bg) !important;
+    color: var(--classic-text) !important;
+    border: 1px solid var(--classic-border) !important;
+}
+.dropdown-item {
+    color: var(--classic-text) !important;
+}
+.dropdown-item:hover {
+    background: var(--classic-body-bg) !important;
+}
+
+/* Segmented Control / Toggle */
+.theme-segment {
+    background: transparent;
+    color: var(--classic-secondary);
+}
+.theme-segment.active {
+    background: var(--classic-card-bg) !important;
+    color: var(--classic-text) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+/* Comment Item */
+.comment-item {
+    background: var(--classic-body-bg) !important;
+    border-radius: 12px !important;
+    padding: 10px 12px !important;
+    border: none !important;
+    margin-bottom: 8px !important;
+}
+.comment-text {
+    color: var(--classic-text) !important;
+}

@@ -994,22 +994,21 @@ if (savedTheme === 'dark') {
 // UI Style Logic
 window.setUiStyle = function(style) {
     const isGlass = style === 'glass';
-    const glassLink = document.getElementById('glass-theme-stylesheet');
+    let themeLink = document.getElementById('ui-style-stylesheet');
+    
+    if (!themeLink) {
+        themeLink = document.createElement('link');
+        themeLink.id = 'ui-style-stylesheet';
+        themeLink.rel = 'stylesheet';
+        document.head.appendChild(themeLink);
+    }
     
     if (isGlass) {
-        if (!glassLink) {
-            const link = document.createElement('link');
-            link.id = 'glass-theme-stylesheet';
-            link.rel = 'stylesheet';
-            link.href = 'glass.css?v=' + Date.now();
-            document.head.appendChild(link);
-        }
+        themeLink.href = 'glass.css?v=' + Date.now();
         document.getElementById('glass-ui-btn').classList.add('active');
         document.getElementById('classic-ui-btn').classList.remove('active');
     } else {
-        if (glassLink) {
-            glassLink.remove();
-        }
+        themeLink.href = 'classic.css?v=' + Date.now();
         document.getElementById('classic-ui-btn').classList.add('active');
         document.getElementById('glass-ui-btn').classList.remove('active');
     }
