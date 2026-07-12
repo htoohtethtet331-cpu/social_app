@@ -1,31 +1,31 @@
-/* classic.css - Facebook Style UI */
+/* classic.css - Old Original UI (Classic) */
+
 :root {
-    --classic-body-bg: #f0f2f5;
-    --classic-card-bg: #ffffff;
-    --classic-text: #050505;
-    --classic-border: #ccd0d5;
-    --classic-secondary: #65676b;
+    --bg-color: #ffffff; /* Restore original light bg */
+    --text-color: #000000;
+    --border-color: #e0e0e0;
+    --primary-color: #4a90e2;
+    --secondary-color: #888888;
 }
 
 body.dark-mode {
-    --classic-body-bg: #18191a;
-    --classic-card-bg: #242526;
-    --classic-text: #e4e6eb;
-    --classic-border: #3e4042;
-    --classic-secondary: #b0b3b8;
+    --bg-color: #121212;
+    --text-color: #ffffff;
+    --border-color: #333333;
+    --secondary-color: #aaaaaa;
 }
 
 body {
-    background: var(--classic-body-bg) !important;
-    color: var(--classic-text) !important;
+    background: var(--bg-color) !important;
+    color: var(--text-color) !important;
 }
 
-/* Remove Aurora background */
+/* Remove Aurora background completely */
 body::before {
     display: none !important;
 }
 
-/* Main UI Containers */
+/* Revert Containers to flat */
 .post-item,
 .create-post-section,
 .app-header,
@@ -33,44 +33,54 @@ body::before {
 .comments-sheet,
 .profile-header,
 .settings-drawer {
-    background: var(--classic-card-bg) !important;
+    background: var(--bg-color) !important;
     border: none !important;
     border-radius: 0 !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
-    color: var(--classic-text) !important;
+    box-shadow: none !important;
+    color: var(--text-color) !important;
 }
 
+/* Restore borders for old UI */
 .post-item {
-    margin-bottom: 10px !important;
-    padding: 12px 16px !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    margin-bottom: 0 !important;
+    padding: 1rem 0 !important;
+}
+.post-item:last-child {
+    border-bottom: none !important;
 }
 
 .app-header {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-    margin-bottom: 10px !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    margin-bottom: 0 !important;
 }
 
 .bottom-nav-bar {
-    box-shadow: 0 -2px 4px rgba(0,0,0,0.1) !important;
+    border-top: 1px solid var(--border-color) !important;
+    background: var(--bg-color) !important;
 }
 
 .comments-sheet {
     border-radius: 16px 16px 0 0 !important; /* Keep top rounded for sheet */
+    border-top: 1px solid var(--border-color) !important;
 }
 
-/* Fix Search Bar */
+/* Restore original search bar */
 #search-bar-container {
-    background: var(--classic-card-bg) !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
-    margin-bottom: 10px !important;
-    border: none !important;
+    background: var(--bg-color) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    margin-bottom: 0 !important;
+    box-shadow: none !important;
     border-radius: 0 !important;
 }
 
 #search-bar-container .search-input-wrapper {
-    background: var(--classic-body-bg) !important;
+    background: rgba(128, 128, 128, 0.1) !important;
+    border-radius: 8px !important;
     border: none !important;
-    box-shadow: none !important;
+}
+body.dark-mode #search-bar-container .search-input-wrapper {
+    background: rgba(255, 255, 255, 0.1) !important;
 }
 
 #search-input,
@@ -80,15 +90,14 @@ body::before {
 input[type="text"],
 input[type="password"],
 textarea {
-    background: var(--classic-body-bg) !important;
-    color: var(--classic-text) !important;
+    background: transparent !important; /* The wrapper has background */
+    color: var(--text-color) !important;
     border: none !important;
-    border-radius: 20px !important;
 }
 
 input::placeholder,
 textarea::placeholder {
-    color: var(--classic-secondary) !important;
+    color: var(--secondary-color) !important;
 }
 
 /* Text and Colors */
@@ -100,7 +109,7 @@ textarea::placeholder {
 .user-display-name,
 .stat-value,
 .profile-bio {
-    color: var(--classic-text) !important;
+    color: var(--text-color) !important;
 }
 
 .post-timestamp,
@@ -109,7 +118,7 @@ textarea::placeholder {
 .stat-label,
 .settings-info p,
 .user-username {
-    color: var(--classic-secondary) !important;
+    color: var(--secondary-color) !important;
 }
 
 .nav-btn.active {
@@ -118,18 +127,18 @@ textarea::placeholder {
 
 /* Secondary Button */
 .secondary-btn {
-    color: var(--classic-text) !important;
-    background: var(--classic-body-bg) !important;
-    border: 1px solid var(--classic-border) !important;
+    color: var(--secondary-color) !important;
+    background: transparent !important;
+    border: 1px solid var(--border-color) !important;
 }
 
 /* Settings Card */
 .settings-card {
-    background: var(--classic-body-bg) !important;
-    border-radius: 12px;
+    background: transparent !important;
+    border-radius: 0 !important;
 }
 .settings-row {
-    border-bottom: 1px solid var(--classic-border) !important;
+    border-bottom: 1px solid var(--border-color) !important;
 }
 .settings-row:last-child {
     border-bottom: none !important;
@@ -137,24 +146,24 @@ textarea::placeholder {
 
 /* Search Suggestions */
 #search-suggestions {
-    background: var(--classic-card-bg) !important;
-    border: 1px solid var(--classic-border) !important;
-    color: var(--classic-text) !important;
+    background: var(--bg-color) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 }
 .suggestion-item {
-    color: var(--classic-text) !important;
-    border-bottom: 1px solid var(--classic-border) !important;
+    color: var(--text-color) !important;
+    border-bottom: 1px solid var(--border-color) !important;
 }
 .suggestion-item:hover {
-    background: var(--classic-body-bg) !important;
+    background: rgba(128, 128, 128, 0.1) !important;
 }
 
 /* Notifications */
 .notification-item {
-    background: var(--classic-card-bg) !important;
+    background: transparent !important;
     border: none !important;
-    border-bottom: 1px solid var(--classic-border) !important;
+    border-bottom: 1px solid var(--border-color) !important;
     margin-bottom: 0 !important;
     border-radius: 0 !important;
 }
@@ -162,36 +171,40 @@ textarea::placeholder {
 /* Modals */
 .modal-content,
 .dropdown-menu {
-    background: var(--classic-card-bg) !important;
-    color: var(--classic-text) !important;
-    border: 1px solid var(--classic-border) !important;
+    background: var(--bg-color) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
 }
 .dropdown-item {
-    color: var(--classic-text) !important;
+    color: var(--text-color) !important;
 }
 .dropdown-item:hover {
-    background: var(--classic-body-bg) !important;
+    background: rgba(128, 128, 128, 0.1) !important;
 }
 
 /* Segmented Control / Toggle */
 .theme-segment {
     background: transparent;
-    color: var(--classic-secondary);
+    color: var(--secondary-color) !important;
 }
 .theme-segment.active {
-    background: var(--classic-card-bg) !important;
-    color: var(--classic-text) !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
 }
 
 /* Comment Item */
 .comment-item {
-    background: var(--classic-body-bg) !important;
-    border-radius: 12px !important;
-    padding: 10px 12px !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 10px 0 !important;
     border: none !important;
-    margin-bottom: 8px !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    margin-bottom: 0 !important;
+}
+.comment-item:last-child {
+    border-bottom: none !important;
 }
 .comment-text {
-    color: var(--classic-text) !important;
+    color: var(--text-color) !important;
 }
