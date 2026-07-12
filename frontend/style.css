@@ -1907,6 +1907,7 @@ body.modal-open {
     content: "";
     position: absolute;
     inset: 0;
+    box-sizing: border-box; /* Fix for crescent artifact */
     border-radius: 50%;
     padding: 2px; /* Ring thickness */
     background: transparent;
