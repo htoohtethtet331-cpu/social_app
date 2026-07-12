@@ -1666,9 +1666,9 @@ document.getElementById('story-upload').onchange = async (e) => {
                     title: 'Successfully uploaded',
                     subtitle: 'Your story is now live!',
                     viewText: 'View Story',
-                    onView: () => { fetchStories(); setTimeout(() => viewUserStories(currentUser.id), 500); }
+                    onView: () => { loadActiveStories(); setTimeout(() => viewUserStories(currentUser.id), 500); }
                 });
-                fetchStories();
+                loadActiveStories();
             } else {
                 hideGlassModal();
                 alert(data.error || 'Failed to add story');
