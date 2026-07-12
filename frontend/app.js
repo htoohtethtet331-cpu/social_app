@@ -227,6 +227,7 @@ function setupUI() {
             return;
         }
 
+        showGlassUploadModal('Uploading post...');
         let image_urls = [];
         if (files.length > 0) {
             for (let file of Array.from(files)) {
@@ -268,8 +269,32 @@ function setupUI() {
                 
                 // Ensure we are on home tab
                 switchTab('home');
+                
+                showGlassSuccess({
+                    title: 'Successfully uploaded',
+                    subtitle: 'Your post is now live!',
+                    viewText: 'View Your post',
+                    onView: () => {
+                        setTimeout(() => {
+                            const newPost = document.getElementById(`post-${data.post.id}`);
+                            if (newPost) newPost.scrollIntoView({behavior: 'smooth', block: 'center'});
+                        }, 300);
+                    }
+                });
+            } else {
+                hideGlassModal();
+                alert('Error: ' + data.error);
             }
-        } catch(e) { console.error(e); }
+        } catch (err) {
+            console.error(err);
+            hideGlassModal();
+            alert('Failed to connect to server');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Post';
+            }
+        }
     };
 
     // Active Now Ping
@@ -1553,6 +1578,7 @@ document.getElementById('bio-form').onsubmit = async (e) => {
 // Upload Cover Photo from Profile
 document.getElementById('cover-upload').onchange = async (e) => {
     if (e.target.files && e.target.files[0]) {
+        showGlassUploadModal('Uploading cover...');
         try {
             const coverUrl = await uploadFileToCloudinary(e.target.files[0], 'image');
             const res = await fetch(`${API_BASE_URL}/upload-cover`, {
@@ -1564,14 +1590,23 @@ document.getElementById('cover-upload').onchange = async (e) => {
             if (data.success) {
                 const bannerCover = document.getElementById('profile-banner-cover');
                 if (bannerCover) bannerCover.src = data.cover_url;
+                showGlassSuccess({
+                    title: 'Successfully uploaded',
+                    subtitle: 'Your cover photo is now live!',
+                    viewText: 'View Profile',
+                    onView: () => { switchTab('profile'); }
+                });
+            } else {
+                hideGlassModal();
             }
-        } catch(err) { console.error(err); }
+        } catch(err) { console.error(err); hideGlassModal(); }
     }
 };
 
 // Upload Avatar from Profile
 document.getElementById('avatar-upload').onchange = async (e) => {
     if (e.target.files && e.target.files[0]) {
+        showGlassUploadModal('Uploading avatar...');
         try {
             const photoUrl = await uploadFileToCloudinary(e.target.files[0], 'image');
             const res = await fetch(`${API_BASE_URL}/upload-profile`, {
@@ -1595,8 +1630,17 @@ document.getElementById('avatar-upload').onchange = async (e) => {
                 
                 currentUser.photo_url = data.photo_url;
                 localStorage.setItem('user', JSON.stringify(currentUser));
+                
+                showGlassSuccess({
+                    title: 'Successfully uploaded',
+                    subtitle: 'Your profile picture is now live!',
+                    viewText: 'View Profile',
+                    onView: () => { switchTab('profile'); }
+                });
+            } else {
+                hideGlassModal();
             }
-        } catch(err) { console.error(err); }
+        } catch(err) { console.error(err); hideGlassModal(); }
     }
 };
 
@@ -1605,6 +1649,7 @@ document.getElementById('avatar-upload').onchange = async (e) => {
 // Upload Story
 document.getElementById('story-upload').onchange = async (e) => {
     if (e.target.files && e.target.files[0]) {
+        showGlassUploadModal('Uploading story...');
         try {
             const file = e.target.files[0];
             const isVideo = file.type.startsWith('video/');
@@ -1617,11 +1662,18 @@ document.getElementById('story-upload').onchange = async (e) => {
             });
             const data = await res.json();
             if (data.success) {
-                alert('Story added successfully!');
+                showGlassSuccess({
+                    title: 'Successfully uploaded',
+                    subtitle: 'Your story is now live!',
+                    viewText: 'View Story',
+                    onView: () => { fetchStories(); setTimeout(() => viewUserStories(currentUser.id), 500); }
+                });
+                fetchStories();
             } else {
+                hideGlassModal();
                 alert(data.error || 'Failed to add story');
             }
-        } catch(err) { console.error(err); alert('Error uploading story'); }
+        } catch(err) { console.error(err); hideGlassModal(); alert('Error uploading story'); }
     }
 };
 
@@ -2773,6 +2825,74 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// --- Glass UI Modal Logic ---
+function showGlassUploadModal(title = "Uploading...") {
+    const modal = document.getElementById('glass-upload-modal');
+    if (!modal) return;
+    const uploadingState = document.getElementById('glass-uploading-state');
+    const successState = document.getElementById('glass-success-state');
+    const progressBar = document.getElementById('glass-progress-bar');
+    const progressText = document.getElementById('glass-progress-text');
+    
+    uploadingState.querySelector('.glass-title').innerText = title;
+    
+    progressBar.style.width = '0%';
+    progressText.innerText = '0%';
+    uploadingState.style.display = 'block';
+    successState.style.display = 'none';
+    modal.classList.add('active');
+}
+
+function updateGlassProgress(percent) {
+    const progressBar = document.getElementById('glass-progress-bar');
+    const progressText = document.getElementById('glass-progress-text');
+    if (progressBar && progressText) {
+        progressBar.style.width = percent + '%';
+        progressText.innerText = percent + '%';
+    }
+}
+
+function showGlassSuccess(options = {}) {
+    const uploadingState = document.getElementById('glass-uploading-state');
+    const successState = document.getElementById('glass-success-state');
+    if (!uploadingState || !successState) return;
+    
+    const titleEl = successState.querySelector('.glass-title');
+    const subtitleEl = document.getElementById('glass-success-subtitle');
+    const viewBtn = document.getElementById('glass-view-btn');
+    const doneBtn = document.getElementById('glass-done-btn');
+    
+    titleEl.innerText = options.title || "Successfully uploaded";
+    subtitleEl.innerHTML = (options.subtitle || "Your post is now live!") + ' <span class="success-checkmark">✔</span>';
+    
+    if (options.viewText && options.onView) {
+        viewBtn.innerText = options.viewText + ' ➔';
+        viewBtn.style.display = 'inline-block';
+        viewBtn.onclick = () => {
+            hideGlassModal();
+            options.onView();
+        };
+    } else {
+        viewBtn.style.display = 'none';
+    }
+    
+    doneBtn.onclick = (e) => {
+        e.preventDefault();
+        hideGlassModal();
+        if (options.onDone) options.onDone();
+    };
+    
+    uploadingState.style.display = 'none';
+    successState.style.display = 'block';
+}
+
+function hideGlassModal() {
+    const modal = document.getElementById('glass-upload-modal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
+
 // --- Direct Cloudinary Upload Utility ---
 async function uploadFileToCloudinary(file, resourceType = "image") {
     return new Promise(async (resolve, reject) => {
@@ -2797,26 +2917,11 @@ async function uploadFileToCloudinary(file, resourceType = "image") {
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
                     const percent = Math.round((e.loaded / e.total) * 100);
-                    const container = document.getElementById("global-progress-container");
-                    const bar = document.getElementById("global-progress-bar");
-                    if (container && bar) {
-                        container.classList.add("active");
-                        bar.style.width = percent + "%";
-                    }
+                    updateGlassProgress(percent);
                 }
             };
             
             xhr.onload = () => {
-                const container = document.getElementById("global-progress-container");
-                const bar = document.getElementById("global-progress-bar");
-                if (container && bar) {
-                    bar.style.width = "100%";
-                    setTimeout(() => {
-                        container.classList.remove("active");
-                        bar.style.width = "0%";
-                    }, 500);
-                }
-                
                 if (xhr.status === 200) {
                     const response = JSON.parse(xhr.responseText);
                     resolve(response.secure_url);

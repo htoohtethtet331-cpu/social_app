@@ -7,7 +7,7 @@
     <title>Telegram Web App</title>
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css?v=53">
+    <link rel="stylesheet" href="style.css?v=54">
     <script>
         const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2RkZCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzkiIHI9IjE4IiBmaWxsPSIjOTk5Ii8+PHBhdGggZD0iTTIyLDgwIGEzMCwyMCAwIDAsMSw1NiwwIHoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=';
         window.handleImageError = function (img) {
@@ -18,8 +18,33 @@
 </head>
 
 <body>
-    <div id="global-progress-container">
-        <div id="global-progress-bar"></div>
+    <!-- Glassmorphism Upload UI Modal -->
+    <div id="glass-upload-modal" class="glass-modal-overlay" style="display: none;">
+        <div class="glass-modal-content">
+            <!-- Uploading State -->
+            <div id="glass-uploading-state">
+                <div class="glass-spinner"></div>
+                <h2 class="glass-title">Uploading post...</h2>
+                <div class="glass-progress-container">
+                    <div id="glass-progress-bar" class="glass-progress-fill"></div>
+                    <span id="glass-progress-text">0%</span>
+                </div>
+                <p class="glass-subtitle">This may take a moment.<br>Please keep the app open.</p>
+            </div>
+            
+            <!-- Success State -->
+            <div id="glass-success-state" style="display: none;">
+                <div class="glass-success-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <h2 class="glass-title">Successfully uploaded</h2>
+                <p id="glass-success-subtitle" class="glass-subtitle">Your post is now live! <span class="success-checkmark">✔</span></p>
+                <button id="glass-view-btn" class="glass-btn-primary">View Your post ➔</button>
+                <div style="margin-top: 15px;">
+                    <a href="#" id="glass-done-btn" class="glass-btn-text">Done</a>
+                </div>
+            </div>
+        </div>
     </div>
     
     <div class="app-container" id="app-container">
@@ -677,7 +702,7 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=64"></script>
+    <script src="app.js?v=65"></script>
 </body>
 
 </html>
