@@ -11,6 +11,7 @@ body::before {
         radial-gradient(circle at 80% 20%, rgba(255, 105, 180, 0.15), transparent 50%),
         radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.15), transparent 50%);
     animation: aurora 20s linear infinite alternate;
+
     z-index: -1;
 }
 
@@ -22,13 +23,21 @@ body.dark-mode::before {
 }
 
 @keyframes aurora {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(2);
+    }
 
     100% {
-        transform: rotate(360deg);
+        transform: scale(1);
     }
+
+
+
+
 }
 
 
@@ -199,7 +208,14 @@ textarea::placeholder {
 }
 
 /* Make avatar not stick to border */
-.avatar-wrapper, .avatar { margin-right: 12px !important; } .avatar-wrapper .avatar { margin-right: 0 !important; }
+.avatar-wrapper,
+.avatar {
+    margin-right: 12px !important;
+}
+
+.avatar-wrapper .avatar {
+    margin-right: 0 !important;
+}
 
 /* Thicker glass for notifications */
 .notification-item {
@@ -292,8 +308,13 @@ body.dark-mode {
     color: var(--text-color) !important;
 }
 
-.comment-item { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.comment-item {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
 \n
+
 /* --- Search Bar Glass UI --- */
 #search-bar-container {
     background: var(--glass-bg) !important;
@@ -333,12 +354,15 @@ body.dark-mode {
     cursor: pointer;
     color: var(--text-color);
 }
+
 .suggestion-item:last-child {
     border-bottom: none;
 }
+
 .suggestion-item:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+
 [data-theme='dark'] .suggestion-item:hover {
     background: rgba(255, 255, 255, 0.05);
 }

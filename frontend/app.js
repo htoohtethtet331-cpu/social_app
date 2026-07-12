@@ -998,6 +998,7 @@ if (savedTheme === 'dark') {
 window.setUiStyle = function(style) {
     const isGlass = style === 'glass';
     let themeLink = document.getElementById('ui-style-stylesheet');
+    const uiStyleSwitch = document.getElementById('ui-style-switch');
     
     if (!themeLink) {
         themeLink = document.createElement('link');
@@ -1008,14 +1009,26 @@ window.setUiStyle = function(style) {
     
     if (isGlass) {
         themeLink.href = 'glass.css?v=' + Date.now();
-        document.getElementById('glass-ui-btn').classList.add('active');
-        document.getElementById('classic-ui-btn').classList.remove('active');
     } else {
         themeLink.href = 'classic.css?v=' + Date.now();
-        document.getElementById('classic-ui-btn').classList.add('active');
-        document.getElementById('glass-ui-btn').classList.remove('active');
     }
     localStorage.setItem('uiStyle', style);
+    
+    if (uiStyleSwitch) {
+        // Prevent transitions on initial load
+        if (uiStyleSwitch.dataset.pristine !== 'false') {
+            uiStyleSwitch.parentElement.classList.add('ui-switch--pristine');
+        }
+        uiStyleSwitch.checked = isGlass;
+        
+        // Remove pristine class after small delay so future changes animate
+        setTimeout(() => {
+            if (uiStyleSwitch && uiStyleSwitch.parentElement) {
+                uiStyleSwitch.parentElement.classList.remove('ui-switch--pristine');
+                uiStyleSwitch.dataset.pristine = 'false';
+            }
+        }, 50);
+    }
 }
 
 // Initialize UI Style

@@ -1,7 +1,8 @@
 /* classic.css - Old Original UI (Classic) */
 
 :root {
-    --bg-color: #ffffff; /* Restore original light bg */
+    --bg-color: #ffffff;
+    /* Restore original light bg */
     --text-color: #000000;
     --border-color: #e0e0e0;
     --primary-color: #4a90e2;
@@ -21,7 +22,9 @@ body {
 }
 
 /* Remove Aurora background completely */
-body::before {
+fore {
+    height: 600px;
+    width: 600px;
     display: none !important;
 }
 
@@ -46,6 +49,7 @@ body::before {
     margin-bottom: 0 !important;
     padding: 1rem 0 !important;
 }
+
 .post-item:last-child {
     border-bottom: none !important;
 }
@@ -61,7 +65,8 @@ body::before {
 }
 
 .comments-sheet {
-    border-radius: 16px 16px 0 0 !important; /* Keep top rounded for sheet */
+    border-radius: 16px 16px 0 0 !important;
+    /* Keep top rounded for sheet */
     border-top: 1px solid var(--border-color) !important;
 }
 
@@ -79,6 +84,7 @@ body::before {
     border-radius: 8px !important;
     border: none !important;
 }
+
 body.dark-mode #search-bar-container .search-input-wrapper {
     background: rgba(255, 255, 255, 0.1) !important;
 }
@@ -90,7 +96,8 @@ body.dark-mode #search-bar-container .search-input-wrapper {
 input[type="text"],
 input[type="password"],
 textarea {
-    background: transparent !important; /* The wrapper has background */
+    background: transparent !important;
+    /* The wrapper has background */
     color: var(--text-color) !important;
     border: none !important;
 }
@@ -137,9 +144,11 @@ textarea::placeholder {
     background: transparent !important;
     border-radius: 0 !important;
 }
+
 .settings-row {
     border-bottom: 1px solid var(--border-color) !important;
 }
+
 .settings-row:last-child {
     border-bottom: none !important;
 }
@@ -149,12 +158,14 @@ textarea::placeholder {
     background: var(--bg-color) !important;
     border: 1px solid var(--border-color) !important;
     color: var(--text-color) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }
+
 .suggestion-item {
     color: var(--text-color) !important;
     border-bottom: 1px solid var(--border-color) !important;
 }
+
 .suggestion-item:hover {
     background: rgba(128, 128, 128, 0.1) !important;
 }
@@ -175,9 +186,11 @@ textarea::placeholder {
     color: var(--text-color) !important;
     border: 1px solid var(--border-color) !important;
 }
+
 .dropdown-item {
     color: var(--text-color) !important;
 }
+
 .dropdown-item:hover {
     background: rgba(128, 128, 128, 0.1) !important;
 }
@@ -187,6 +200,7 @@ textarea::placeholder {
     background: transparent;
     color: var(--secondary-color) !important;
 }
+
 .theme-segment.active {
     background: var(--primary-color) !important;
     color: #ffffff !important;
@@ -202,9 +216,11 @@ textarea::placeholder {
     border-bottom: 1px solid var(--border-color) !important;
     margin-bottom: 0 !important;
 }
+
 .comment-item:last-child {
     border-bottom: none !important;
 }
+
 .comment-text {
     color: var(--text-color) !important;
 }

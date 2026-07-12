@@ -2,7 +2,8 @@
 
 :root {
     --bg-color: transparent;
-    --text-color: #333333; /* Light Mode Text */
+    --text-color: #333333;
+    /* Light Mode Text */
     --border-color: rgba(0, 0, 0, 0.1);
     --primary-color: #4a90e2;
     --secondary-color: rgba(0, 0, 0, 0.6);
@@ -2399,7 +2400,8 @@ body.modal-open {
     --switch-trans-timing-in: cubic-bezier(0.76, 0.05, 0.86, 0.06);
     --switch-trans-timing-out: cubic-bezier(0.05, 0.76, 0.06, 0.86);
     position: relative;
-    font-size: 20px; /* Made it slightly bigger to match UI */
+    font-size: 20px;
+    /* Made it slightly bigger to match UI */
     display: inline-block;
 }
 
@@ -2533,4 +2535,235 @@ body.modal-open {
     position: absolute;
     width: 1px;
     height: 1px;
+}\n
+/* --- UI Style Switch (themeSwitch.html) --- */
+.ui-switch {
+    --ui-switch-hue: 223;
+    --ui-switch-trans-dur: 0.4s;
+    --ui-switch-trans-timing: cubic-bezier(0.83, 0, 0.17, 1);
+    font-size: 20px; /* Adjust size to fit in settings */
+    display: inline-block;
+    position: relative;
+    border-radius: 0.75em;
+    -webkit-tap-highlight-color: transparent;
+    margin: 0;
+}
+
+.ui-switch__input,
+.ui-switch__scene {
+    display: block;
+    position: relative;
+}
+
+.ui-switch__input {
+    border-radius: 0.75em;
+    -webkit-tap-highlight-color: transparent;
+    background-image: linear-gradient(hsl(213, 90%, 60%), hsl(193, 70%, 60%));
+    box-shadow: 0 0 0 0.125em hsla(var(--ui-switch-hue), 90%, 50%, 0);
+    cursor: pointer;
+    outline: transparent;
+    width: 3em;
+    height: 1.5em;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: box-shadow 0.15s linear;
+    margin: 0;
+    font-size: inherit;
+}
+
+.ui-switch__input:focus-visible {
+    box-shadow: 0 0 0 0.125em hsla(var(--ui-switch-hue), 90%, 50%, 1);
+}
+
+.ui-switch__input:before {
+    background-color: hsl(3, 90%, 50%);
+    background-image: linear-gradient(hsla(253, 90%, 50%, 1), hsla(253, 90%, 50%, 0));
+    border-radius: inherit;
+    content: "";
+    display: block;
+    opacity: 0;
+    position: absolute;
+    width: inherit;
+    height: inherit;
+    top: 0;
+    left: 0;
+    transition:
+        background-color var(--ui-switch-trans-dur) var(--ui-switch-trans-timing),
+        opacity var(--ui-switch-trans-dur) var(--ui-switch-trans-timing);
+}
+
+.ui-switch__cloud,
+.ui-switch__handle,
+.ui-switch__handle-side,
+.ui-switch__handle-side circle,
+.ui-switch__moon-hole,
+.ui-switch__star,
+.ui-switch__star use,
+.ui-switch__stars {
+    transition:
+        opacity var(--ui-switch-trans-dur) var(--ui-switch-trans-timing),
+        transform var(--ui-switch-trans-dur) var(--ui-switch-trans-timing);
+}
+
+.ui-switch__cloud {
+    transform: translate(34px, 9px);
+    transform-origin: 4.5px 4px;
+}
+
+.ui-switch__cloud:nth-child(2) {
+    transform: translate(24px, 13px) scale(0.8);
+    transition-delay: 0.2s;
+}
+
+.ui-switch__cloud:nth-child(3) {
+    transform: translate(24px, 5px) scale(0.6);
+    transition-delay: 0.1s;
+}
+
+.ui-switch__handle {
+    transform: translate(12px, 12px);
+}
+
+.ui-switch__moon-hole {
+    transform: translate(16px, 0);
+}
+
+.ui-switch__scene {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+}
+
+.ui-switch__star,
+.ui-switch__star use {
+    transform-origin: 2px 2px;
+}
+
+.ui-switch__star {
+    transform: translate(28px, 14px) scale(0) rotate(20deg);
+}
+
+.ui-switch__star use {
+    transform: scale(0);
+}
+
+.ui-switch__star:nth-child(2) {
+    transform: translate(21px, 13px) scale(0) rotate(-20deg);
+}
+
+.ui-switch__star:nth-child(3) {
+    transform: translate(17px, 10px) scale(0) rotate(20deg);
+}
+
+.ui-switch__star:nth-child(4) {
+    transform: translate(24px, 6px) scale(0) rotate(-20deg);
+}
+
+.ui-switch__star:nth-child(5) {
+    transform: translate(31px, 5px) scale(0) rotate(20deg);
+}
+
+.ui-switch__stars {
+    opacity: 0;
+}
+
+.ui-switch__text {
+    overflow: hidden;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+}
+
+.ui-switch__input:checked:before {
+    background-color: hsl(223, 90%, 60%);
+    opacity: 1;
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__cloud {
+    opacity: 0;
+    transform: translate(34px, 24px);
+    transition-duration: 0.25s, var(--ui-switch-trans-dur);
+    transition-delay: 0s;
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__cloud:nth-child(2) {
+    transform: translate(24px, 24px) scale(0.8);
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__cloud:nth-child(3) {
+    transform: translate(24px, 24px) scale(0.6);
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__handle {
+    transform: translate(36px, 12px);
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__handle-side:first-child circle:nth-child(2) {
+    transform: scale(0.75);
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__handle-side:nth-child(2),
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__stars {
+    opacity: 1;
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__moon-hole {
+    transform: translate(0, 0);
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star {
+    transform: translate(18px, 14px) scale(1) rotate(-20deg);
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star use {
+    transform: scale(1);
+    transition:
+        opacity var(--ui-switch-trans-dur) var(--ui-switch-trans-timing),
+        transform 0.5s cubic-bezier(0.65, 0, 0.35, 2);
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(2) {
+    transform: translate(11px, 13px) scale(0.8) rotate(20deg);
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(2),
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(2) use {
+    transition-delay: 0.2s;
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(3) {
+    transform: translate(7px, 10px) scale(0.6) rotate(-20deg);
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(3),
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(3) use {
+    transition-delay: 0.05s;
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(4) {
+    transform: translate(14px, 6px) scale(0.6) rotate(20deg);
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(4),
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(4) use {
+    transition-delay: 0.15s;
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(5) {
+    transform: translate(21px, 5px) scale(0.4) rotate(-20deg);
+}
+
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(5),
+.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(5) use {
+    transition-delay: 0.1s;
+}
+
+/* Pristine state */
+.ui-switch--pristine,
+.ui-switch--pristine *,
+.ui-switch--pristine *:before {
+    transition: none !important;
 }
