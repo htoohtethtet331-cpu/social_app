@@ -2570,9 +2570,7 @@ textarea::placeholder {
 }
 
 /* Make avatar not stick to border */
-.avatar {
-    margin-right: 12px !important;
-}
+.avatar-wrapper, .avatar { margin-right: 12px !important; } .avatar-wrapper .avatar { margin-right: 0 !important; }
 
 /* Thicker glass for notifications */
 .notification-item {
