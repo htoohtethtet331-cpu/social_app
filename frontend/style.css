@@ -2826,3 +2826,82 @@ body.modal-open {
 
 body[data-ui-style="glass"] .classic-only-loader { display: none !important; }
 body:not([data-ui-style="glass"]) .glass-only-loader { display: none !important; }
+
+/* --- Stories Bar --- */
+.stories-bar {
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    background: transparent;
+}
+
+.stories-bar-header {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+    color: var(--text-color);
+}
+
+.stories-scroll-area {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 5px;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.stories-scroll-area::-webkit-scrollbar {
+    display: none;
+}
+
+.story-bar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    width: 68px;
+    flex-shrink: 0;
+}
+
+.story-bar-item .story-ring-wrapper {
+    width: 64px;
+    height: 64px;
+    padding: 3px;
+    margin-bottom: 5px;
+    position: relative;
+}
+
+.story-bar-item .story-ring-wrapper .avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid var(--card-bg);
+}
+
+.story-bar-item .add-story-icon {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: #43acff;
+    color: #fff;
+    border: 2px solid var(--card-bg);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.story-bar-username {
+    font-size: 0.75rem;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    text-align: center;
+}

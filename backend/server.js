@@ -6,6 +6,7 @@ const cloudinary = require('cloudinary').v2;
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cron = require('node-cron');
 
 // Models
 const User = require('./models/User');
@@ -33,6 +34,42 @@ const io = new Server(server, {
 app.use((req, res, next) => {
     req.io = io;
     next();
+});
+
+// --- CRON JOBS ---
+// Run every hour to clean up expired stories
+cron.schedule('0 * * * *', async () => {
+    try {
+        console.log('Running cron job to clean up expired stories...');
+        const expiredStories = await Story.find({ expires_at: { $lt: new Date() } });
+        
+        for (const story of expiredStories) {
+            // If it has a cloudinary media URL, try to delete it
+            if (story.media_url && story.media_url.includes('cloudinary')) {
+                try {
+                    // Extract public_id from Cloudinary URL (assumes format: .../upload/v1234/folder/filename.ext)
+                    const urlParts = story.media_url.split('/');
+                    const fileWithExt = urlParts[urlParts.length - 1];
+                    const filename = fileWithExt.split('.')[0];
+                    // Folder is usually the part before filename in our uploadService (unichat_uploads)
+                    const folder = urlParts[urlParts.length - 2];
+                    const public_id = `${folder}/${filename}`;
+                    
+                    if (process.env.CLOUDINARY_CLOUD_NAME) {
+                        await cloudinary.uploader.destroy(public_id, { resource_type: story.media_type === 'video' ? 'video' : 'image' });
+                    }
+                } catch(err) {
+                    console.error(`Failed to delete Cloudinary media for story ${story._id}:`, err);
+                }
+            }
+            await Story.findByIdAndDelete(story._id);
+        }
+        if (expiredStories.length > 0) {
+            console.log(`Cleaned up ${expiredStories.length} expired stories.`);
+        }
+    } catch(err) {
+        console.error('Error in story cleanup cron job:', err);
+    }
 });
 
 const PORT = process.env.PORT || 3000;
@@ -1193,8 +1230,15 @@ app.get('/api/stories', async (req, res) => {
                 if (isUnseen) grouped[uid].has_unseen = true;
             }
         });
+        const result = Object.values(grouped);
         
-        res.json({ users_with_stories: Object.values(grouped), raw_grouped: grouped });
+        // Sort: Unseen stories first
+        result.sort((a, b) => {
+            if (a.has_unseen === b.has_unseen) return 0;
+            return a.has_unseen ? -1 : 1;
+        });
+        
+        res.json({ users_with_stories: result, raw_grouped: grouped });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

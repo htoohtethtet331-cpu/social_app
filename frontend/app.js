@@ -1157,8 +1157,45 @@ async function loadActiveStories() {
         const data = await res.json();
         if (data.raw_grouped) {
             window.activeStoryUsers = data.raw_grouped;
+            renderStoriesBar(data.users_with_stories || []);
         }
     } catch(err) { console.error('Failed to load active stories', err); }
+}
+
+function renderStoriesBar(usersWithStories) {
+    const container = document.getElementById('stories-bar-container');
+    const scrollArea = document.getElementById('stories-scroll-area');
+    if (!container || !scrollArea) return;
+    
+    container.style.display = 'block';
+    
+    let html = `
+        <div class="story-bar-item" onclick="document.getElementById('story-upload').click()">
+            <div class="story-ring-wrapper none">
+                <img src="${currentUser.photo_url || ''}" class="avatar" onerror="handleImageError(this)">
+                <div class="add-story-icon">+</div>
+            </div>
+            <span class="story-bar-username">သင့်ထည့်ရန်</span>
+        </div>
+    `;
+    
+    usersWithStories.forEach(u => {
+        const ringClass = u.has_unseen ? 'unseen' : 'seen';
+        html += `
+            <div class="story-bar-item" onclick="viewUserStories('${u.id}')">
+                <div class="story-ring-wrapper ${ringClass}">
+                    <img src="${u.photo_url || ''}" class="avatar" onerror="handleImageError(this)">
+                </div>
+                <span class="story-bar-username">${escapeHtml(u.username)}</span>
+            </div>
+        `;
+    });
+    
+    scrollArea.innerHTML = html;
+    
+    // Prevent app swipe when scrolling stories horizontally
+    scrollArea.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+    scrollArea.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
 }
 
 function createPostHtml(post, searchQuery = '', isMinimized = false) {

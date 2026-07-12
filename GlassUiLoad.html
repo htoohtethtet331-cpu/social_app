@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: #001424;
+        width: 100%;
+    }
+
+    .loader {
+        position: relative;
+        width: 200px;
+        height: 200px;
+    }
+
+    .loader svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .loader svg circle {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 10px;
+        stroke-linecap: round;
+        animation: animate 2s linear infinite;
+    }
+
+    .loader svg:nth-child(1) circle {
+        filter: blur(10px);
+        stroke: #43acff;
+    }
+
+    .loader svg:nth-child(2) circle {
+        filter: blur(20px);
+        stroke: #43acff;
+    }
+
+    @keyframes animate {
+        0% {
+            stroke-dasharray: 295;
+            stroke-dashoffset: 295;
+        }
+
+        50% {
+            stroke-dasharray: 295;
+            stroke-dashoffset: 0;
+        }
+
+        100% {
+            stroke-dasharray: 295;
+            stroke-dashoffset: -295;
+        }
+    }
+</style>
+
+<body>
+    <div class="loader">
+        <svg viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="50"></circle>
+        </svg>
+        <svg viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="50"></circle>
+        </svg>
+        <svg viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="50"></circle>
+        </svg>
+    </div>
+</body>
+
+</html>
