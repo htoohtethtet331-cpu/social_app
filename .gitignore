@@ -3,3 +3,4 @@ uploads/
 .env
 database.db
 .DS_Store
+cool-citadel-*.json

@@ -2464,3 +2464,34 @@ textarea::placeholder {
     border-radius: 16px !important;
     color: #fff !important;
 }
+
+
+/* --- GLASS UI FIXES --- */
+.post-item, .notification-item, .comment-item {
+    padding: 15px !important;
+}
+
+.post-header, .notification-content, .comment-content {
+    padding: 0 !important;
+}
+
+/* Make avatar not stick to border */
+.avatar {
+    margin-right: 12px !important;
+}
+
+/* Thicker glass for notifications */
+.notification-item {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(25px) !important;
+    -webkit-backdrop-filter: blur(25px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Ensure Dark Mode doesn't hide the beautiful Aurora background */
+body.dark-mode {
+    background-color: transparent !important;
+}
+.app-container {
+    background-color: transparent !important;
+}
