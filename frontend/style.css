@@ -2771,11 +2771,19 @@ body.modal-open {
 
 /* --- App Loaders --- */
 .app-loader-wrapper {
+    width: 100%;
+    padding: 2rem 0;
+}
+
+.classic-only-loader {
+    width: 100%;
+}
+
+.glass-only-loader {
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
-    padding: 2rem 0;
 }
 
 .glass-loader {
