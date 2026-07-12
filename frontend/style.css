@@ -2433,6 +2433,7 @@ body.modal-open {
         0.125em 0.125em 0.25em hsla(var(--switch-hue), 90%, 10%, 0.2);
     outline: transparent;
     position: relative;
+    font-size: inherit;
     width: 3em;
     height: 1.5em;
     -webkit-appearance: none;
