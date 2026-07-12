@@ -1686,14 +1686,14 @@ async function showUserProfile(userId) {
         const postsData = await postsRes.json();
 
         // Fetch User Highlights
-        const hlRes = await fetch(`${API_BASE_URL}/users/${userId}/stories?viewer_id=${currentUser.id}`);
+        const hlRes = await fetch(`${API_BASE_URL}/highlights/${userId}`);
         const hlData = await hlRes.json();
         
-        
-        if (hlData.stories && hlData.stories.length > 0) {
-            hlContainer.innerHTML = hlData.stories.map((story, i) => `
-                <div class="highlight-item" onclick="viewUserStories('${userId}')">
-                    <img src="${story.media_url}" class="highlight-circle">
+        if (hlData.highlights && hlData.highlights.length > 0) {
+            hlContainer.innerHTML = hlData.highlights.map(hl => `
+                <div class="highlight-item" onclick="viewHighlight('${hl.id}')" style="cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+                    <img src="${hl.cover_image_url}" class="highlight-circle" style="width:70px; height:70px; border-radius:50%; object-fit:cover; border:2px solid var(--border-color); padding:2px;">
+                    <span style="font-size:0.7rem; color:var(--text-color); margin-top:5px; max-width:70px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${escapeHtml(hl.title)}</span>
                 </div>
             `).join('');
             hlContainer.style.display = 'flex';
@@ -1899,6 +1899,34 @@ async function viewUserStories(userId) {
             showUserProfile(userId);
         }
     } catch(e) { console.error("Error fetching stories", e); }
+}
+
+async function viewHighlight(highlightId) {
+    try {
+        const res = await fetch(`${API_BASE_URL}/highlights/view/${highlightId}`);
+        const data = await res.json();
+        
+        if (data.stories && data.stories.length > 0) {
+            currentStories = data.stories;
+            currentStoryIndex = 0;
+            
+            // For highlight, we use the highlight title as username, and cover as avatar
+            document.getElementById('story-avatar').src = data.highlight.cover_image_url || getAvatarUrl('default');
+            document.getElementById('story-username').innerText = data.highlight.title;
+            document.getElementById('story-avatar').onclick = null;
+            document.getElementById('story-username').onclick = null;
+            
+            document.getElementById('story-viewer-modal').style.display = 'flex';
+            
+            renderStoryProgress();
+            setupStoryTouchEvents();
+            playStory();
+        } else {
+            showGlassError("This highlight is empty.");
+        }
+    } catch(e) {
+        showGlassError("Error fetching highlight");
+    }
 }
 
 let isStoryPaused = false;
@@ -2727,11 +2755,14 @@ async function loadFavorites() {
     }
 }
 
+let selectedHighlightStories = [];
+
 async function viewStoryArchive() {
     const modal = document.getElementById('archive-modal');
     const feed = document.getElementById('archive-feed');
     feed.innerHTML = '<p class="text-center text-muted" style="grid-column: span 3; padding: 20px;">Loading archive...</p>';
     modal.classList.add('active');
+    selectedHighlightStories = [];
     
     try {
         const res = await fetch(`${API_BASE_URL}/stories/archive?user_id=${currentUser.id}`);
@@ -2743,8 +2774,9 @@ async function viewStoryArchive() {
                     ? `<video src="${story.media_url}" style="width:100%; height:120px; object-fit:cover;"></video>`
                     : `<img src="${story.media_url}" style="width:100%; height:120px; object-fit:cover;">`;
                 return `
-                <div style="position:relative; cursor:pointer;" onclick="viewArchivedStory(event, '${story.id}')">
+                <div style="position:relative; cursor:pointer;" class="archive-story-item" onclick="toggleHighlightSelection(this, '${story.id}')">
                     ${mediaHtml}
+                    <div class="selection-indicator" style="position:absolute; top:5px; right:5px; width:20px; height:20px; border-radius:50%; border:2px solid white; background:rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center;"></div>
                     <div style="position:absolute; bottom:5px; right:5px; background:rgba(0,0,0,0.5); padding:2px 5px; border-radius:10px; font-size:0.7rem; color:white;">
                         ${new Date(story.created_at).toLocaleDateString()}
                     </div>
@@ -2757,6 +2789,62 @@ async function viewStoryArchive() {
         }
     } catch(e) {
         feed.innerHTML = '<p class="text-center text-muted" style="grid-column: span 3; padding: 20px;">Error loading archive</p>';
+    }
+}
+
+function toggleHighlightSelection(element, storyId) {
+    const idx = selectedHighlightStories.indexOf(storyId);
+    const indicator = element.querySelector('.selection-indicator');
+    if (idx > -1) {
+        selectedHighlightStories.splice(idx, 1);
+        indicator.innerHTML = '';
+        indicator.style.background = 'rgba(0,0,0,0.3)';
+        indicator.style.borderColor = 'white';
+    } else {
+        selectedHighlightStories.push(storyId);
+        indicator.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="white"><path d="M9 16.2l-4.2-4.2-1.4 1.4 5.6 5.6 12-12-1.4-1.4z"/></svg>';
+        indicator.style.background = 'var(--primary-color)';
+        indicator.style.borderColor = 'var(--primary-color)';
+    }
+}
+
+function proceedToHighlightTitle() {
+    if (selectedHighlightStories.length === 0) {
+        showGlassError('Please select at least one story for the highlight.');
+        return;
+    }
+    document.getElementById('highlight-title-input').value = 'Highlight';
+    document.getElementById('highlight-title-modal').classList.add('active');
+}
+
+async function createHighlight() {
+    const title = document.getElementById('highlight-title-input').value.trim();
+    if (!title) return;
+    
+    document.getElementById('highlight-title-modal').classList.remove('active');
+    document.getElementById('archive-modal').classList.remove('active');
+    
+    try {
+        const res = await fetch(`${API_BASE_URL}/highlights`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: currentUser.id,
+                title: title,
+                story_ids: selectedHighlightStories
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showGlassSuccess({ title: 'Highlight created!', subtitle: 'Your highlight has been added to your profile.' });
+            if (currentProfileUserId === currentUser.id) {
+                showUserProfile(currentUser.id);
+            }
+        } else {
+            showGlassError(data.error || 'Failed to create highlight.');
+        }
+    } catch(err) {
+        showGlassError('An error occurred while creating highlight.');
     }
 }
 

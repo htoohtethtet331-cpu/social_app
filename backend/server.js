@@ -18,6 +18,7 @@ const StoryLike = require('./models/StoryLike');
 const Favorite = require('./models/Favorite');
 const Notification = require('./models/Notification');
 const Follow = require('./models/Follow');
+const Highlight = require('./models/Highlight');
 
 const http = require('http');
 const { Server } = require("socket.io");
@@ -36,41 +37,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- CRON JOBS ---
-// Run every hour to clean up expired stories
-cron.schedule('0 * * * *', async () => {
-    try {
-        console.log('Running cron job to clean up expired stories...');
-        const expiredStories = await Story.find({ expires_at: { $lt: new Date() } });
-        
-        for (const story of expiredStories) {
-            // If it has a cloudinary media URL, try to delete it
-            if (story.media_url && story.media_url.includes('cloudinary')) {
-                try {
-                    // Extract public_id from Cloudinary URL (assumes format: .../upload/v1234/folder/filename.ext)
-                    const urlParts = story.media_url.split('/');
-                    const fileWithExt = urlParts[urlParts.length - 1];
-                    const filename = fileWithExt.split('.')[0];
-                    // Folder is usually the part before filename in our uploadService (unichat_uploads)
-                    const folder = urlParts[urlParts.length - 2];
-                    const public_id = `${folder}/${filename}`;
-                    
-                    if (process.env.CLOUDINARY_CLOUD_NAME) {
-                        await cloudinary.uploader.destroy(public_id, { resource_type: story.media_type === 'video' ? 'video' : 'image' });
-                    }
-                } catch(err) {
-                    console.error(`Failed to delete Cloudinary media for story ${story._id}:`, err);
-                }
-            }
-            await Story.findByIdAndDelete(story._id);
-        }
-        if (expiredStories.length > 0) {
-            console.log(`Cleaned up ${expiredStories.length} expired stories.`);
-        }
-    } catch(err) {
-        console.error('Error in story cleanup cron job:', err);
-    }
-});
 
 const PORT = process.env.PORT || 3000;
 
@@ -1278,6 +1244,56 @@ app.post('/api/stories/:id/view', async (req, res) => {
             }
         }
         res.json({ success: true, viewers: story.viewers || [] });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// --- Highlights APIs ---
+// Create a new highlight
+app.post('/api/highlights', async (req, res) => {
+    const { user_id, title, cover_image_url, story_ids } = req.body;
+    if (!user_id || !title || !story_ids || story_ids.length === 0) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    try {
+        let cover = cover_image_url;
+        if (!cover) {
+            const firstStory = await Story.findById(story_ids[0]);
+            if (firstStory) cover = firstStory.media_url;
+        }
+        
+        const highlight = new Highlight({
+            user_id,
+            title,
+            cover_image_url: cover,
+            stories: story_ids
+        });
+        await highlight.save();
+        res.json({ success: true, highlight });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get a user's highlights
+app.get('/api/highlights/:user_id', async (req, res) => {
+    try {
+        const highlights = await Highlight.find({ user_id: req.params.user_id }).sort({ created_at: -1 });
+        res.json({ highlights });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get stories for a specific highlight
+app.get('/api/highlights/view/:id', async (req, res) => {
+    try {
+        const highlight = await Highlight.findById(req.params.id).populate('stories');
+        if (!highlight) return res.status(404).json({ error: 'Highlight not found' });
+        // Filter out any deleted stories just in case
+        const validStories = highlight.stories.filter(s => s != null);
+        res.json({ highlight, stories: validStories });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

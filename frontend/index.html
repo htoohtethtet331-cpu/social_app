@@ -746,7 +746,7 @@
     <div id="archive-modal" class="modal" style="z-index: 5000; background: var(--bg-color);"
         onclick="if(event.target === this) this.classList.remove('active')">
         <div class="fb-modal-header" style="position: sticky; top: 0; background: var(--bg-color); z-index: 10;">
-            <div style="width: 36px;"></div>
+            <button type="button" class="fb-close-btn" style="color: var(--primary-color); font-weight: bold; width: auto; padding: 0 10px; font-size: 1rem; border-radius: 8px;" onclick="proceedToHighlightTitle()">Next</button>
             <h2>Story Archive</h2>
             <button type="button" class="fb-close-btn"
                 onclick="document.getElementById('archive-modal').classList.remove('active')">
@@ -760,6 +760,16 @@
         <div id="archive-feed"
             style="padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; overflow-y: auto; max-height: calc(100vh - 60px);">
             <!-- Archived items go here -->
+        </div>
+    </div>
+
+    <!-- Highlight Title Modal -->
+    <div id="highlight-title-modal" class="modal bottom-sheet" style="z-index: 5100;" onclick="if(event.target === this) this.classList.remove('active')">
+        <div class="modal-content" style="text-align: center;">
+            <div class="sheet-handle"></div>
+            <h3 style="margin-bottom: 15px; color: var(--text-color);">New Highlight</h3>
+            <input type="text" id="highlight-title-input" class="fb-input" placeholder="Highlight Name" style="width: 100%; margin-bottom: 15px; text-align: center;" maxlength="15">
+            <button class="fb-btn primary" style="width: 100%;" onclick="createHighlight()">Add</button>
         </div>
     </div>
 
