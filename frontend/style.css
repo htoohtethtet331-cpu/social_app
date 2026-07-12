@@ -1,23 +1,21 @@
 /* Clean and Classic UI */
 
 :root {
-    --bg-color: #f9f9f9;
-    --text-color: #333;
-    --border-color: #ddd;
-    --primary-color: #0066cc;
-    --secondary-color: #666;
-    --white: #fff;
-    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    --like-color: #e0245e;
+    --bg-color: transparent;
+    --text-color: #ffffff;
+    --border-color: rgba(255, 255, 255, 0.2);
+    --primary-color: #4a90e2;
+    --secondary-color: rgba(255, 255, 255, 0.7);
+    --white: rgba(255, 255, 255, 0.1);
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-blur: blur(20px);
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --like-color: #ff3b30;
 }
 
 body.dark-mode {
-    --bg-color: #1a1a1a;
-    --text-color: #f1f1f1;
-    --border-color: #333;
-    --white: #2a2a2a;
-    --secondary-color: #aaa;
-    --comment-bg: #3a3b3c;
+    /* Glass UI looks good in dark mode by default */
 }
 
 * {
@@ -29,21 +27,35 @@ body.dark-mode {
 
 body {
     font-family: var(--font-family);
-    background-color: var(--bg-color);
+    background: linear-gradient(135deg, #1b2735 0%, #090a0f 100%);
+    background-attachment: fixed;
     color: var(--text-color);
     line-height: 1.6;
+    min-height: 100vh;
+}
+
+/* Beautiful Animated Aurora Background Effect */
+body::before {
+    content: "";
+    position: fixed;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(74, 144, 226, 0.15), transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 59, 48, 0.1), transparent 50%),
+                radial-gradient(circle at 20% 80%, rgba(52, 199, 89, 0.1), transparent 50%);
+    animation: aurora 20s linear infinite alternate;
+    z-index: -1;
+}
+@keyframes aurora {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .app-container {
     max-width: 600px;
     margin: 0 auto;
-    background-color: var(--white);
     min-height: 100vh;
-    border-left: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
     position: relative;
     padding-bottom: 70px;
-    /* Space for bottom nav */
 }
 
 /* Header */
@@ -2318,4 +2330,137 @@ body.modal-open {
     text-decoration: underline;
     font-size: 0.95rem;
     cursor: pointer;
+}
+
+
+/* =========================================
+   APPLE GLASS UI (GLASSMORPHISM) OVERRIDES
+   ========================================= */
+
+/* Main Containers */
+.post-item,
+.create-post-section,
+.comment-item,
+.bottom-nav-bar,
+.profile-header,
+.notification-item,
+.app-header,
+.comments-sheet {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1) !important;
+    color: var(--text-color) !important;
+    margin-bottom: 15px;
+}
+
+/* Remove margin for elements that shouldn't have them */
+.bottom-nav-bar, .app-header, .comments-sheet {
+    margin-bottom: 0;
+}
+
+/* Bottom Nav Bar specific */
+.bottom-nav-container {
+    background: transparent !important;
+}
+.bottom-nav-bar {
+    border-radius: 20px 20px 0 0 !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    border-right: none !important;
+}
+.nav-btn {
+    color: var(--secondary-color) !important;
+}
+.nav-btn.active {
+    color: var(--primary-color) !important;
+}
+
+/* App Header specific */
+.app-header {
+    border-radius: 0 0 20px 20px !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+}
+
+/* Inputs, Textareas */
+input[type="text"],
+input[type="password"],
+textarea,
+.comment-input,
+#post-content,
+.profile-edit-input {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    border-radius: 12px !important;
+}
+input::placeholder,
+textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+#post-content:focus {
+    border-color: var(--primary-color) !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Buttons & Actions */
+.btn-primary {
+    background: var(--primary-color) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 20px !important;
+    font-weight: 600;
+}
+.btn-secondary {
+    background: rgba(255,255,255,0.2) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 20px !important;
+}
+.upload-icon-btn, .post-action-btn, .comment-action-btn {
+    color: var(--secondary-color) !important;
+}
+.upload-icon-btn:hover, .post-action-btn:hover, .comment-action-btn:hover {
+    color: var(--primary-color) !important;
+}
+
+/* Profile Elements */
+.profile-stats-container {
+    background: transparent !important;
+    border: none !important;
+}
+.stat-box {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 12px !important;
+    color: #fff !important;
+}
+.stat-value {
+    color: #fff !important;
+}
+.stat-label {
+    color: var(--secondary-color) !important;
+}
+.profile-bio {
+    color: #fff !important;
+}
+
+/* Story Highlights */
+.story-ring-wrapper {
+    background: rgba(255,255,255,0.1) !important;
+    border-radius: 50% !important;
+}
+
+/* Dropdown/Modals */
+.modal-content, .dropdown-menu {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 16px !important;
+    color: #fff !important;
 }
