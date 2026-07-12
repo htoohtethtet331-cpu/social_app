@@ -7,7 +7,7 @@
     <title>Telegram Web App</title>
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css?v=52">
+    <link rel="stylesheet" href="style.css?v=53">
     <script>
         const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2RkZCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzkiIHI9IjE4IiBmaWxsPSIjOTk5Ii8+PHBhdGggZD0iTTIyLDgwIGEzMCwyMCAwIDAsMSw1NiwwIHoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=';
         window.handleImageError = function (img) {
@@ -18,7 +18,11 @@
 </head>
 
 <body>
-    <div class="app-container">
+    <div id="global-progress-container">
+        <div id="global-progress-bar"></div>
+    </div>
+    
+    <div class="app-container" id="app-container">
         <!-- Header -->
         <header class="app-header"
             style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;">
@@ -119,7 +123,7 @@
                             <button type="submit" id="post-submit-btn" class="btn primary-btn"
                                 style="padding: 8px 24px; border-radius: 20px; display: flex; align-items: center; justify-content: center; gap: 6px;">
                                 <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-                                    <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                                    <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z" />
                                 </svg>
                                 Upload
                             </button>
@@ -131,10 +135,6 @@
             <!-- User Profile Section -->
 
 
-            <!-- Main Feed -->
-
-
-            <!-- Users List Section -->
 
 
             <!-- Notifications Section -->
@@ -151,17 +151,32 @@
                         <span id="new-posts-count">New Posts</span>
                     </div>
                     <!-- Posts will be injected here -->
-                    <div class="cat-loader-container"><div class="cat"><div class="cat__body"></div><div class="cat__body"></div><div class="cat__tail"></div><div class="cat__head"></div></div></div>
+                    <div class="cat-loader-container">
+                        <div class="cat">
+                            <div class="cat__body"></div>
+                            <div class="cat__body"></div>
+                            <div class="cat__tail"></div>
+                            <div class="cat__head"></div>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- Users List Section -->
                 <section class="users-list-section swipe-slide" id="users-list-section">
-                    <div class="fb-profile-header" style="display: flex; flex-direction: column; align-items: flex-start; padding-top: 10px;">
+                    <div class="fb-profile-header"
+                        style="display: flex; flex-direction: column; align-items: flex-start; padding-top: 10px;">
                         <img src="Topcat.gif" alt="Cat" style="height: 60px; margin-bottom: 5px; object-fit: contain;">
                         <h2 style="margin: 0;">Users</h2>
                     </div>
                     <div id="explore-users-list" style="padding: 15px;">
-                        <div class="cat-loader-container"><div class="cat"><div class="cat__body"></div><div class="cat__body"></div><div class="cat__tail"></div><div class="cat__head"></div></div></div>
+                        <div class="cat-loader-container">
+                            <div class="cat">
+                                <div class="cat__body"></div>
+                                <div class="cat__body"></div>
+                                <div class="cat__tail"></div>
+                                <div class="cat__head"></div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -200,12 +215,14 @@
 
                             <h2 id="profile-banner-name" class="fb-profile-name">User Name</h2>
                             <div class="profile-stats-grid">
-                                <div class="stat-box" onclick="openUsersListModal('following', currentProfileUserId)" style="cursor: pointer;">
+                                <div class="stat-box" onclick="openUsersListModal('following', currentProfileUserId)"
+                                    style="cursor: pointer;">
                                     <div class="stat-number" id="profile-stats-following">0</div>
                                     <div class="stat-label">Following</div>
                                 </div>
                                 <div class="stat-divider"></div>
-                                <div class="stat-box" onclick="openUsersListModal('followers', currentProfileUserId)" style="cursor: pointer;">
+                                <div class="stat-box" onclick="openUsersListModal('followers', currentProfileUserId)"
+                                    style="cursor: pointer;">
                                     <div class="stat-number" id="profile-stats-followers">0</div>
                                     <div class="stat-label">Followers</div>
                                 </div>
@@ -221,15 +238,17 @@
                                 <div id="other-user-actions" style="display: none; width: 100%; gap: 10px;">
                                     <button id="follow-profile-btn" class="fb-action-btn primary" style="flex: 1;"
                                         onclick="toggleFollow(currentProfileUserId, this)">
-                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" id="follow-icon-svg" style="display:none;">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"
+                                            id="follow-icon-svg" style="display:none;">
                                             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                                         </svg>
                                         <span id="follow-btn-text">Follow</span>
                                     </button>
                                     <button id="message-profile-btn" class="fb-action-btn secondary" style="flex: 1;"
                                         onclick="window.open('https://t.me/' + currentProfileUsername, '_blank')">
-                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-right: 5px;">
-                                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"
+                                            style="margin-right: 5px;">
+                                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                                         </svg>
                                         Message
                                     </button>
@@ -296,9 +315,11 @@
                         <div class="settings-section-title">Privacy</div>
                         <div class="settings-card">
                             <div class="settings-row">
-                                <div class="settings-icon-wrapper" style="background: rgba(255, 107, 107, 0.1); color: #ff6b6b;">
+                                <div class="settings-icon-wrapper"
+                                    style="background: rgba(255, 107, 107, 0.1); color: #ff6b6b;">
                                     <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                                        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+                                        <path
+                                            d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM9 6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9V6zm9 14H6V10h12v10zm-6-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z" />
                                     </svg>
                                 </div>
                                 <div class="settings-info">
@@ -307,7 +328,8 @@
                                 </div>
                                 <div class="settings-action">
                                     <label class="toggle-switch">
-                                        <input type="checkbox" id="privacy-toggle" onchange="togglePrivacy(this.checked)">
+                                        <input type="checkbox" id="privacy-toggle"
+                                            onchange="togglePrivacy(this.checked)">
                                         <span class="slider"></span>
                                     </label>
                                 </div>
@@ -361,7 +383,14 @@
         </div>
         <div id="notifications-feed" style="padding: 10px 20px 20px 20px;">
             <!-- Skeletons initially or loading -->
-            <div class="cat-loader-container"><div class="cat"><div class="cat__body"></div><div class="cat__body"></div><div class="cat__tail"></div><div class="cat__head"></div></div></div>
+            <div class="cat-loader-container">
+                <div class="cat">
+                    <div class="cat__body"></div>
+                    <div class="cat__body"></div>
+                    <div class="cat__tail"></div>
+                    <div class="cat__head"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -492,46 +521,68 @@
 
     <!-- Story Likes Modal -->
     <div class="modal bottom-sheet" id="story-likes-modal" style="z-index: 4000;"
-            onclick="if(event.target === this) this.classList.remove('active')">
-            <div class="modal-content" style="max-height: 60vh; display: flex; flex-direction: column; padding: 0;">
-                <div class="fb-modal-header">
-                    <div style="width: 36px;"></div> <!-- Spacer -->
-                    <h2>Story Likes</h2>
-                    <button type="button" class="fb-close-btn" onclick="toggleStoryLikes()">
-                        &times;
-                    </button>
-                </div>
-                <div id="story-likes-list" style="overflow-y: auto; flex: 1; padding: 0 10px;">
-                    <!-- Likers will go here -->
-                </div>
+        onclick="if(event.target === this) this.classList.remove('active')">
+        <div class="modal-content" style="max-height: 60vh; display: flex; flex-direction: column; padding: 0;">
+            <div class="fb-modal-header">
+                <div style="width: 36px;"></div> <!-- Spacer -->
+                <h2>Story Likes</h2>
+                <button type="button" class="fb-close-btn" onclick="toggleStoryLikes()">
+                    &times;
+                </button>
+            </div>
+            <div id="story-likes-list" style="overflow-y: auto; flex: 1; padding: 0 10px;">
+                <!-- Likers will go here -->
             </div>
         </div>
+    </div>
 
-        <!-- Story Viewers Modal -->
-        <div class="modal bottom-sheet" id="story-viewers-modal" style="z-index: 4000;"
-            onclick="if(event.target === this) this.classList.remove('active')">
-            <div class="modal-content" style="max-height: 60vh; display: flex; flex-direction: column; padding: 0;">
-                <div class="fb-modal-header">
-                    <div style="width: 36px;"></div> <!-- Spacer -->
-                    <h2>Story Viewers</h2>
-                    <button type="button" class="fb-close-btn" onclick="toggleStoryViewers()">
-                        &times;
-                    </button>
-                </div>
-                <div id="story-viewers-list" style="overflow-y: auto; flex: 1; padding: 0 10px;">
-                    <!-- Viewers will go here -->
-                </div>
+    <!-- Story Viewers Modal -->
+    <div class="modal bottom-sheet" id="story-viewers-modal" style="z-index: 4000;"
+        onclick="if(event.target === this) this.classList.remove('active')">
+        <div class="modal-content" style="max-height: 60vh; display: flex; flex-direction: column; padding: 0;">
+            <div class="fb-modal-header">
+                <div style="width: 36px;"></div> <!-- Spacer -->
+                <h2>Story Viewers</h2>
+                <button type="button" class="fb-close-btn" onclick="toggleStoryViewers()">
+                    &times;
+                </button>
+            </div>
+            <div id="story-viewers-list" style="overflow-y: auto; flex: 1; padding: 0 10px;">
+                <!-- Viewers will go here -->
             </div>
         </div>
+    </div>
 
-        <!-- Archive Modal -->
-        <div id="archive-modal" class="modal" style="z-index: 5000; background: var(--bg-color);"
-            onclick="if(event.target === this) this.classList.remove('active')">
-            <div class="fb-modal-header" style="position: sticky; top: 0; background: var(--bg-color); z-index: 10;">
-                <div style="width: 36px;"></div>
-                <h2>Story Archive</h2>
+    <!-- Archive Modal -->
+    <div id="archive-modal" class="modal" style="z-index: 5000; background: var(--bg-color);"
+        onclick="if(event.target === this) this.classList.remove('active')">
+        <div class="fb-modal-header" style="position: sticky; top: 0; background: var(--bg-color); z-index: 10;">
+            <div style="width: 36px;"></div>
+            <h2>Story Archive</h2>
+            <button type="button" class="fb-close-btn"
+                onclick="document.getElementById('archive-modal').classList.remove('active')">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path
+                        d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z">
+                    </path>
+                </svg>
+            </button>
+        </div>
+        <div id="archive-feed"
+            style="padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; overflow-y: auto; max-height: calc(100vh - 60px);">
+            <!-- Archived items go here -->
+        </div>
+    </div>
+
+    <!-- Post Likes Modal -->
+    <div class="modal bottom-sheet" id="post-likes-modal" style="z-index: 4000;"
+        onclick="if(event.target === this) this.classList.remove('active')">
+        <div class="modal-content" style="max-height: 60vh; display: flex; flex-direction: column; padding: 0;">
+            <div class="fb-modal-header">
+                <div style="width: 36px;"></div> <!-- Spacer -->
+                <h2>Post Likes</h2>
                 <button type="button" class="fb-close-btn"
-                    onclick="document.getElementById('archive-modal').classList.remove('active')">
+                    onclick="document.getElementById('post-likes-modal').classList.remove('active')">
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
                         <path
                             d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z">
@@ -539,63 +590,49 @@
                     </svg>
                 </button>
             </div>
-            <div id="archive-feed"
-                style="padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; overflow-y: auto; max-height: calc(100vh - 60px);">
-                <!-- Archived items go here -->
+            <div id="post-likes-list" style="overflow-y: auto; flex: 1; padding: 0 10px;">
+                <!-- Likers will go here -->
             </div>
         </div>
+    </div>
 
-        <!-- Post Likes Modal -->
-        <div class="modal bottom-sheet" id="post-likes-modal" style="z-index: 4000;"
-            onclick="if(event.target === this) this.classList.remove('active')">
-            <div class="modal-content" style="max-height: 60vh; display: flex; flex-direction: column; padding: 0;">
-                <div class="fb-modal-header">
-                    <div style="width: 36px;"></div> <!-- Spacer -->
-                    <h2>Post Likes</h2>
-                    <button type="button" class="fb-close-btn"
-                        onclick="document.getElementById('post-likes-modal').classList.remove('active')">
-                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                            <path
-                                d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z">
-                            </path>
-                        </svg>
-                    </button>
-                </div>
-                <div id="post-likes-list" style="overflow-y: auto; flex: 1; padding: 0 10px;">
-                    <!-- Likers will go here -->
-                </div>
-            </div>
+    <!-- Full Screen Image Viewer Modal -->
+    <div class="modal image-lightbox-modal" id="image-viewer-modal" style="z-index: 5000;"
+        onclick="if(event.target === this) this.classList.remove('active')">
+        <div class="lightbox-overlay" id="lightbox-overlay" onclick="closeFullScreenImage()"></div>
+        <div class="lightbox-header">
+            <span class="lightbox-close" id="lightbox-close" onclick="closeFullScreenImage()">&times;</span>
         </div>
+        <div class="lightbox-content" id="lightbox-content">
+            <img id="full-screen-image">
+        </div>
+    </div>
 
-        <!-- Full Screen Image Viewer Modal -->
-        <div class="modal image-lightbox-modal" id="image-viewer-modal" style="z-index: 5000;"
-            onclick="if(event.target === this) this.classList.remove('active')">
-            <div class="lightbox-overlay" id="lightbox-overlay" onclick="closeFullScreenImage()"></div>
-            <div class="lightbox-header">
-                <span class="lightbox-close" id="lightbox-close" onclick="closeFullScreenImage()">&times;</span>
+    <!-- Users List Modal -->
+    <div class="modal bottom-sheet" id="users-list-modal"
+        onclick="if(event.target === this) this.classList.remove('active')"
+        style="z-index: 5000; background-color: rgba(0, 0, 0, 0.5) !important;">
+        <div class="modal-content" style="max-height: 80vh; display: flex; flex-direction: column; padding: 0;">
+            <div class="bottom-sheet-handle"></div>
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--border-color);">
+                <h3 id="users-list-title" style="margin: 0; font-size: 1.1rem;">Users</h3>
+                <button class="icon-btn"
+                    onclick="document.getElementById('users-list-modal').classList.remove('active')"
+                    style="background: none; border: none; cursor: pointer; color: var(--text-color);">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path
+                            d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z">
+                        </path>
+                    </svg>
+                </button>
             </div>
-            <div class="lightbox-content" id="lightbox-content">
-                <img id="full-screen-image">
-            </div>
-        </div>
-
-        <!-- Users List Modal -->
-        <div class="modal bottom-sheet" id="users-list-modal" onclick="if(event.target === this) this.classList.remove('active')" style="z-index: 5000; background-color: rgba(0, 0, 0, 0.5) !important;">
-            <div class="modal-content" style="max-height: 80vh; display: flex; flex-direction: column; padding: 0;">
-                <div class="bottom-sheet-handle"></div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--border-color);">
-                    <h3 id="users-list-title" style="margin: 0; font-size: 1.1rem;">Users</h3>
-                    <button class="icon-btn" onclick="document.getElementById('users-list-modal').classList.remove('active')" style="background: none; border: none; cursor: pointer; color: var(--text-color);">
-                        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                            <path d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path>
-                        </svg>
-                    </button>
-                </div>
-                <div id="users-list-container" style="overflow-y: auto; flex: 1 1 auto; min-height: 150px; padding: 10px; display: flex; flex-direction: column; gap: 10px;">
-                    <!-- Users will go here -->
-                </div>
+            <div id="users-list-container"
+                style="overflow-y: auto; flex: 1 1 auto; min-height: 150px; padding: 10px; display: flex; flex-direction: column; gap: 10px;">
+                <!-- Users will go here -->
             </div>
         </div>
+    </div>
 
     <div class="bottom-nav-container">
         <nav class="bottom-nav-bar" id="bottom-nav">
@@ -640,7 +677,7 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=62"></script>
+    <script src="app.js?v=63"></script>
 </body>
 
 </html>

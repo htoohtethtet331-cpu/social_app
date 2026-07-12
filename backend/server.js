@@ -318,8 +318,27 @@ app.post('/api/auth', async (req, res) => {
 
 // 1.5 Ping Active Status
 app.post('/api/ping', async (req, res) => {
-    const { user_id } = req.body;
-    if (!user_id) return res.status(400).json({ error: 'User ID required' });
+    res.json({ success: true, timestamp: Date.now() });
+});
+
+app.get('/api/cloudinary-signature', (req, res) => {
+    try {
+        const timestamp = Math.round((new Date).getTime() / 1000);
+        const signature = cloudinary.utils.api_sign_request({
+            timestamp: timestamp,
+            folder: 'unichat_uploads'
+        }, process.env.CLOUDINARY_API_SECRET);
+        
+        res.json({
+            signature: signature,
+            timestamp: timestamp,
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY
+        });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to generate signature' });
+    }
+});    if (!user_id) return res.status(400).json({ error: 'User ID required' });
     try {
         await User.findByIdAndUpdate(user_id, { last_active: Date.now() });
         res.json({ success: true });
@@ -330,16 +349,18 @@ app.post('/api/ping', async (req, res) => {
 
 app.post('/api/upload-profile', upload.single('photo'), async (req, res) => {
     const user_id = req.body.user_id;
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    let photo_url = req.body.photo_url;
     
-    let photo_url = '';
-    try {
-        photo_url = await uploadImageToCloudinary(req.file.path);
-    } catch (err) {
+    if (!photo_url && req.file) {
+        try {
+            photo_url = await uploadImageToCloudinary(req.file.path);
+        } catch (err) {
+            deleteLocalFile(req.file.path);
+            return res.status(500).json({ error: 'Failed to upload photo' });
+        }
         deleteLocalFile(req.file.path);
-        return res.status(500).json({ error: 'Failed to upload photo' });
     }
-    deleteLocalFile(req.file.path);
+    if (!photo_url) return res.status(400).json({ error: 'No photo provided' });
 
     try {
         const user = await User.findByIdAndUpdate(user_id, { photo_url }, { new: true });
@@ -351,16 +372,18 @@ app.post('/api/upload-profile', upload.single('photo'), async (req, res) => {
 
 app.post('/api/upload-cover', upload.single('cover'), async (req, res) => {
     const user_id = req.body.user_id;
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    let cover_url = req.body.cover_url;
     
-    let cover_url = '';
-    try {
-        cover_url = await uploadImageToCloudinary(req.file.path);
-    } catch (err) {
+    if (!cover_url && req.file) {
+        try {
+            cover_url = await uploadImageToCloudinary(req.file.path);
+        } catch (err) {
+            deleteLocalFile(req.file.path);
+            return res.status(500).json({ error: 'Failed to upload cover' });
+        }
         deleteLocalFile(req.file.path);
-        return res.status(500).json({ error: 'Failed to upload cover' });
     }
-    deleteLocalFile(req.file.path);
+    if (!cover_url) return res.status(400).json({ error: 'No cover provided' });
 
     try {
         const user = await User.findByIdAndUpdate(user_id, { cover_url }, { new: true });
@@ -383,9 +406,13 @@ app.post('/api/skip-profile', async (req, res) => {
 
 app.post('/api/posts', upload.array('images', 100), async (req, res) => {
     const { user_id, content, layout_type } = req.body;
-    if (!user_id || (!content && (!req.files || req.files.length === 0))) return res.status(400).json({ error: 'Content or images required' });
+    let image_urls = req.body.image_urls;
+    if (typeof image_urls === 'string') {
+        try { image_urls = JSON.parse(image_urls); } catch(e) { image_urls = [image_urls]; }
+    }
+    if (!image_urls) image_urls = [];
 
-    let image_urls = [];
+    if (!user_id || (!content && (!req.files || req.files.length === 0) && image_urls.length === 0)) return res.status(400).json({ error: 'Content or images required' });
     if (req.files && req.files.length > 0) {
         for (const file of req.files) {
             try {
@@ -1030,22 +1057,26 @@ app.put('/api/users/:id/bio', async (req, res) => {
 
 app.post('/api/stories', upload.single('media'), async (req, res) => {
     const { user_id } = req.body;
-    if (!req.file || !user_id) return res.status(400).json({ error: 'User ID and media file required' });
+    let media_url = req.body.media_url;
+    let media_type = req.body.media_type;
 
-    let media_url = '';
-    const media_type = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+    if (!media_url && !req.file) return res.status(400).json({ error: 'Media file required' });
+    if (!user_id) return res.status(400).json({ error: 'User ID required' });
 
-    try {
-        if (media_type === 'video') {
-            media_url = await uploadVideoToCloudinary(req.file.path);
-        } else {
-            media_url = await uploadImageToCloudinary(req.file.path);
+    if (!media_url && req.file) {
+        media_type = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+        try {
+            if (media_type === 'video') {
+                media_url = await uploadVideoToCloudinary(req.file.path);
+            } else {
+                media_url = await uploadImageToCloudinary(req.file.path);
+            }
+        } catch (err) {
+            deleteLocalFile(req.file.path);
+            return res.status(500).json({ error: 'Failed to upload media' });
         }
-    } catch (err) {
         deleteLocalFile(req.file.path);
-        return res.status(500).json({ error: 'Failed to upload media' });
     }
-    deleteLocalFile(req.file.path);
 
     try {
         const expires_at = new Date(Date.now() + 24 * 60 * 60 * 1000);

@@ -103,14 +103,12 @@ function showPhotoModal() {
         const fileInput = document.getElementById('photo-input');
         if (fileInput.files.length === 0) return alert('Please select a photo first');
 
-        const formData = new FormData();
-        formData.append('photo', fileInput.files[0]);
-        formData.append('user_id', currentUser.id);
-
         try {
+            const photoUrl = await uploadFileToCloudinary(fileInput.files[0], 'image');
             const res = await fetch(`${API_BASE_URL}/upload-profile`, {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentUser.id, photo_url: photoUrl })
             });
             const data = await res.json();
             if (data.success) {
@@ -229,20 +227,29 @@ function setupUI() {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('user_id', currentUser.id);
-        if (content) formData.append('content', content);
+        let image_urls = [];
         if (files.length > 0) {
-            Array.from(files).forEach(file => {
-                formData.append('images', file);
-            });
-            formData.append('layout_type', currentLayoutType);
+            for (let file of Array.from(files)) {
+                const isVideo = file.type.startsWith('video/');
+                try {
+                    const url = await uploadFileToCloudinary(file, isVideo ? 'video' : 'image');
+                    image_urls.push(url);
+                } catch(e) {
+                    console.error('Upload failed', e);
+                }
+            }
         }
 
         try {
             const res = await fetch(`${API_BASE_URL}/posts`, {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: currentUser.id,
+                    content: content || '',
+                    layout_type: currentLayoutType,
+                    image_urls: image_urls
+                })
             });
             const data = await res.json();
             if (data.post) {
@@ -1546,14 +1553,12 @@ document.getElementById('bio-form').onsubmit = async (e) => {
 // Upload Cover Photo from Profile
 document.getElementById('cover-upload').onchange = async (e) => {
     if (e.target.files && e.target.files[0]) {
-        const formData = new FormData();
-        formData.append('cover', e.target.files[0]);
-        formData.append('user_id', currentUser.id);
-
         try {
+            const coverUrl = await uploadFileToCloudinary(e.target.files[0], 'image');
             const res = await fetch(`${API_BASE_URL}/upload-cover`, {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentUser.id, cover_url: coverUrl })
             });
             const data = await res.json();
             if (data.success) {
@@ -1566,14 +1571,12 @@ document.getElementById('cover-upload').onchange = async (e) => {
 // Upload Avatar from Profile
 document.getElementById('avatar-upload').onchange = async (e) => {
     if (e.target.files && e.target.files[0]) {
-        const formData = new FormData();
-        formData.append('photo', e.target.files[0]);
-        formData.append('user_id', currentUser.id);
-
         try {
+            const photoUrl = await uploadFileToCloudinary(e.target.files[0], 'image');
             const res = await fetch(`${API_BASE_URL}/upload-profile`, {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentUser.id, photo_url: photoUrl })
             });
             const data = await res.json();
             if (data.success) {
@@ -1597,14 +1600,15 @@ document.getElementById('avatar-upload').onchange = async (e) => {
 // Upload Story
 document.getElementById('story-upload').onchange = async (e) => {
     if (e.target.files && e.target.files[0]) {
-        const formData = new FormData();
-        formData.append('media', e.target.files[0]);
-        formData.append('user_id', currentUser.id);
-
         try {
+            const file = e.target.files[0];
+            const isVideo = file.type.startsWith('video/');
+            const mediaUrl = await uploadFileToCloudinary(file, isVideo ? 'video' : 'image');
+            
             const res = await fetch(`${API_BASE_URL}/stories`, {
                 method: 'POST',
-                body: formData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentUser.id, media_url: mediaUrl, media_type: isVideo ? 'video' : 'image' })
             });
             const data = await res.json();
             if (data.success) {
@@ -2763,3 +2767,65 @@ document.addEventListener('click', (e) => {
         openCommentsBottomSheet(postId);
     }
 });
+
+// --- Direct Cloudinary Upload Utility ---
+async function uploadFileToCloudinary(file, resourceType = "image") {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const sigRes = await fetch(`${API_BASE_URL}/cloudinary-signature`);
+            const sigData = await sigRes.json();
+            
+            if (sigData.error) return reject(sigData.error);
+            
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("api_key", sigData.api_key);
+            formData.append("timestamp", sigData.timestamp);
+            formData.append("signature", sigData.signature);
+            formData.append("folder", "unichat_uploads");
+
+            const xhr = new XMLHttpRequest();
+            const uploadUrl = `https://api.cloudinary.com/v1_1/${sigData.cloud_name}/${resourceType}/upload`;
+            
+            xhr.open("POST", uploadUrl);
+            
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const percent = Math.round((e.loaded / e.total) * 100);
+                    const container = document.getElementById("global-progress-container");
+                    const bar = document.getElementById("global-progress-bar");
+                    if (container && bar) {
+                        container.classList.add("active");
+                        bar.style.width = percent + "%";
+                    }
+                }
+            };
+            
+            xhr.onload = () => {
+                const container = document.getElementById("global-progress-container");
+                const bar = document.getElementById("global-progress-bar");
+                if (container && bar) {
+                    bar.style.width = "100%";
+                    setTimeout(() => {
+                        container.classList.remove("active");
+                        bar.style.width = "0%";
+                    }, 500);
+                }
+                
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+                    resolve(response.secure_url);
+                } else {
+                    reject("Cloudinary upload failed");
+                }
+            };
+            
+            xhr.onerror = () => reject("Network error during upload");
+            
+            xhr.send(formData);
+            
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
