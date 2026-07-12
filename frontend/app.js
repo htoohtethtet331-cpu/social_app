@@ -276,8 +276,7 @@ function setupUI() {
             if (data.post) {
                 contentInput.value = '';
                 removeImgBtn.click(); // Reset image
-                
-                const feed = document.getElementById('posts-feed');
+                const feed = document.getElementById('posts-container');
                 const loadingText = feed.querySelector('.loading-text');
                 if (loadingText) loadingText.remove();
 
@@ -661,7 +660,7 @@ function highlightComment(commentId) {
 }
 
 function showNewPosts() {
-    const feed = document.getElementById('posts-feed');
+    const feed = document.getElementById('posts-container');
     // Prepend all pending posts
     [...pendingNewPosts].forEach(post => {
         feed.insertAdjacentHTML('afterbegin', createPostHtml(post));
@@ -1065,10 +1064,10 @@ function openCreatePostModal() {
 }
 
 async function loadPosts(silent = false) {
-    const feed = document.getElementById('posts-feed');
+    const feed = document.getElementById('posts-container');
     if (!silent) {
-        // Only show skeletons if not silently refreshing
-        if (!feed.innerHTML.includes('post-item')) {
+        // Only show skeletons if not silently refreshing and no app loader is present
+        if (!feed.innerHTML.includes('post-item') && !feed.innerHTML.includes('app-loader-wrapper')) {
             const skeletonHtml = `
                 <div class="skeleton-post">
                     <div class="skeleton-header">
@@ -2834,7 +2833,7 @@ document.getElementById('search-input').addEventListener('keypress', (e) => {
 });
 
 async function performSearch(query) {
-    const feed = document.getElementById('posts-feed');
+    const feed = document.getElementById('posts-container');
     document.getElementById('search-input').value = query; // update input box if clicked from suggest
     document.getElementById('search-suggestions').style.display = 'none';
     
