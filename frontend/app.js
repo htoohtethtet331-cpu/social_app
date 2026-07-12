@@ -882,7 +882,7 @@ function toggleNotificationsDrawer() {
             isNotificationsLoaded = true;
         }
     }
-}}
+}
 
 async function loadAllUsers(silent = false) {
     const container = document.getElementById('explore-users-list');
