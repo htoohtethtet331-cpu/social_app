@@ -788,6 +788,58 @@ function triggerLazyLoad() {
     }
 }
 
+
+let isDrawerOpen = false;
+let isCommentsOpen = false;
+let isUsersListOpen = false;
+
+window.updateTelegramBackButton = function() {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButton) {
+        if (isDrawerOpen || isCommentsOpen || isUsersListOpen) {
+            window.Telegram.WebApp.BackButton.show();
+        } else {
+            window.Telegram.WebApp.BackButton.hide();
+        }
+    }
+};
+
+window.addEventListener('popstate', (e) => {
+    if (isUsersListOpen) {
+        isUsersListOpen = false;
+        document.getElementById('users-list-modal').classList.remove('active');
+        updateTelegramBackButton();
+    } else if (isCommentsOpen) {
+        isCommentsOpen = false;
+        const sheet = document.getElementById('comments-sheet');
+        const sheetOverlay = document.getElementById('comments-sheet-overlay');
+        if(sheet) {
+            sheet.style.transform = '';
+            sheet.classList.remove('open');
+        }
+        setTimeout(() => {
+            if(sheetOverlay) sheetOverlay.style.display = 'none';
+            if(document.getElementById('sheet-comments-list')) document.getElementById('sheet-comments-list').innerHTML = '';
+            if(typeof cancelReply === 'function') cancelReply();
+        }, 300);
+        updateTelegramBackButton();
+    } else if (isDrawerOpen) {
+        isDrawerOpen = false;
+        const drawer = document.getElementById('notifications-drawer');
+        const backdrop = document.getElementById('notifications-backdrop');
+        if (drawer) drawer.classList.remove('active');
+        if (backdrop) backdrop.classList.remove('active');
+        updateTelegramBackButton();
+    }
+});
+
+if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButton) {
+    window.Telegram.WebApp.BackButton.onClick(() => {
+        if (isDrawerOpen || isCommentsOpen || isUsersListOpen) {
+            history.back();
+        }
+    });
+}
+
 // Navigation Functions
 function switchTab(tabName, userId = null) {
     if (tabName === 'profile' && userId) {
@@ -801,30 +853,6 @@ function switchTab(tabName, userId = null) {
     }
 }
 
-let isDrawerOpen = false;
-
-window.addEventListener('popstate', (e) => {
-    if (isDrawerOpen) {
-        const drawer = document.getElementById('notifications-drawer');
-        const backdrop = document.getElementById('notifications-backdrop');
-        drawer.classList.remove('active');
-        backdrop.classList.remove('active');
-        isDrawerOpen = false;
-        
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButton) {
-            window.Telegram.WebApp.BackButton.hide();
-        }
-    }
-});
-
-if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButton) {
-    window.Telegram.WebApp.BackButton.onClick(() => {
-        if (isDrawerOpen) {
-            history.back(); // Let the popstate listener handle the closing
-        }
-    });
-}
-
 // Notifications Drawer Logic
 function toggleNotificationsDrawer() {
     const drawer = document.getElementById('notifications-drawer');
@@ -835,11 +863,9 @@ function toggleNotificationsDrawer() {
         
         if (isDrawerOpen) {
             isDrawerOpen = false;
-            history.back(); // Popping the state pushed earlier
+            history.back();
         }
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButton) {
-            window.Telegram.WebApp.BackButton.hide();
-        }
+        updateTelegramBackButton();
     } else {
         drawer.classList.add('active');
         backdrop.classList.add('active');
@@ -848,17 +874,15 @@ function toggleNotificationsDrawer() {
             history.pushState({drawer: true}, '');
             isDrawerOpen = true;
         }
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButton) {
-            window.Telegram.WebApp.BackButton.show();
-        }
+        updateTelegramBackButton();
         
-        if (!isNotificationsLoaded) {
+        if (typeof isNotificationsLoaded !== 'undefined' && !isNotificationsLoaded) {
             loadNotifications();
             markNotificationsRead();
             isNotificationsLoaded = true;
         }
     }
-}
+}}
 
 async function loadAllUsers(silent = false) {
     const container = document.getElementById('explore-users-list');
@@ -1272,6 +1296,12 @@ function renderCommentBubble(c) {
 }
 
 async function openCommentsBottomSheet(postId) {
+    if (!isCommentsOpen) {
+        history.pushState({comments: true}, '');
+        isCommentsOpen = true;
+    }
+    updateTelegramBackButton();
+
     if (!postId) return;
     currentCommentPostId = postId;
     cancelReply();
@@ -1331,6 +1361,11 @@ function closeCommentsBottomSheet() {
         currentCommentPostId = null;
         cancelReply();
     }, 300);
+    if (isCommentsOpen) {
+        isCommentsOpen = false;
+        history.back();
+    }
+    updateTelegramBackButton();
 }
 
 function replyToComment(commentId, username) {
@@ -2649,6 +2684,12 @@ let isFetchingUsersList = false;
 let hasMoreUsersList = true;
 
 async function openUsersListModal(type, userId) {
+    if (!isUsersListOpen) {
+        history.pushState({usersList: true}, '');
+        isUsersListOpen = true;
+    }
+    updateTelegramBackButton();
+
     console.log("openUsersListModal triggered:", type, userId);
     if (!userId) {
         console.warn("openUsersListModal aborted: no userId");
@@ -3014,3 +3055,13 @@ if (notifDrawer) {
         notifCurrentX = 0;
     });
 }
+
+
+window.closeUsersListModal = function() {
+    document.getElementById('users-list-modal').classList.remove('active');
+    if (isUsersListOpen) {
+        isUsersListOpen = false;
+        history.back();
+    }
+    updateTelegramBackButton();
+};

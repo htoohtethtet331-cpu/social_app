@@ -647,7 +647,7 @@
                 style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--border-color);">
                 <h3 id="users-list-title" style="margin: 0; font-size: 1.1rem;">Users</h3>
                 <button class="icon-btn"
-                    onclick="document.getElementById('users-list-modal').classList.remove('active')"
+                    onclick="closeUsersListModal()"
                     style="background: none; border: none; cursor: pointer; color: var(--text-color);">
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
                         <path
@@ -706,7 +706,7 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=68"></script>
+    <script src="app.js?v=69"></script>
 </body>
 
 </html>
