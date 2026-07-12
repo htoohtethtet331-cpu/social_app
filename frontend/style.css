@@ -2495,3 +2495,59 @@ body.dark-mode {
 .app-container {
     background-color: transparent !important;
 }
+
+
+/* --- MORE GLASS UI FIXES (Search & Comments) --- */
+/* Search Bar Container */
+#search-bar-container, .search-bar-container {
+    background: transparent !important;
+    border-bottom: none !important;
+}
+#search-input {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    border-radius: 20px !important;
+    padding-left: 35px !important;
+}
+#search-input::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Comment Bubbles */
+.comment-bubble {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: var(--text-color) !important;
+}
+.comment-author-name {
+    color: var(--primary-color) !important;
+}
+.comment-text {
+    color: #ffffff !important;
+}
+
+/* Comment Input Form at bottom */
+.comment-form {
+    background: transparent !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+.comment-input {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    border-radius: 20px !important;
+}
+.comment-submit {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 50% !important;
+}
+
+/* Add margin to fix any tight spacing in bubbles */
+.comment-bubble-wrapper {
+    margin-bottom: 5px !important;
+}
