@@ -991,6 +991,35 @@ if (savedTheme === 'dark') {
     setTheme('dark');
 }
 
+// UI Style Logic
+window.setUiStyle = function(style) {
+    const isGlass = style === 'glass';
+    const glassLink = document.getElementById('glass-theme-stylesheet');
+    
+    if (isGlass) {
+        if (!glassLink) {
+            const link = document.createElement('link');
+            link.id = 'glass-theme-stylesheet';
+            link.rel = 'stylesheet';
+            link.href = 'glass.css?v=' + Date.now();
+            document.head.appendChild(link);
+        }
+        document.getElementById('glass-ui-btn').classList.add('active');
+        document.getElementById('classic-ui-btn').classList.remove('active');
+    } else {
+        if (glassLink) {
+            glassLink.remove();
+        }
+        document.getElementById('classic-ui-btn').classList.add('active');
+        document.getElementById('glass-ui-btn').classList.remove('active');
+    }
+    localStorage.setItem('uiStyle', style);
+}
+
+// Initialize UI Style
+const savedUiStyle = localStorage.getItem('uiStyle') || 'glass';
+window.setUiStyle(savedUiStyle);
+
 function showMyProfile() {
     switchTab('profile');
 }
