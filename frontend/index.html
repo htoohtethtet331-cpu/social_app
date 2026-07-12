@@ -7,7 +7,7 @@
     <title>Telegram Web App</title>
     <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css?v=72">
+    <link rel="stylesheet" href="style.css?v=1783881099286">
     <script>
         const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2RkZCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzkiIHI9IjE4IiBmaWxsPSIjOTk5Ii8+PHBhdGggZD0iTTIyLDgwIGEzMCwyMCAwIDAsMSw1NiwwIHoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=';
         window.handleImageError = function (img) {
@@ -84,7 +84,7 @@
 
         <!-- Search Bar Container -->
         <div id="search-bar-container"
-            style="display: none; padding: 10px 15px; background: var(--bg-color); border-bottom: 1px solid var(--border-color); position: relative; z-index: 100;">
+            style="display: none; padding: 10px 15px; position: relative; z-index: 100;">
             <div style="display: flex; gap: 5px; align-items: center;">
                 <button onclick="toggleSearch()"
                     style="background: none; border: none; color: var(--text-color); cursor: pointer; padding: 0; display: flex; align-items: center;">
@@ -92,9 +92,9 @@
                         <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" />
                     </svg>
                 </button>
-                <div
-                    style="flex: 1; display: flex; align-items: center; background: var(--comment-bg, #f0f2f5); border-radius: 8px; padding: 6px 12px; gap: 8px;">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="var(--secondary-color)">
+                <div class="search-input-wrapper"
+                    style="flex: 1; display: flex; align-items: center; border-radius: 12px; padding: 8px 12px; gap: 8px;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="var(--text-color)" style="opacity: 0.7;">
                         <path
                             d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
                     </svg>
@@ -102,11 +102,11 @@
                         style="flex: 1; border: none; background: transparent; color: var(--text-color); outline: none; font-size: 1rem; caret-color: var(--like-color);">
                 </div>
                 <button onclick="performSearch(document.getElementById('search-input').value)"
-                    style="background: none; border: none; color: var(--primary-color); font-weight: 600; font-size: 1rem; cursor: pointer; padding: 0; margin-right: 5px;">Search</button>
+                    style="background: none; border: none; color: var(--primary-color); font-weight: 600; font-size: 1rem; cursor: pointer; padding: 0; margin-left: 5px;">Search</button>
             </div>
             <!-- Suggestions Dropdown -->
             <div id="search-suggestions"
-                style="display: none; position: absolute; top: 100%; left: 10px; right: 10px; background: var(--white); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); margin-top: 5px; z-index: 101; max-height: 250px; overflow-y: auto;">
+                style="display: none; position: absolute; left: 10px; right: 10px; z-index: 101; max-height: 250px; overflow-y: auto;">
                 <!-- Filled by JS -->
             </div>
         </div>
