@@ -318,7 +318,14 @@ app.post('/api/auth', async (req, res) => {
 
 // 1.5 Ping Active Status
 app.post('/api/ping', async (req, res) => {
-    res.json({ success: true, timestamp: Date.now() });
+    const { user_id } = req.body;
+    if (!user_id) return res.status(400).json({ error: 'User ID required' });
+    try {
+        await User.findByIdAndUpdate(user_id, { last_active: Date.now() });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.get('/api/cloudinary-signature', (req, res) => {
@@ -337,13 +344,6 @@ app.get('/api/cloudinary-signature', (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ error: 'Failed to generate signature' });
-    }
-});    if (!user_id) return res.status(400).json({ error: 'User ID required' });
-    try {
-        await User.findByIdAndUpdate(user_id, { last_active: Date.now() });
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
     }
 });
 
