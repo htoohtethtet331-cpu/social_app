@@ -2939,3 +2939,38 @@ async function uploadFileToCloudinary(file, resourceType = "image") {
         }
     });
 }
+
+// Swipe to close notifications drawer
+let notifStartX = 0;
+let notifCurrentX = 0;
+const notifDrawer = document.getElementById('notifications-drawer');
+
+if (notifDrawer) {
+    notifDrawer.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 1) return;
+        notifStartX = e.touches[0].clientX;
+        notifDrawer.style.transition = 'none';
+    }, {passive: true});
+
+    notifDrawer.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 1) return;
+        notifCurrentX = e.touches[0].clientX;
+        const diffX = notifCurrentX - notifStartX;
+        if (diffX > 0) {
+            // Swiping right
+            notifDrawer.style.transform = `translateX(${diffX}px)`;
+            e.preventDefault();
+        }
+    }, {passive: false});
+
+    notifDrawer.addEventListener('touchend', (e) => {
+        notifDrawer.style.transition = 'transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), right 0.35s cubic-bezier(0.25, 0.8, 0.25, 1)';
+        if (notifCurrentX - notifStartX > 100) {
+            // Close it
+            toggleNotificationsDrawer();
+        }
+        notifDrawer.style.transform = 'translateX(0)';
+        notifStartX = 0;
+        notifCurrentX = 0;
+    });
+}
