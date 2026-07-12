@@ -2249,6 +2249,31 @@ let galleryTouchStartTime = 0;
 let galleryIsSwiping = false;
 let galleryDidSwipe = false;
 
+// Gallery Zoom State
+let gScale = 1;
+let gTransX = 0;
+let gTransY = 0;
+let gInitPinchDist = null;
+let gInitScale = 1;
+let gIsDragging = false;
+let gLastX = 0;
+let gLastY = 0;
+
+function updateGalleryImgTransform(smooth = false) {
+    const currentImg = document.querySelector(`#gallery-slide-${currentGalleryIndex} img`);
+    if (currentImg) {
+        currentImg.style.transition = smooth ? 'transform 0.2s ease-out' : 'none';
+        currentImg.style.transform = `translate(${gTransX}px, ${gTransY}px) scale(${gScale})`;
+    }
+}
+function resetGalleryZoom() {
+    if (gScale !== 1 || gTransX !== 0 || gTransY !== 0) {
+        gScale = 1; gTransX = 0; gTransY = 0;
+        updateGalleryImgTransform(true);
+    }
+}
+
+
 function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
     if (event) event.stopPropagation();
     
@@ -2260,6 +2285,7 @@ function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
     
     if (currentGalleryUrls.length === 0) return;
     currentGalleryIndex = startIndex;
+    resetGalleryZoom();
     
     let modal = document.getElementById('gallery-image-viewer');
     if (!modal) {
@@ -2290,6 +2316,18 @@ function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
         
         // Swiping support
         modal.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                gInitPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                gInitScale = gScale;
+                gIsDragging = false;
+                galleryIsSwiping = false;
+            } else if (e.touches.length === 1) {
+                if (gScale > 1) {
+                    gIsDragging = true;
+                    gLastX = e.touches[0].clientX;
+                    gLastY = e.touches[0].clientY;
+                    galleryIsSwiping = false;
+                } else {
             galleryTouchStartX = e.changedTouches[0].screenX;
             galleryTouchStartTime = Date.now();
             galleryIsSwiping = true;
@@ -2302,10 +2340,25 @@ function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
                 if (slide) slide.style.transition = 'none';
                 if (overlay) overlay.style.transition = 'none';
             }
-        }, {passive: true});
+                }
+            }
+        }, {passive: false});
         
         modal.addEventListener('touchmove', (e) => {
-            if (!galleryIsSwiping) return;
+            if (e.touches.length === 2 && gInitPinchDist) {
+                e.preventDefault();
+                const currentDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                gScale = Math.min(Math.max(1, gInitScale * (currentDist / gInitPinchDist)), 4);
+                updateGalleryImgTransform();
+            } else if (e.touches.length === 1 && gIsDragging && gScale > 1) {
+                e.preventDefault();
+                gTransX += (e.touches[0].clientX - gLastX);
+                gTransY += (e.touches[0].clientY - gLastY);
+                gLastX = e.touches[0].clientX;
+                gLastY = e.touches[0].clientY;
+                updateGalleryImgTransform();
+            } else if (galleryIsSwiping) {
+                e.preventDefault();
             galleryTouchMoveX = e.changedTouches[0].screenX;
             const deltaX = galleryTouchMoveX - galleryTouchStartX;
             if (Math.abs(deltaX) > 10) galleryDidSwipe = true;
@@ -2353,14 +2406,37 @@ function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
                     }
                 }
             }
-        }, {passive: true});
+            }
+        }, {passive: false});
         
         modal.addEventListener('touchend', (e) => {
-            if (!galleryIsSwiping) return;
-            galleryTouchEndX = e.changedTouches[0].screenX;
-            galleryIsSwiping = false;
-            handleGallerySwipe();
-        }, {passive: true});
+            if (e.touches.length < 2) gInitPinchDist = null;
+            if (e.touches.length === 0) {
+                gIsDragging = false;
+                if (gScale < 1) {
+                    resetGalleryZoom();
+                } else if (gScale > 1) {
+                    // Snap back to bounds if panned too far
+                    const img = document.querySelector(`#gallery-slide-${currentGalleryIndex} img`);
+                    if (img) {
+                        const bounds = img.getBoundingClientRect();
+                        const maxTransX = Math.max(0, (bounds.width * gScale - window.innerWidth) / 2);
+                        const maxTransY = Math.max(0, (bounds.height * gScale - window.innerHeight) / 2);
+                        
+                        if (gTransX > maxTransX) gTransX = maxTransX;
+                        if (gTransX < -maxTransX) gTransX = -maxTransX;
+                        if (gTransY > maxTransY) gTransY = maxTransY;
+                        if (gTransY < -maxTransY) gTransY = -maxTransY;
+                        updateGalleryImgTransform(true);
+                    }
+                }
+            }
+            if (galleryIsSwiping) {
+                galleryTouchEndX = e.changedTouches[0].screenX;
+                galleryIsSwiping = false;
+                handleGallerySwipe();
+            }
+        }, {passive: false});
         
         // Close on background click
         modal.addEventListener('click', (e) => {
@@ -2392,6 +2468,7 @@ function viewFullScreenGallery(event, urlsJson, startIndex = 0) {
 }
 
 function handleGallerySwipe() {
+    resetGalleryZoom();
     const deltaX = galleryTouchEndX - galleryTouchStartX;
     const deltaTime = Date.now() - galleryTouchStartTime;
     const velocity = Math.abs(deltaX) / (deltaTime || 1); // px per ms
@@ -2489,6 +2566,7 @@ function prevGalleryImage(e) {
 }
 
 function closeGallery(e) {
+    resetGalleryZoom();
     if(e) e.stopPropagation();
     const modal = document.getElementById('gallery-image-viewer');
     if(modal) {
