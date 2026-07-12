@@ -1562,7 +1562,8 @@ document.getElementById('cover-upload').onchange = async (e) => {
             });
             const data = await res.json();
             if (data.success) {
-                document.getElementById('profile-banner-cover').src = data.cover_url;
+                const bannerCover = document.getElementById('profile-banner-cover');
+                if (bannerCover) bannerCover.src = data.cover_url;
             }
         } catch(err) { console.error(err); }
     }
@@ -1580,8 +1581,12 @@ document.getElementById('avatar-upload').onchange = async (e) => {
             });
             const data = await res.json();
             if (data.success) {
-                document.getElementById('profile-banner-avatar').src = data.photo_url;
-                document.getElementById('profile-photo').src = data.photo_url;
+                const bannerAvatar = document.getElementById('profile-banner-avatar');
+                if (bannerAvatar) bannerAvatar.src = data.photo_url;
+                
+                const profilePhoto = document.getElementById('profile-photo');
+                if (profilePhoto) profilePhoto.src = data.photo_url;
+                
                 const formAvatar = document.getElementById('form-avatar');
                 if (formAvatar) formAvatar.src = data.photo_url;
                 
