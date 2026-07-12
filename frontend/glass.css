@@ -1,22 +1,30 @@
 /* Beautiful Animated Aurora Background Effect */
 body::before {
-    content: "";
+    content: '';
     position: fixed;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at 50% 50%, rgba(74, 144, 226, 0.15), transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 59, 48, 0.1), transparent 50%),
-        radial-gradient(circle at 20% 80%, rgba(52, 199, 89, 0.1), transparent 50%);
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Light Mode Aurora */
+    background: radial-gradient(circle at 50% 50%, rgba(74, 144, 226, 0.2), transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 105, 180, 0.15), transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.15), transparent 50%);
     animation: aurora 20s linear infinite alternate;
     z-index: -1;
 }
 
+body.dark-mode::before {
+    /* Dark Mode Aurora */
+    background: radial-gradient(circle at 50% 50%, rgba(74, 144, 226, 0.15), transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 59, 48, 0.1), transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(52, 199, 89, 0.1), transparent 50%);
+}
+
 @keyframes aurora {
-    0% {
-        transform: rotate(0deg);
-    }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 
     100% {
         transform: rotate(360deg);
@@ -90,15 +98,15 @@ textarea,
 #post-content,
 .profile-edit-input {
     font-family: inherit;
-    background: rgba(0, 0, 0, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: #ffffff !important;
+    background: var(--glass-input-bg) !important;
+    border: 1px solid var(--glass-input-border) !important;
+    color: var(--text-color) !important;
     border-radius: 12px !important;
 }
 
 input::placeholder,
 textarea::placeholder {
-    color: rgba(255, 255, 255, 0.5) !important;
+    color: var(--glass-placeholder) !important;
 }
 
 #post-content:focus {
@@ -109,16 +117,16 @@ textarea::placeholder {
 /* Buttons & Actions */
 .btn-primary {
     background: var(--primary-color) !important;
-    color: #fff !important;
+    color: #ffffff !important;
     border: none !important;
     border-radius: 20px !important;
     font-weight: 600;
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.2) !important;
-    color: #fff !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: var(--glass-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--glass-border) !important;
     border-radius: 20px !important;
 }
 
@@ -141,14 +149,14 @@ textarea::placeholder {
 }
 
 .stat-box {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: var(--glass-bg) !important;
+    border: 1px solid var(--glass-border) !important;
     border-radius: 12px !important;
-    color: #fff !important;
+    color: var(--text-color) !important;
 }
 
 .stat-value {
-    color: #fff !important;
+    color: var(--text-color) !important;
 }
 
 .stat-label {
@@ -156,12 +164,12 @@ textarea::placeholder {
 }
 
 .profile-bio {
-    color: #fff !important;
+    color: var(--text-color) !important;
 }
 
 /* Story Highlights */
 .story-ring-wrapper {
-    background: rgba(255, 255, 255, 0.1) !important;
+    background: var(--glass-input-bg) !important;
     border-radius: 50% !important;
 }
 
@@ -173,7 +181,7 @@ textarea::placeholder {
     -webkit-backdrop-filter: var(--glass-blur) !important;
     border: 1px solid var(--glass-border) !important;
     border-radius: 16px !important;
-    color: #fff !important;
+    color: var(--text-color) !important;
 }
 
 
@@ -195,7 +203,7 @@ textarea::placeholder {
 
 /* Thicker glass for notifications */
 .notification-item {
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: var(--glass-bg) !important;
     backdrop-filter: blur(25px) !important;
     -webkit-backdrop-filter: blur(25px) !important;
     border: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -222,23 +230,23 @@ body.dark-mode {
 #search-input {
     font-family: inherit;
     line-height: 1.5;
-    background: rgba(0, 0, 0, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: #ffffff !important;
+    background: var(--glass-input-bg) !important;
+    border: 1px solid var(--glass-input-border) !important;
+    color: var(--text-color) !important;
     border-radius: 20px !important;
     padding-left: 35px !important;
 }
 
 #search-input::placeholder {
-    color: rgba(255, 255, 255, 0.5) !important;
+    color: var(--glass-placeholder) !important;
 }
 
 /* Comment Bubbles */
 .comment-bubble {
-    background: rgba(255, 255, 255, 0.1) !important;
+    background: var(--glass-input-bg) !important;
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid var(--glass-input-border) !important;
     color: var(--text-color) !important;
 }
 
@@ -247,7 +255,7 @@ body.dark-mode {
 }
 
 .comment-text {
-    color: #ffffff !important;
+    color: var(--text-color) !important;
 }
 
 /* Comment Input Form at bottom */
@@ -257,9 +265,9 @@ body.dark-mode {
 }
 
 .comment-input {
-    background: rgba(0, 0, 0, 0.3) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: #ffffff !important;
+    background: var(--glass-input-bg) !important;
+    border: 1px solid var(--glass-input-border) !important;
+    color: var(--text-color) !important;
     border-radius: 20px !important;
 }
 
@@ -277,7 +285,7 @@ body.dark-mode {
 
 /* --- NOTIFICATIONS DRAWER GLASS --- */
 .settings-drawer {
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: var(--glass-bg) !important;
     backdrop-filter: blur(30px) !important;
     -webkit-backdrop-filter: blur(30px) !important;
     border-left: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -298,8 +306,8 @@ body.dark-mode {
 }
 
 #search-bar-container .search-input-wrapper {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    background: var(--glass-input-bg) !important;
+    border: 1px solid var(--glass-input-border) !important;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
