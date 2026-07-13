@@ -1316,10 +1316,6 @@ app.get('/api/highlights/view/:id', async (req, res) => {
     }
 });
 
-// Fallback route for frontend
-app.use((req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/index.html'));
-});
 // Delete Post Route
 app.delete('/api/posts/:id', async (req, res) => {
     try {
@@ -1363,6 +1359,11 @@ app.delete('/api/posts/:postId/comments/:commentId', async (req, res) => {
         console.error(err);
         res.status(500).json({ success: false, error: err.message });
     }
+});
+
+// Fallback route for frontend
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 server.listen(PORT, '0.0.0.0', () => {
