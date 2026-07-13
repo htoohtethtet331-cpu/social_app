@@ -316,8 +316,9 @@ function setupUI() {
         }
     };
 
-    // Active Now Ping
+    // Active Now    // Start Ping
     setInterval(async () => {
+        if (!currentUser) return;
         try {
             await fetch(`${API_BASE_URL}/ping`, {
                 method: 'POST',
@@ -560,6 +561,7 @@ function updateNotificationBadge() {
 }
 
 async function fetchInitialNotifications() {
+    if (!currentUser) return;
     try {
         const res = await fetch(`${API_BASE_URL}/notifications?user_id=${currentUser.id}`);
         const data = await res.json();
@@ -572,6 +574,10 @@ async function fetchInitialNotifications() {
 
 async function loadNotifications() {
     const feed = document.getElementById('notifications-feed');
+    if (!currentUser) {
+        feed.innerHTML = '<p class="loading-text" style="text-align:center;">User not found. Please reload.</p>';
+        return;
+    }
     try {
         const res = await fetch(`${API_BASE_URL}/notifications?user_id=${currentUser.id}`);
         const data = await res.json();
@@ -605,6 +611,7 @@ async function loadNotifications() {
 }
 
 async function markNotificationsRead() {
+    if (!currentUser) return;
     try {
         await fetch(`${API_BASE_URL}/notifications/read`, {
             method: 'PUT',
