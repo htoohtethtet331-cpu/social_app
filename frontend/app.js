@@ -1691,8 +1691,10 @@ async function showUserProfile(userId) {
         
         if (hlData.highlights && hlData.highlights.length > 0) {
             hlContainer.innerHTML = hlData.highlights.map(hl => `
-                <div class="highlight-item" onclick="viewHighlight('${hl.id}')" style="cursor: pointer; display: flex; flex-direction: column; align-items: center;">
-                    <img src="${hl.cover_image_url}" class="highlight-circle" style="width:70px; height:70px; border-radius:50%; object-fit:cover; border:2px solid var(--border-color); padding:2px;">
+                <div class="story-bar-item" onclick="viewHighlight('${hl.id}')" style="cursor: pointer; display: flex; flex-direction: column; align-items: center; margin-right: 15px;">
+                    <div class="story-ring-wrapper seen" style="width: 70px; height: 70px;">
+                        <img src="${hl.cover_image_url}" class="avatar" style="object-fit:cover;">
+                    </div>
                     <span style="font-size:0.7rem; color:var(--text-color); margin-top:5px; max-width:70px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${escapeHtml(hl.title)}</span>
                 </div>
             `).join('');
