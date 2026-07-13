@@ -1320,6 +1320,50 @@ app.get('/api/highlights/view/:id', async (req, res) => {
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
+// Delete Post Route
+app.delete('/api/posts/:id', async (req, res) => {
+    try {
+        const { user_id } = req.body;
+        const post = await Post.findById(req.params.id);
+        if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+        if (post.user.toString() !== user_id) {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
+        await Post.findByIdAndDelete(req.params.id);
+        // Also delete associated comments, likes, etc. (optional but good practice)
+        res.json({ success: true, message: 'Post deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Delete Comment Route
+app.delete('/api/posts/:postId/comments/:commentId', async (req, res) => {
+    try {
+        const { user_id } = req.body;
+        const post = await Post.findById(req.params.postId);
+        if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
+        
+        // Find comment index
+        const commentIndex = post.comments.findIndex(c => c._id.toString() === req.params.commentId);
+        if (commentIndex === -1) {
+            return res.status(404).json({ success: false, message: 'Comment not found' });
+        }
+
+        const comment = post.comments[commentIndex];
+        if (comment.user.toString() !== user_id) {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
+
+        post.comments.splice(commentIndex, 1);
+        await post.save();
+        res.json({ success: true, message: 'Comment deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);

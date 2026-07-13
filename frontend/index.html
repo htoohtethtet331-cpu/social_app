@@ -59,15 +59,22 @@
     <div class="app-container" id="app-container">
         <!-- Header -->
         <header class="app-header"
-            style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;">
-            <div class="logo-container" style="display: flex; align-items: center; gap: 10px;"
-                onclick="switchTab('profile', document.querySelector('.nav-btn[onclick*=\'profile\']'))">
+            style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; position: relative;">
+            
+            <!-- Left: Profile Pic -->
+            <div style="flex: 1; display: flex; justify-content: flex-start;">
                 <img id="app-bar-profile-pic" src="https://ui-avatars.com/api/?name=User&background=random"
-                    alt="Profile"
+                    alt="Profile" onclick="if(currentUser) { switchTab('profile', currentUser.id); }"
                     style="height: 40px; width: 40px; border-radius: 50%; object-fit: cover; cursor: pointer;">
+            </div>
+
+            <!-- Center: Logo -->
+            <div class="logo-container" style="flex: 1; display: flex; justify-content: center; align-items: center; white-space: nowrap;">
                 <h1 style="margin: 0; color: var(--primary-color); font-size: 2.2rem; font-family: 'Grand Hotel', cursive; font-weight: 400;">Unify</h1>
             </div>
-            <div style="display: flex; gap: 15px; align-items: center;">
+
+            <!-- Right: Actions -->
+            <div style="flex: 1; display: flex; justify-content: flex-end; gap: 15px; align-items: center;">
                 <button class="nav-btn" onclick="toggleSearch()"
                     style="padding: 5px; background: none; border: none; cursor: pointer; color: var(--text-color);">
                     <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">

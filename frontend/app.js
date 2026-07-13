@@ -868,8 +868,11 @@ if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButt
 
 // Navigation Functions
 function switchTab(tabName, userId = null) {
-    if (tabName === 'profile' && userId) {
-        showUserProfile(userId);
+    if (tabName === 'profile') {
+        const targetUserId = userId || (currentUser ? currentUser.id : null);
+        if (targetUserId) {
+            showUserProfile(targetUserId);
+        }
     }
     
     const index = tabs.indexOf(tabName);
@@ -1229,6 +1232,12 @@ function createPostHtml(post, searchQuery = '', isMinimized = false) {
                     </span>
                     <span class="post-date">${date}</span>
                 </div>
+                ${currentUser && currentUser.id === post.user_id ? `
+                <button class="delete-post-btn" onclick="deletePost('${post.id}')" style="margin-left: auto; background: none; border: none; cursor: pointer; color: #ff4d4f; padding: 5px;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                </button>` : ''}
             </div>
             <div class="post-body">${contentHtml}</div>
             ${post.image_urls && post.image_urls.length > 0 ? `
@@ -1403,6 +1412,7 @@ function renderCommentBubble(c) {
                 <div class="comment-actions">
                     <span class="comment-time">${formatTimeAgo(c.created_at)}</span>
                     <button class="comment-action-btn" onclick="replyToComment('${c.id}', '${escapeHtml(c.username)}')">Reply</button>
+                    ${currentUser && currentUser.id === c.user_id ? `<button class="comment-action-btn" style="color: #ff4d4f; margin-left: 8px;" onclick="deleteComment('${c.id}', currentCommentPostId)">Delete</button>` : ''}
                 </div>
             </div>
         </div>
@@ -3466,3 +3476,52 @@ window.closeUsersListModal = function() {
     }
     updateTelegramBackButton();
 };
+
+async function deletePost(postId) {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    try {
+        const res = await fetch(`${API_BASE_URL}/posts/${postId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: currentUser.id })
+        });
+        const data = await res.json();
+        if (data.success) {
+            const el = document.getElementById(`post-${postId}`);
+            if (el) el.remove();
+            
+            const gridEl = document.querySelector(`.profile-grid-item[onclick*="${postId}"]`);
+            if (gridEl) gridEl.remove();
+        } else {
+            alert(data.message || 'Error deleting post');
+        }
+    } catch(e) {
+        console.error(e);
+        alert('Failed to delete post');
+    }
+}
+
+async function deleteComment(commentId, postId) {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+    try {
+        const res = await fetch(`${API_BASE_URL}/posts/${postId}/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: currentUser.id })
+        });
+        const data = await res.json();
+        if (data.success) {
+            openCommentsBottomSheet(postId);
+            const countEl = document.getElementById(`comment-count-${postId}`);
+            if (countEl) {
+                let currentCount = parseInt(countEl.innerText) || 0;
+                countEl.innerText = Math.max(0, currentCount - 1);
+            }
+        } else {
+            alert(data.message || 'Error deleting comment');
+        }
+    } catch(e) {
+        console.error(e);
+        alert('Failed to delete comment');
+    }
+}
