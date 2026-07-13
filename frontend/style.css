@@ -276,7 +276,7 @@ body {
 
 .primary-btn {
     background-color: var(--primary-color);
-    color: var(--white);
+    color: #ffffff;
 }
 
 .primary-btn:hover {
@@ -915,7 +915,7 @@ body {
 
 .fb-action-btn.primary {
     background-color: var(--primary-color);
-    color: var(--white);
+    color: white
 }
 
 /* Story Viewer Modal */
@@ -1241,7 +1241,7 @@ body {
     bottom: 0;
     right: 0;
     background: var(--primary-color);
-    color: var(--white);
+    color: #ffffff;
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -1907,9 +1907,11 @@ body.modal-open {
     content: "";
     position: absolute;
     inset: 0;
-    box-sizing: border-box; /* Fix for crescent artifact */
+    box-sizing: border-box;
+    /* Fix for crescent artifact */
     border-radius: 50%;
-    padding: 2px; /* Ring thickness */
+    padding: 2px;
+    /* Ring thickness */
     background: transparent;
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
@@ -1931,6 +1933,7 @@ body.modal-open {
 .story-ring-wrapper.none {
     padding: 0;
 }
+
 .story-ring-wrapper.none::before {
     display: none;
 }
@@ -2552,12 +2555,14 @@ body.modal-open {
     width: 1px;
     height: 1px;
 }
+
 /* --- UI Style Switch (themeSwitch.html) --- */
 .ui-switch {
     --ui-switch-hue: 223;
     --ui-switch-trans-dur: 0.4s;
     --ui-switch-trans-timing: cubic-bezier(0.83, 0, 0.17, 1);
-    font-size: 20px; /* Adjust size to fit in settings */
+    font-size: 20px;
+    /* Adjust size to fit in settings */
     display: inline-block;
     position: relative;
     border-radius: 0.75em;
@@ -2699,82 +2704,82 @@ body.modal-open {
     opacity: 1;
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__cloud {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__cloud {
     opacity: 0;
     transform: translate(34px, 24px);
     transition-duration: 0.25s, var(--ui-switch-trans-dur);
     transition-delay: 0s;
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__cloud:nth-child(2) {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__cloud:nth-child(2) {
     transform: translate(24px, 24px) scale(0.8);
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__cloud:nth-child(3) {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__cloud:nth-child(3) {
     transform: translate(24px, 24px) scale(0.6);
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__handle {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__handle {
     transform: translate(36px, 12px);
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__handle-side:first-child circle:nth-child(2) {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__handle-side:first-child circle:nth-child(2) {
     transform: scale(0.75);
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__handle-side:nth-child(2),
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__stars {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__handle-side:nth-child(2),
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__stars {
     opacity: 1;
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__moon-hole {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__moon-hole {
     transform: translate(0, 0);
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star {
     transform: translate(18px, 14px) scale(1) rotate(-20deg);
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star use {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star use {
     transform: scale(1);
     transition:
         opacity var(--ui-switch-trans-dur) var(--ui-switch-trans-timing),
         transform 0.5s cubic-bezier(0.65, 0, 0.35, 2);
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(2) {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star:nth-child(2) {
     transform: translate(11px, 13px) scale(0.8) rotate(20deg);
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(2),
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(2) use {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star:nth-child(2),
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star:nth-child(2) use {
     transition-delay: 0.2s;
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(3) {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star:nth-child(3) {
     transform: translate(7px, 10px) scale(0.6) rotate(-20deg);
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(3),
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(3) use {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star:nth-child(3),
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star:nth-child(3) use {
     transition-delay: 0.05s;
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(4) {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star:nth-child(4) {
     transform: translate(14px, 6px) scale(0.6) rotate(20deg);
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(4),
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(4) use {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star:nth-child(4),
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star:nth-child(4) use {
     transition-delay: 0.15s;
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(5) {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star:nth-child(5) {
     transform: translate(21px, 5px) scale(0.4) rotate(-20deg);
 }
 
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(5),
-.ui-switch__input:checked + .ui-switch__scene .ui-switch__star:nth-child(5) use {
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star:nth-child(5),
+.ui-switch__input:checked+.ui-switch__scene .ui-switch__star:nth-child(5) use {
     transition-delay: 0.1s;
 }
 
@@ -2835,13 +2840,29 @@ body.modal-open {
 }
 
 @keyframes animate-glass-loader {
-    0% { stroke-dasharray: 295; stroke-dashoffset: 295; }
-    50% { stroke-dasharray: 295; stroke-dashoffset: 0; }
-    100% { stroke-dasharray: 295; stroke-dashoffset: -295; }
+    0% {
+        stroke-dasharray: 295;
+        stroke-dashoffset: 295;
+    }
+
+    50% {
+        stroke-dasharray: 295;
+        stroke-dashoffset: 0;
+    }
+
+    100% {
+        stroke-dasharray: 295;
+        stroke-dashoffset: -295;
+    }
 }
 
-body[data-ui-style="glass"] .classic-only-loader { display: none !important; }
-body:not([data-ui-style="glass"]) .glass-only-loader { display: none !important; }
+body[data-ui-style="glass"] .classic-only-loader {
+    display: none !important;
+}
+
+body:not([data-ui-style="glass"]) .glass-only-loader {
+    display: none !important;
+}
 
 /* --- Stories Bar --- */
 .stories-bar {
@@ -2862,8 +2883,10 @@ body:not([data-ui-style="glass"]) .glass-only-loader { display: none !important;
     overflow-x: auto;
     gap: 12px;
     padding-bottom: 5px;
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
 }
 
 .stories-scroll-area::-webkit-scrollbar {

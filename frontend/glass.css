@@ -178,7 +178,7 @@ textarea::placeholder {
 
 /* Story Highlights */
 .story-ring-wrapper {
-    background: var(--glass-input-bg) !important;
+    background: transparent !important;
     border-radius: 50% !important;
 }
 
