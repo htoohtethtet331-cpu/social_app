@@ -9,6 +9,8 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="style.css?v=83">
     <link id="ui-style-stylesheet" rel="stylesheet" href="glass.css?v=2">
+    <!-- Cropper.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
     <script>
         const DEFAULT_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI1MCIgZmlsbD0iI2RkZCIvPjxjaXJjbGUgY3g9IjUwIiBjeT0iMzkiIHI9IjE4IiBmaWxsPSIjOTk5Ii8+PHBhdGggZD0iTTIyLDgwIGEzMCwyMCAwIDAsMSw1NiwwIHoiIGZpbGw9IiM5OTkiLz48L3N2Zz4=';
         window.handleImageError = function (img) {
@@ -160,15 +162,6 @@
                     </form>
                 </div>
             </div>
-
-            <!-- User Profile Section -->
-
-
-
-
-            <!-- Notifications Section -->
-
-
 
             <div id="swipe-wrapper" class="swipe-wrapper">
                 <!-- Posts Feed Section -->
@@ -876,8 +869,37 @@
         </nav>
     </div>
 
+    <!-- Crop Modal -->
+    <div id="crop-modal" class="modal" style="z-index: 6000;">
+        <div class="modal-content" style="width: 100%; height: 100%; max-width: none; border-radius: 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: #000;">
+            <div class="fb-modal-header" style="position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #333; background: #111;">
+                <button type="button" class="fb-close-btn" style="background: transparent; color: white;"
+                    onclick="closeCropModal()">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path>
+                    </svg>
+                </button>
+                <h2 style="color: white; font-size: 1.1rem;">Crop Photo</h2>
+                <button type="button" class="primary-btn" style="width: auto; padding: 8px 16px; font-weight: bold; border-radius: 20px;" onclick="handleCrop()">Crop</button>
+            </div>
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;">
+                <img id="crop-image" style="max-width: 100%; max-height: 100%; display: block;">
+            </div>
+        </div>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
-    <script src="app.js?v=81"></script>
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+
+    <!-- Cropper.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+    <!-- Application Script -->
+    <script src="app.js?v=84"></script>
 </body>
 
 </html>

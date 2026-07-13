@@ -80,6 +80,8 @@ async function initApp() {
     }
 }
 
+let currentOnboardingPhotoFile = null;
+
 function showPhotoModal() {
     const modal = document.getElementById('photo-modal');
     modal.classList.add('active');
@@ -92,11 +94,11 @@ function showPhotoModal() {
     if (photoInput && photoPreviewImg) {
         photoInput.onchange = (e) => {
             if (e.target.files && e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    photoPreviewImg.src = e.target.result;
-                }
-                reader.readAsDataURL(e.target.files[0]);
+                openCropModal(e.target.files[0], (croppedFile) => {
+                    currentOnboardingPhotoFile = croppedFile;
+                    photoPreviewImg.src = URL.createObjectURL(croppedFile);
+                });
+                e.target.value = ''; // Reset input
             }
         };
     }
@@ -110,7 +112,6 @@ function showPhotoModal() {
             });
             const data = await res.json();
             if (data.success) {
-                currentUser.photo_url = data.photo_url;
                 modal.classList.remove('active');
                 setupUI();
                 loadPosts();
@@ -120,11 +121,10 @@ function showPhotoModal() {
 
     photoForm.onsubmit = async (e) => {
         e.preventDefault();
-        const fileInput = document.getElementById('photo-input');
-        if (fileInput.files.length === 0) return alert('Please select a photo first');
+        if (!currentOnboardingPhotoFile) return alert('Please select a photo first');
 
         try {
-            const photoUrl = await uploadFileToCloudinary(fileInput.files[0], 'image');
+            const photoUrl = await uploadFileToCloudinary(currentOnboardingPhotoFile, 'image');
             const res = await fetch(`${API_BASE_URL}/upload-profile`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1782,43 +1782,46 @@ document.getElementById('cover-upload').onchange = async (e) => {
 };
 
 // Upload Avatar from Profile
-document.getElementById('avatar-upload').onchange = async (e) => {
+document.getElementById('avatar-upload').onchange = (e) => {
     if (e.target.files && e.target.files[0]) {
-        showGlassUploadModal('Uploading avatar...');
-        try {
-            const photoUrl = await uploadFileToCloudinary(e.target.files[0], 'image');
-            const res = await fetch(`${API_BASE_URL}/upload-profile`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: currentUser.id, photo_url: photoUrl })
-            });
-            const data = await res.json();
-            if (data.success) {
-                const bannerAvatar = document.getElementById('profile-banner-avatar');
-                if (bannerAvatar) bannerAvatar.src = data.photo_url;
-                
-                const profilePhoto = document.getElementById('profile-photo');
-                if (profilePhoto) profilePhoto.src = data.photo_url;
-                
-                const formAvatar = document.getElementById('form-avatar');
-                if (formAvatar) formAvatar.src = data.photo_url;
-                
-                const appBarProfilePic = document.getElementById('app-bar-profile-pic');
-                if (appBarProfilePic) appBarProfilePic.src = data.photo_url;
-                
-                currentUser.photo_url = data.photo_url;
-                localStorage.setItem('user', JSON.stringify(currentUser));
-                
-                showGlassSuccess({
-                    title: 'Successfully uploaded',
-                    subtitle: 'Your profile picture is now live!',
-                    viewText: 'View Profile',
-                    onView: () => { switchTab('profile'); }
+        openCropModal(e.target.files[0], async (croppedFile) => {
+            showGlassUploadModal('Uploading avatar...');
+            try {
+                const photoUrl = await uploadFileToCloudinary(croppedFile, 'image');
+                const res = await fetch(`${API_BASE_URL}/upload-profile`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: currentUser.id, photo_url: photoUrl })
                 });
-            } else {
-                hideGlassModal();
-            }
-        } catch(err) { console.error(err); hideGlassModal(); }
+                const data = await res.json();
+                if (data.success) {
+                    const bannerAvatar = document.getElementById('profile-banner-avatar');
+                    if (bannerAvatar) bannerAvatar.src = data.photo_url;
+                    
+                    const profilePhoto = document.getElementById('profile-photo');
+                    if (profilePhoto) profilePhoto.src = data.photo_url;
+                    
+                    const formAvatar = document.getElementById('form-avatar');
+                    if (formAvatar) formAvatar.src = data.photo_url;
+                    
+                    const appBarProfilePic = document.getElementById('app-bar-profile-pic');
+                    if (appBarProfilePic) appBarProfilePic.src = data.photo_url;
+                    
+                    currentUser.photo_url = data.photo_url;
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    
+                    showGlassSuccess({
+                        title: 'Successfully uploaded',
+                        subtitle: 'Your profile picture is now live!',
+                        viewText: 'View Profile',
+                        onView: () => { switchTab('profile'); }
+                    });
+                } else {
+                    hideGlassModal();
+                }
+            } catch(err) { console.error(err); hideGlassModal(); }
+        });
+        e.target.value = ''; // Reset input
     }
 };
 
@@ -3252,6 +3255,59 @@ function hideGlassModal() {
         modal.classList.remove('active');
     }
 }
+
+// --- Client-side Cropping Utility ---
+let currentCropper = null;
+let currentCropCallback = null;
+
+function openCropModal(file, onCropSubmit) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = document.getElementById('crop-image');
+        img.src = e.target.result;
+        document.getElementById('crop-modal').classList.add('active');
+        
+        if (currentCropper) {
+            currentCropper.destroy();
+        }
+        currentCropper = new Cropper(img, {
+            aspectRatio: 1,
+            viewMode: 1,
+            autoCropArea: 1,
+            dragMode: 'move',
+        });
+        currentCropCallback = onCropSubmit;
+    };
+    reader.readAsDataURL(file);
+}
+
+function closeCropModal() {
+    document.getElementById('crop-modal').classList.remove('active');
+    if (currentCropper) {
+        currentCropper.destroy();
+        currentCropper = null;
+    }
+    currentCropCallback = null;
+}
+window.closeCropModal = closeCropModal;
+
+window.handleCrop = function() {
+    if (!currentCropper) return;
+    
+    const canvas = currentCropper.getCroppedCanvas({
+        width: 500,
+        height: 500
+    });
+    
+    canvas.toBlob((blob) => {
+        if (!blob) return;
+        const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg', lastModified: Date.now() });
+        closeCropModal();
+        if (currentCropCallback) {
+            currentCropCallback(file);
+        }
+    }, 'image/jpeg', 0.8);
+};
 
 // --- Direct Cloudinary Upload Utility ---
 async function uploadFileToCloudinary(file, resourceType = "image") {
