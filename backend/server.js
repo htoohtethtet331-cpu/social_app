@@ -1215,9 +1215,9 @@ app.get('/api/stories/archive', async (req, res) => {
     const user_id = req.query.user_id;
     if (!user_id) return res.status(400).json({ error: 'User ID required' });
     try {
+        // Fetch ALL stories for the user (both active and expired) so they can highlight recent ones too
         const archivedStories = await Story.find({
-            user_id,
-            expires_at: { $lte: new Date() }
+            user_id
         }).sort({ created_at: -1 });
         res.json({ stories: archivedStories });
     } catch (err) {
