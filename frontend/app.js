@@ -2037,13 +2037,19 @@ function playStory() {
     }
     document.getElementById('story-like-count').innerText = story.like_count > 0 ? story.like_count : '';
     
-    if (story.user_id === currentUser.id && story.like_count > 0) {
-        document.getElementById('story-like-count').style.display = 'block';
-        document.getElementById('story-like-count').onclick = (e) => {
-            e.stopPropagation();
-            viewStoryLikes(story.id);
-        };
+    if (story.user_id === currentUser.id) {
+        document.getElementById('story-like-btn').style.display = 'none';
+        if (story.like_count > 0) {
+            document.getElementById('story-like-count').style.display = 'block';
+            document.getElementById('story-like-count').onclick = (e) => {
+                e.stopPropagation();
+                viewStoryLikes(story.id);
+            };
+        } else {
+            document.getElementById('story-like-count').style.display = 'none';
+        }
     } else {
+        document.getElementById('story-like-btn').style.display = 'block';
         document.getElementById('story-like-count').style.display = 'none';
     }
 
