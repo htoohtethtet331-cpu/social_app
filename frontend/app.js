@@ -3301,10 +3301,21 @@ window.handleCrop = function() {
     
     canvas.toBlob((blob) => {
         if (!blob) return;
-        const file = new File([blob], 'avatar.jpg', { type: 'image/jpeg', lastModified: Date.now() });
+        
+        let file;
+        try {
+            file = new File([blob], 'avatar.jpg', { type: 'image/jpeg', lastModified: Date.now() });
+        } catch (e) {
+            // Fallback for older browsers that don't support new File()
+            file = blob;
+            file.name = 'avatar.jpg';
+            file.lastModified = Date.now();
+        }
+        
+        const cb = currentCropCallback;
         closeCropModal();
-        if (currentCropCallback) {
-            currentCropCallback(file);
+        if (cb) {
+            cb(file);
         }
     }, 'image/jpeg', 0.8);
 };
