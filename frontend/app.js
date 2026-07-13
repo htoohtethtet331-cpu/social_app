@@ -967,8 +967,8 @@ async function loadAllUsers(silent = false) {
                                 ${isActive ? '<div class="active-dot"></div>' : ''}
                             </div>
                             <div class="user-list-info" style="flex: 1;">
-                                <h3 class="user-list-name">${user.display_name || user.username}</h3>
-
+                                <h3 class="user-list-name" style="margin: 0 0 2px 0;">${user.display_name || user.username}</h3>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">@${user.username}</div>
                             </div>
                             ${followBtnHtml}
                         </div>
@@ -1216,7 +1216,10 @@ function createPostHtml(post, searchQuery = '', isMinimized = false) {
                     ${isActive ? '<div class="active-dot"></div>' : ''}
                 </div>
                 <div class="post-meta">
-                    <span class="post-author clickable-user" onclick="showUserProfile('${post.user_id}')">${post.display_name || post.username}</span>
+                    <span class="post-author clickable-user" onclick="showUserProfile('${post.user_id}')">
+                        ${post.display_name || post.username}
+                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal; margin-left: 6px;">@${post.username}</span>
+                    </span>
                     <span class="post-date">${date}</span>
                 </div>
             </div>
@@ -1384,7 +1387,10 @@ function renderCommentBubble(c) {
             </div>
             <div class="comment-bubble-wrapper">
                 <div class="comment-bubble" onclick="replyToComment('${c.id}', '${escapeHtml(c.username)}')">
-                    <div class="comment-author-name">${escapeHtml(c.display_name || c.username)}</div>
+                    <div class="comment-author-name">
+                        ${escapeHtml(c.display_name || c.username)}
+                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 6px;">@${escapeHtml(c.username)}</span>
+                    </div>
                     <div class="comment-text">${contentHtml}</div>
                 </div>
                 <div class="comment-actions">

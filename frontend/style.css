@@ -52,6 +52,7 @@ body {
     min-height: 100vh;
     position: relative;
     padding-bottom: 70px;
+    overflow-x: hidden;
 }
 
 /* Header */
@@ -1991,6 +1992,8 @@ body.modal-open {
     /* Changed from 25% */
     height: 100%;
     flex: 0 0 100%;
+    box-sizing: border-box;
+    max-width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
     /* iOS smooth scrolling */
