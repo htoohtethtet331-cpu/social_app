@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   telegram_id: { type: String, unique: true },
   username: String,
+  display_name: { type: String, default: "" },
   photo_url: String,
   cover_url: String,
   bio: { type: String, default: "" },

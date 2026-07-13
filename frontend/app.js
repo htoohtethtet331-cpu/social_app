@@ -1640,7 +1640,12 @@ async function showUserProfile(userId) {
         if (userData.user) {
             document.getElementById('profile-banner-avatar').src = getAvatarUrl(userData.user.photo_url);
             document.getElementById('profile-banner-cover').src = userData.user.cover_url ? userData.user.cover_url : 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="600" height="200"%3E%3Crect width="100%25" height="100%25" fill="%23cccccc"/%3E%3C/svg%3E';
-            document.getElementById('profile-banner-name').innerText = userData.user.username;
+            const displayNameEl = document.getElementById('profile-banner-name');
+            displayNameEl.innerText = userData.user.display_name || userData.user.username;
+            const usernameEl = document.getElementById('profile-banner-username');
+            if (usernameEl) {
+                usernameEl.innerText = `@${userData.user.username}`;
+            }
             currentProfileUsername = userData.user.username;
             document.getElementById('profile-stats-followers').innerText = userData.user.follower_count || 0;
             document.getElementById('profile-stats-following').innerText = userData.user.following_count || 0;
@@ -1657,6 +1662,8 @@ async function showUserProfile(userId) {
             if (userId === currentUser.id) {
                 bioEl.onclick = openBioModal;
                 bioEl.style.cursor = 'pointer';
+                displayNameEl.onclick = openDisplayNameModal;
+                displayNameEl.style.cursor = 'pointer';
                 document.getElementById('view-archive-btn').style.display = 'flex';
                 document.getElementById('add-story-btn').style.display = 'flex';
                 document.getElementById('cover-camera-btn').style.display = 'flex';
@@ -1665,6 +1672,8 @@ async function showUserProfile(userId) {
             } else {
                 bioEl.onclick = null;
                 bioEl.style.cursor = 'default';
+                displayNameEl.onclick = null;
+                displayNameEl.style.cursor = 'default';
                 document.getElementById('view-archive-btn').style.display = 'none';
                 document.getElementById('add-story-btn').style.display = 'none';
                 document.getElementById('cover-camera-btn').style.display = 'none';
@@ -1750,6 +1759,39 @@ document.getElementById('bio-form').onsubmit = async (e) => {
     } catch (e) {
         console.error(e);
         alert('Error updating bio');
+    }
+};
+
+function openDisplayNameModal() {
+    const currentName = document.getElementById('profile-banner-name').innerText;
+    const currentUsername = document.getElementById('profile-banner-username').innerText.replace('@', '');
+    document.getElementById('display-name-input').value = currentName === currentUsername ? '' : currentName;
+    document.getElementById('display-name-modal').style.display = 'flex';
+}
+
+function closeDisplayNameModal() {
+    document.getElementById('display-name-modal').style.display = 'none';
+}
+
+document.getElementById('display-name-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const newName = document.getElementById('display-name-input').value;
+    try {
+        const res = await fetch(`${API_BASE_URL}/users/${currentUser.id}/display_name`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ display_name: newName })
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('profile-banner-name').innerText = data.display_name || currentProfileUsername;
+            closeDisplayNameModal();
+        } else {
+            alert(data.error || 'Failed to update display name');
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Error updating display name');
     }
 };
 

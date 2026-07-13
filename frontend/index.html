@@ -269,7 +269,10 @@
                                 <input type="file" id="avatar-upload" accept="image/*" class="hidden-file-input">
                             </div>
 
-                            <h2 id="profile-banner-name" class="fb-profile-name">User Name</h2>
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 10px;">
+                                <h2 id="profile-banner-name" class="fb-profile-name" style="margin-bottom: 0;">User Name</h2>
+                                <span id="profile-banner-username" style="font-size: 0.9rem; color: var(--text-muted); font-weight: normal;">@username</span>
+                            </div>
                             <div class="profile-stats-grid">
                                 <div class="stat-box" onclick="openUsersListModal('following', currentProfileUserId)"
                                     style="cursor: pointer;">
@@ -611,6 +614,21 @@
                     style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 4px; font-family: var(--font-family); resize: none;"></textarea>
                 <div class="modal-actions">
                     <button type="button" class="btn secondary-btn" onclick="closeBioModal()">Cancel</button>
+                    <button type="submit" class="btn primary-btn">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Display Name Modal -->
+    <div id="display-name-modal" class="modal" onclick="if(event.target === this) this.classList.remove('active')">
+        <div class="modal-content">
+            <h2>Edit Display Name</h2>
+            <form id="display-name-form">
+                <input type="text" id="display-name-input" placeholder="Your display name..."
+                    style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 4px; font-family: var(--font-family); background: var(--surface-color); color: var(--text-color);" required>
+                <div class="modal-actions">
+                    <button type="button" class="btn secondary-btn" onclick="closeDisplayNameModal()">Cancel</button>
                     <button type="submit" class="btn primary-btn">Save</button>
                 </div>
             </form>

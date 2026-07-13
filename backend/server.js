@@ -108,7 +108,7 @@ app.get('/api/notifications', async (req, res) => {
     try {
         const notifications = await Notification.find({ receiver_id: user_id })
             .sort({ created_at: -1 })
-            .populate('actor_id', 'username photo_url');
+            .populate('actor_id', 'username display_name photo_url');
         res.json({ notifications });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -195,7 +195,7 @@ app.get('/api/posts/search', async (req, res) => {
             { score: { $meta: "textScore" } }
         )
         .sort({ score: { $meta: "textScore" } })
-        .populate('user_id', 'username photo_url last_active')
+        .populate('user_id', 'username display_name photo_url last_active')
         .limit(50);
 
         // 2. Fuzzy Search Fallback (if no exact text matches found or very few)
@@ -203,7 +203,7 @@ app.get('/api/posts/search', async (req, res) => {
             const recentPosts = await Post.find()
                 .sort({ created_at: -1 })
                 .limit(200)
-                .populate('user_id', 'username photo_url last_active');
+                .populate('user_id', 'username display_name photo_url last_active');
             
             const fuzzyResults = recentPosts.map(post => {
                 const score = calculateFuzzyScore(post.content, q);
@@ -442,7 +442,7 @@ app.post('/api/posts', upload.array('images', 100), async (req, res) => {
             image_url: image_urls.length > 0 ? image_urls[0] : null,
             layout_type: layout_type || 'single'
         });
-        post = await post.populate('user_id', 'username photo_url last_active');
+        post = await post.populate('user_id', 'username display_name photo_url last_active');
         const newPost = {
             id: post._id,
             user_id: post.user_id._id,
@@ -470,7 +470,7 @@ app.get('/api/posts', async (req, res) => {
     const user_id = req.query.user_id;
     
     try {
-        const posts = await Post.find().populate('user_id', 'username photo_url last_active').sort({ created_at: -1 });
+        const posts = await Post.find().populate('user_id', 'username display_name photo_url last_active').sort({ created_at: -1 });
         const postIds = posts.map(p => p._id);
         
         let userFavoriteSet = new Set();
@@ -565,7 +565,7 @@ class LikeQueue {
                     type: 'like',
                     post_id: post._id
                 });
-                const populatedNotif = await notif.populate('actor_id', 'username photo_url');
+                const populatedNotif = await notif.populate('actor_id', 'username display_name photo_url');
                 io.emit(`new_notification_${post.user_id}`, populatedNotif);
                 sendTelegramNotification(post.user_id, `${populatedNotif.actor_id.username} liked your post.`);
             }
@@ -627,7 +627,7 @@ app.post('/api/posts/:id/favorite', async (req, res) => {
                     type: 'favorite',
                     post_id: post._id
                 });
-                const populatedNotif = await notif.populate('actor_id', 'username photo_url');
+                const populatedNotif = await notif.populate('actor_id', 'username display_name photo_url');
                 req.io.emit(`new_notification_${post.user_id}`, populatedNotif);
                 sendTelegramNotification(post.user_id, `${populatedNotif.actor_id.username} favorited your post.`);
             }
@@ -646,7 +646,7 @@ app.get('/api/favorites', async (req, res) => {
     try {
         const favorites = await Favorite.find({ user_id }).populate({
             path: 'post_id',
-            populate: { path: 'user_id', select: 'username photo_url last_active' }
+            populate: { path: 'user_id', select: 'username display_name photo_url last_active' }
         }).sort({ created_at: -1 });
         
         const validFavorites = favorites.filter(f => f.post_id != null);
@@ -688,7 +688,7 @@ app.get('/api/favorites', async (req, res) => {
 app.get('/api/posts/:id/likes', async (req, res) => {
     const post_id = req.params.id;
     try {
-        const post = await Post.findById(post_id).populate('likes', 'username photo_url');
+        const post = await Post.findById(post_id).populate('likes', 'username display_name photo_url');
         if (!post) return res.status(404).json({ error: 'Post not found' });
         
         const formattedLikes = post.likes.map(user => ({
@@ -728,9 +728,9 @@ app.post('/api/posts/:id/comments', async (req, res) => {
         }
         
         let comment = await Comment.create({ post_id: postId, user_id, content, parent_id: actualParentId, replied_to_user_id: actualRepliedToUserId });
-        comment = await comment.populate('user_id', 'username photo_url');
+        comment = await comment.populate('user_id', 'username display_name photo_url');
         if (comment.replied_to_user_id) {
-            comment = await comment.populate('replied_to_user_id', 'username');
+            comment = await comment.populate('replied_to_user_id', 'username display_name');
         }
         
         const formattedComment = {
@@ -759,7 +759,7 @@ app.post('/api/posts/:id/comments', async (req, res) => {
                 post_id: post._id,
                 comment_id: comment._id
             });
-            const populatedNotif = await notif.populate('actor_id', 'username photo_url');
+            const populatedNotif = await notif.populate('actor_id', 'username display_name photo_url');
             req.io.emit(`new_notification_${actualRepliedToUserId}`, populatedNotif);
             sendTelegramNotification(actualRepliedToUserId, `${populatedNotif.actor_id.username} replied to your comment.`);
         }
@@ -773,7 +773,7 @@ app.post('/api/posts/:id/comments', async (req, res) => {
                 post_id: post._id,
                 comment_id: comment._id
             });
-            const populatedNotif = await notif.populate('actor_id', 'username photo_url');
+            const populatedNotif = await notif.populate('actor_id', 'username display_name photo_url');
             req.io.emit(`new_notification_${post.user_id}`, populatedNotif);
             sendTelegramNotification(post.user_id, `${populatedNotif.actor_id.username} commented on your post.`);
         }
@@ -788,8 +788,8 @@ app.post('/api/posts/:id/comments', async (req, res) => {
 app.get('/api/posts/:id/comments', async (req, res) => {
     try {
         const comments = await Comment.find({ post_id: req.params.id })
-            .populate('user_id', 'username photo_url')
-            .populate('replied_to_user_id', 'username')
+            .populate('user_id', 'username display_name photo_url')
+            .populate('replied_to_user_id', 'username display_name')
             .sort({ created_at: 1 });
             
         const formatComments = comments.map(c => ({
@@ -812,7 +812,7 @@ app.get('/api/posts/:id/comments', async (req, res) => {
 // Get all users
 app.get('/api/users', async (req, res) => {
     try {
-        const users = await User.find().select('id username photo_url bio last_active follower_count following_count');
+        const users = await User.find().select('id username display_name photo_url bio last_active follower_count following_count');
         const mappedUsers = users.map(u => ({
             ...u.toObject({ virtuals: true }),
             is_active: u.last_active ? (Date.now() - new Date(u.last_active).getTime() < 300000) : false
@@ -826,7 +826,7 @@ app.get('/api/users', async (req, res) => {
 // 9. Get User Profile
 app.get('/api/users/:id', async (req, res) => {
     try {
-        const user = await User.findById(req.params.id).select('id username photo_url cover_url bio last_active follower_count following_count');
+        const user = await User.findById(req.params.id).select('id username display_name photo_url cover_url bio last_active follower_count following_count');
         const posts = await Post.find({ user_id: req.params.id });
         const posts_count = posts.length;
         const likes_count = posts.reduce((acc, post) => acc + (post.likes ? post.likes.length : 0), 0);
@@ -932,7 +932,7 @@ app.get('/api/users/:id/followers', async (req, res) => {
         const follows = await Follow.find(query)
             .sort({ _id: -1 })
             .limit(limit)
-            .populate('follower_id', 'username photo_url bio last_active is_private');
+            .populate('follower_id', 'username display_name photo_url bio last_active is_private');
             
         const nextCursor = follows.length === limit ? follows[follows.length - 1]._id : null;
         const users = follows.map(f => f.follower_id).filter(Boolean);
@@ -964,7 +964,7 @@ app.get('/api/users/:id/following', async (req, res) => {
         const follows = await Follow.find(query)
             .sort({ _id: -1 })
             .limit(limit)
-            .populate('following_id', 'username photo_url bio last_active is_private');
+            .populate('following_id', 'username display_name photo_url bio last_active is_private');
             
         const nextCursor = follows.length === limit ? follows[follows.length - 1]._id : null;
         const users = follows.map(f => f.following_id).filter(Boolean);
@@ -1009,7 +1009,7 @@ app.get('/api/users/:id/posts', async (req, res) => {
     const target_user_id = req.params.id;
 
     try {
-        const posts = await Post.find({ user_id: target_user_id }).populate('user_id', 'username photo_url').sort({ created_at: -1 });
+        const posts = await Post.find({ user_id: target_user_id }).populate('user_id', 'username display_name photo_url').sort({ created_at: -1 });
         const postIds = posts.map(p => p._id);
         let userFavoriteSet = new Set();
         if (current_user_id) {
@@ -1058,6 +1058,17 @@ app.put('/api/users/:id/bio', async (req, res) => {
     }
 });
 
+// 11.5 Edit User Display Name
+app.put('/api/users/:id/display_name', async (req, res) => {
+    const { display_name } = req.body;
+    try {
+        await User.findByIdAndUpdate(req.params.id, { display_name: display_name || '' });
+        res.json({ success: true, display_name: display_name || '' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.post('/api/stories', upload.single('media'), async (req, res) => {
     const { user_id } = req.body;
     let media_url = req.body.media_url;
@@ -1096,7 +1107,7 @@ app.get('/api/users/:id/stories', async (req, res) => {
     const userId = req.params.id;
 
     try {
-        const user = await User.findById(userId).select('id username photo_url');
+        const user = await User.findById(userId).select('id username display_name photo_url');
         if (!user) return res.status(404).json({ error: 'User not found' });
 
         const stories = await Story.find({ 
@@ -1132,7 +1143,7 @@ app.post('/api/stories/:id/like', async (req, res) => {
                     type: 'story_like',
                     story_id: story._id
                 });
-                const populatedNotif = await notif.populate('actor_id', 'username photo_url');
+                const populatedNotif = await notif.populate('actor_id', 'username display_name photo_url');
                 req.io.emit(`new_notification_${story.user_id}`, populatedNotif);
                 sendTelegramNotification(story.user_id, `${populatedNotif.actor_id.username} liked your story.`);
             }
@@ -1168,7 +1179,7 @@ app.get('/api/stories', async (req, res) => {
         const viewerId = req.query.viewer_id;
         const stories = await Story.find({
             $or: [ { expires_at: { $gt: new Date() } }, { expires_at: { $exists: false } } ]
-        }).populate('user_id', 'username photo_url');
+        }).populate('user_id', 'username display_name photo_url');
         
         const grouped = {};
         stories.forEach(story => {
@@ -1231,7 +1242,7 @@ app.post('/api/stories/:id/view', async (req, res) => {
     const { user_id } = req.body;
     if (!user_id) return res.status(400).json({ error: 'User ID required' });
     try {
-        const story = await Story.findById(storyId).populate('viewers.user_id', 'username photo_url');
+        const story = await Story.findById(storyId).populate('viewers.user_id', 'username display_name photo_url');
         if (!story) return res.status(404).json({ error: 'Story not found' });
         
         // Prevent story owner from being counted as a viewer, or count it? Usually owners aren't counted in 'seen by'.
@@ -1240,7 +1251,7 @@ app.post('/api/stories/:id/view', async (req, res) => {
             if (!hasViewed) {
                 story.viewers.push({ user_id, viewed_at: new Date() });
                 await story.save();
-                await story.populate('viewers.user_id', 'username photo_url');
+                await story.populate('viewers.user_id', 'username display_name photo_url');
             }
         }
         res.json({ success: true, viewers: story.viewers || [] });
