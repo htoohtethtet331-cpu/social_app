@@ -1885,11 +1885,15 @@ async function viewUserStories(userId) {
             if (window.activeStoryUsers[userId]) {
                 window.activeStoryUsers[userId].has_unseen = false;
                 // Re-render feed and comments to update rings
-                const rings = document.querySelectorAll(`.story-ring-wrapper`);
-                rings.forEach(ring => {
-                    if (ring.getAttribute('onclick').includes(userId)) {
-                        ring.classList.remove('unseen');
-                        ring.classList.add('seen');
+                const items = document.querySelectorAll('.story-bar-item');
+                items.forEach(item => {
+                    const onclickStr = item.getAttribute('onclick');
+                    if (onclickStr && onclickStr.includes(userId)) {
+                        const ring = item.querySelector('.story-ring-wrapper');
+                        if (ring) {
+                            ring.classList.remove('unseen');
+                            ring.classList.add('seen');
+                        }
                     }
                 });
             }
