@@ -53,6 +53,8 @@ body {
     position: relative;
     padding-bottom: 70px;
     overflow-x: hidden;
+    contain: paint;
+    transform: translateZ(0);
 }
 
 /* Header */
@@ -1974,6 +1976,8 @@ body.modal-open {
     height: calc(100vh - 125px);
     /* Header 60 + Bottom Nav 65 */
     position: relative;
+    contain: paint;
+    transform: translateZ(0);
 }
 
 /* The long canvas holding all 4 screens */
