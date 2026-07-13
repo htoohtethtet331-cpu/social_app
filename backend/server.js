@@ -82,8 +82,8 @@ async function sendTelegramNotification(userId, message) {
     try {
         const user = await User.findById(userId);
         if (user && user.telegram_id) {
-            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-            await fetch(url, {
+            const url = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -91,6 +91,10 @@ async function sendTelegramNotification(userId, message) {
                     text: message
                 })
             });
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Telegram API Error:", response.status, errorText);
+            }
         }
     } catch (err) {
         console.error("Failed to send Telegram notification:", err);
