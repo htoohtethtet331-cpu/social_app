@@ -245,7 +245,7 @@ app.get('/api/posts/search', async (req, res) => {
             return {
                 id: post._id || post.id,
                 user_id: post.user_id._id,
-                username: post.user_id.username,
+                username: post.user_id.username, display_name: post.user_id.display_name,
                 photo_url: post.user_id.photo_url,
                 is_active: post.user_id.last_active ? (Date.now() - new Date(post.user_id.last_active).getTime() < 300000) : false,
                 content: post.content,
@@ -446,7 +446,7 @@ app.post('/api/posts', upload.array('images', 100), async (req, res) => {
         const newPost = {
             id: post._id,
             user_id: post.user_id._id,
-            username: post.user_id.username,
+            username: post.user_id.username, display_name: post.user_id.display_name,
             photo_url: post.user_id.photo_url,
             is_active: post.user_id.last_active ? (Date.now() - new Date(post.user_id.last_active).getTime() < 300000) : false,
             content: post.content,
@@ -489,7 +489,7 @@ app.get('/api/posts', async (req, res) => {
             return {
                 id: post._id,
                 user_id: post.user_id ? post.user_id._id : null,
-                username: post.user_id ? post.user_id.username : 'Unknown',
+                username: post.user_id ? post.user_id.username : 'Unknown', display_name: post.user_id ? post.user_id.display_name : '',
                 photo_url: post.user_id ? post.user_id.photo_url : null,
                 is_active: post.user_id && post.user_id.last_active ? (Date.now() - new Date(post.user_id.last_active).getTime() < 300000) : false,
                 content: post.content,
@@ -663,7 +663,7 @@ app.get('/api/favorites', async (req, res) => {
             return {
                 id: post._id,
                 user_id: post.user_id ? post.user_id._id : null,
-                username: post.user_id ? post.user_id.username : 'Unknown',
+                username: post.user_id ? post.user_id.username : 'Unknown', display_name: post.user_id ? post.user_id.display_name : '',
                 photo_url: post.user_id ? post.user_id.photo_url : null,
                 is_active: post.user_id && post.user_id.last_active ? (Date.now() - new Date(post.user_id.last_active).getTime() < 300000) : false,
                 content: post.content,
@@ -693,7 +693,7 @@ app.get('/api/posts/:id/likes', async (req, res) => {
         
         const formattedLikes = post.likes.map(user => ({
             user_id: user._id,
-            username: user.username,
+            username: user.username, display_name: user.display_name,
             photo_url: user.photo_url
         }));
         res.json({ likes: formattedLikes });
@@ -737,11 +737,11 @@ app.post('/api/posts/:id/comments', async (req, res) => {
             id: comment._id,
             post_id: comment.post_id,
             user_id: comment.user_id ? comment.user_id._id : null,
-            username: comment.user_id ? comment.user_id.username : 'Unknown',
+            username: comment.user_id ? comment.user_id.username : 'Unknown', display_name: comment.user_id ? comment.user_id.display_name : '',
             photo_url: comment.user_id ? comment.user_id.photo_url : null,
             content: comment.content,
             parent_id: comment.parent_id,
-            replied_to_username: comment.replied_to_user_id ? comment.replied_to_user_id.username : null,
+            replied_to_username: comment.replied_to_user_id ? comment.replied_to_user_id.username : null, replied_to_display_name: comment.replied_to_user_id ? comment.replied_to_user_id.display_name : '',
             created_at: comment.created_at
         };
         const count = await Comment.countDocuments({ post_id: postId });
@@ -796,11 +796,11 @@ app.get('/api/posts/:id/comments', async (req, res) => {
             id: c._id,
             post_id: c.post_id,
             user_id: c.user_id ? c.user_id._id : null,
-            username: c.user_id ? c.user_id.username : 'Unknown',
+            username: c.user_id ? c.user_id.username : 'Unknown', display_name: c.user_id ? c.user_id.display_name : '',
             photo_url: c.user_id ? c.user_id.photo_url : null,
             content: c.content,
             parent_id: c.parent_id,
-            replied_to_username: c.replied_to_user_id ? c.replied_to_user_id.username : null,
+            replied_to_username: c.replied_to_user_id ? c.replied_to_user_id.username : null, replied_to_display_name: c.replied_to_user_id ? c.replied_to_user_id.display_name : '',
             created_at: c.created_at
         }));
         res.json({ comments: formatComments });
@@ -1027,7 +1027,7 @@ app.get('/api/users/:id/posts', async (req, res) => {
             return {
                 id: post._id,
                 user_id: post.user_id ? post.user_id._id : null,
-                username: post.user_id ? post.user_id.username : 'Unknown',
+                username: post.user_id ? post.user_id.username : 'Unknown', display_name: post.user_id ? post.user_id.display_name : '',
                 photo_url: post.user_id ? post.user_id.photo_url : null,
                 content: post.content,
                 image_urls: post.image_urls,
@@ -1198,7 +1198,7 @@ app.get('/api/stories', async (req, res) => {
             if (!grouped[uid]) {
                 grouped[uid] = {
                     id: uid,
-                    username: story.user_id.username,
+                    username: story.user_id.username, display_name: story.user_id.display_name,
                     photo_url: story.user_id.photo_url,
                     has_unseen: isUnseen
                 };

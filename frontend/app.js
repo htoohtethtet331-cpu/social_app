@@ -590,7 +590,7 @@ async function loadNotifications() {
                     <div class="notification-item ${bgClass}" onclick="handleNotificationClick('${n.type}', '${n.post_id || n.story_id}', '${n.comment_id || ''}')">
                         <img src="${getAvatarUrl(n.actor_id ? n.actor_id.photo_url : null)}" class="notification-avatar" onerror="handleImageError(this)">
                         <div class="notification-content">
-                            <p class="notification-text"><strong>${n.actor_id ? n.actor_id.username : 'Someone'}</strong> ${text}</p>
+                            <p class="notification-text"><strong>${n.actor_id ? (n.actor_id.display_name || n.actor_id.username) : 'Someone'}</strong> ${text}</p>
                             <p class="notification-time">${time}</p>
                         </div>
                     </div>
@@ -963,11 +963,11 @@ async function loadAllUsers(silent = false) {
                     const userHtml = `
                         <div class="user-list-item" id="user-item-${user.id}" onclick="switchTab('profile', '${user.id}');">
                             <div class="avatar-wrapper">
-                                <img src="${photoUrl}" alt="${user.username}" class="user-list-avatar" onerror="handleImageError(this)">
+                                <img src="${photoUrl}" alt="${user.display_name || user.username}" class="user-list-avatar" onerror="handleImageError(this)">
                                 ${isActive ? '<div class="active-dot"></div>' : ''}
                             </div>
                             <div class="user-list-info" style="flex: 1;">
-                                <h3 class="user-list-name">${user.username}</h3>
+                                <h3 class="user-list-name">${user.display_name || user.username}</h3>
 
                             </div>
                             ${followBtnHtml}
@@ -1185,7 +1185,7 @@ function renderStoriesBar(usersWithStories) {
                 <div class="story-ring-wrapper ${ringClass}">
                     <img src="${u.photo_url || ''}" class="avatar" onerror="handleImageError(this)">
                 </div>
-                <span class="story-bar-username">${escapeHtml(u.username)}</span>
+                <span class="story-bar-username">${escapeHtml(u.display_name || u.username)}</span>
             </div>
         `;
     });
@@ -1212,11 +1212,11 @@ function createPostHtml(post, searchQuery = '', isMinimized = false) {
         <div class="post-item ${isMinimized ? 'post-minimized' : ''}" id="post-${post.id}">
             <div class="post-header">
                 <div class="avatar-wrapper">
-                    ${renderAvatarWithStoryRing(post.user_id, post.photo_url, post.username, 'clickable-user')}
+                    ${renderAvatarWithStoryRing(post.user_id, post.photo_url, (post.display_name || post.username), 'clickable-user')}
                     ${isActive ? '<div class="active-dot"></div>' : ''}
                 </div>
                 <div class="post-meta">
-                    <span class="post-author clickable-user" onclick="showUserProfile('${post.user_id}')">${post.username}</span>
+                    <span class="post-author clickable-user" onclick="showUserProfile('${post.user_id}')">${post.display_name || post.username}</span>
                     <span class="post-date">${date}</span>
                 </div>
             </div>
@@ -1380,11 +1380,11 @@ function renderCommentBubble(c) {
     return `
         <div class="comment-item" id="comment-${c.id}">
             <div class="avatar-wrapper" style="margin-right: 10px;">
-                ${renderAvatarWithStoryRing(c.user_id, c.photo_url, c.username, 'comment-avatar clickable-user')}
+                ${renderAvatarWithStoryRing(c.user_id, c.photo_url, (c.display_name || c.username), 'comment-avatar clickable-user')}
             </div>
             <div class="comment-bubble-wrapper">
                 <div class="comment-bubble" onclick="replyToComment('${c.id}', '${escapeHtml(c.username)}')">
-                    <div class="comment-author-name">${escapeHtml(c.username)}</div>
+                    <div class="comment-author-name">${escapeHtml(c.display_name || c.username)}</div>
                     <div class="comment-text">${contentHtml}</div>
                 </div>
                 <div class="comment-actions">
@@ -1916,7 +1916,7 @@ async function viewUserStories(userId) {
             currentStoryIndex = 0;
             
             const avatarUrl = data.user ? getAvatarUrl(data.user.photo_url) : getAvatarUrl('default');
-            const usernameStr = data.user ? data.user.username : 'User';
+            const usernameStr = data.user ? (data.user.display_name || data.user.username) : 'User';
             
             document.getElementById('story-avatar').src = avatarUrl;
             document.getElementById('story-username').innerText = usernameStr;
@@ -2196,7 +2196,7 @@ async function toggleStoryViewers() {
                     <div class="user-list-item" onclick="showUserProfile('${user._id || user.id}')" style="cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid var(--border-color);">
                         <img src="${getAvatarUrl(user.photo_url)}" class="avatar" style="width: 40px; height: 40px;">
                         <div>
-                            <strong>${escapeHtml(user.username || 'Unknown')}</strong>
+                            <strong>${escapeHtml(user.display_name || user.username || 'Unknown')}</strong>
                             <div class="text-muted" style="font-size: 0.8em;">${formatTimeAgo(v.viewed_at)}</div>
                         </div>
                     </div>`;
@@ -2252,7 +2252,7 @@ async function viewPostLikes(postId) {
             list.innerHTML = data.likes.map(l => `
                 <div class="fb-user-item">
                     <img src="${getAvatarUrl(l.photo_url)}" alt="Avatar" onerror="handleImageError(this)">
-                    <span>${l.username}</span>
+                    <span>${l.display_name || l.username}</span>
                 </div>
             `).join('');
         } else {
@@ -2277,7 +2277,7 @@ async function viewStoryLikes(storyId) {
         list.innerHTML = data.likes.map(l => `
             <div class="fb-user-item">
                 <img src="${getAvatarUrl(l.photo_url)}" alt="Avatar" onerror="handleImageError(this)">
-                <span>${l.username}</span>
+                <span>${l.display_name || l.username}</span>
             </div>
         `).join('');
         
@@ -3126,11 +3126,11 @@ async function fetchAndRenderUsersList(isInitial) {
             return `
                 <div class="user-list-item" onclick="document.getElementById('users-list-modal').classList.remove('active'); switchTab('profile', '${user._id || user.id}');">
                     <div class="avatar-wrapper">
-                        <img src="${getAvatarUrl(user.photo_url)}" alt="${user.username}" class="user-list-avatar" onerror="handleImageError(this)">
+                        <img src="${getAvatarUrl(user.photo_url)}" alt="${user.display_name || user.username}" class="user-list-avatar" onerror="handleImageError(this)">
                         ${user.is_active ? '<div class="active-dot"></div>' : ''}
                     </div>
                     <div class="user-list-info" style="flex: 1;">
-                        <h3 class="user-list-name">${user.username}</h3>
+                        <h3 class="user-list-name">${user.display_name || user.username}</h3>
 
                     </div>
                     ${followBtnHtml}
