@@ -1322,11 +1322,14 @@ app.delete('/api/posts/:id', async (req, res) => {
         const { user_id } = req.body;
         const post = await Post.findById(req.params.id);
         if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
-        if (post.user.toString() !== user_id) {
+        
+        if (post.user_id.toString() !== user_id) {
             return res.status(403).json({ success: false, message: 'Unauthorized' });
         }
+        
         await Post.findByIdAndDelete(req.params.id);
-        // Also delete associated comments, likes, etc. (optional but good practice)
+        await Comment.deleteMany({ post_id: req.params.id });
+        
         res.json({ success: true, message: 'Post deleted successfully' });
     } catch (err) {
         console.error(err);
@@ -1338,22 +1341,17 @@ app.delete('/api/posts/:id', async (req, res) => {
 app.delete('/api/posts/:postId/comments/:commentId', async (req, res) => {
     try {
         const { user_id } = req.body;
-        const post = await Post.findById(req.params.postId);
-        if (!post) return res.status(404).json({ success: false, message: 'Post not found' });
         
-        // Find comment index
-        const commentIndex = post.comments.findIndex(c => c._id.toString() === req.params.commentId);
-        if (commentIndex === -1) {
+        const comment = await Comment.findById(req.params.commentId);
+        if (!comment) {
             return res.status(404).json({ success: false, message: 'Comment not found' });
         }
-
-        const comment = post.comments[commentIndex];
-        if (comment.user.toString() !== user_id) {
+        if (comment.user_id.toString() !== user_id) {
             return res.status(403).json({ success: false, message: 'Unauthorized' });
         }
 
-        post.comments.splice(commentIndex, 1);
-        await post.save();
+        await Comment.findByIdAndDelete(req.params.commentId);
+        
         res.json({ success: true, message: 'Comment deleted successfully' });
     } catch (err) {
         console.error(err);
