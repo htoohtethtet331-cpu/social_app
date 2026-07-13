@@ -213,7 +213,8 @@ textarea::placeholder {
     margin-right: 12px !important;
 }
 
-.avatar-wrapper .avatar {
+.avatar-wrapper .avatar,
+.story-ring-wrapper .avatar {
     margin-right: 0 !important;
 }
 
