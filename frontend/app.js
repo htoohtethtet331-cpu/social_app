@@ -1228,7 +1228,6 @@ function createPostHtml(post, searchQuery = '', isMinimized = false) {
                 <div class="post-meta">
                     <span class="post-author clickable-user" onclick="showUserProfile('${post.user_id}')">
                         ${post.display_name || post.username}
-                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: normal; margin-left: 6px;">@${post.username}</span>
                     </span>
                     <span class="post-date">${date}</span>
                 </div>
@@ -1405,7 +1404,6 @@ function renderCommentBubble(c) {
                 <div class="comment-bubble" onclick="replyToComment('${c.id}', '${escapeHtml(c.username)}')">
                     <div class="comment-author-name">
                         ${escapeHtml(c.display_name || c.username)}
-                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-left: 6px;">@${escapeHtml(c.username)}</span>
                     </div>
                     <div class="comment-text">${contentHtml}</div>
                 </div>
