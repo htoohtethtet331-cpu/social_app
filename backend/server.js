@@ -765,7 +765,8 @@ app.post('/api/posts/:id/comments', async (req, res) => {
             });
             const populatedNotif = await notif.populate('actor_id', 'username display_name photo_url');
             req.io.emit(`new_notification_${actualRepliedToUserId}`, populatedNotif);
-            sendTelegramNotification(actualRepliedToUserId, `${populatedNotif.actor_id.username} replied to your comment.`);
+            const snippet = comment.content.length > 30 ? comment.content.substring(0, 30) + '...' : comment.content;
+            sendTelegramNotification(actualRepliedToUserId, `${populatedNotif.actor_id.username} replied to your comment: "${snippet}"`);
         }
         
         // Target: Post Owner (only if they are not the ones who just got notified as the replied user)
@@ -779,7 +780,8 @@ app.post('/api/posts/:id/comments', async (req, res) => {
             });
             const populatedNotif = await notif.populate('actor_id', 'username display_name photo_url');
             req.io.emit(`new_notification_${post.user_id}`, populatedNotif);
-            sendTelegramNotification(post.user_id, `${populatedNotif.actor_id.username} commented on your post.`);
+            const snippet = comment.content.length > 30 ? comment.content.substring(0, 30) + '...' : comment.content;
+            sendTelegramNotification(post.user_id, `${populatedNotif.actor_id.username} commented on your post: "${snippet}"`);
         }
 
         res.json({ comment: formattedComment });
