@@ -52,9 +52,10 @@ body {
     min-height: 100vh;
     position: relative;
     padding-bottom: 70px;
-    overflow-x: hidden;
-    contain: paint;
+    overflow: hidden;
+    contain: layout paint;
     transform: translateZ(0);
+    isolation: isolate;
 }
 
 /* Header */
@@ -726,7 +727,7 @@ body {
 .comment-author-name {
     font-weight: 600;
     font-size: 0.9rem;
-    color: var(--text-color);
+    color: var(--primary-color);
     margin-bottom: 2px;
 }
 
@@ -1969,41 +1970,47 @@ body.modal-open {
 
 /* The outer viewport (window) */
 .swipe-container {
-    overflow-x: hidden;
-    overflow-y: hidden;
-    /* Slides handle their own vertical scroll */
+    overflow: hidden;
+    /* Strict clipping — no edge bleed */
     width: 100%;
     height: calc(100vh - 125px);
     /* Header 60 + Bottom Nav 65 */
     position: relative;
-    contain: paint;
+    contain: layout paint style;
     transform: translateZ(0);
+    /* Clip any paint that leaks outside */
+    clip-path: inset(0);
 }
 
 /* The long canvas holding all 4 screens */
 .swipe-wrapper {
     display: flex;
     width: 100%;
-    /* Changed from 400% to prevent fractional pixels */
     height: 100%;
     will-change: transform;
+    /* Prevent sub-pixel bleed */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
     /* transition is applied dynamically in JS for snaps */
 }
 
 /* Individual screens */
 .swipe-slide {
     width: 100%;
-    /* Changed from 25% */
     height: 100%;
+    /* Each slide is exactly 1 viewport wide — no overflow */
     flex: 0 0 100%;
     box-sizing: border-box;
     max-width: 100%;
+    min-width: 0;
     overflow-y: auto;
     overflow-x: hidden;
     /* iOS smooth scrolling */
     -webkit-overflow-scrolling: touch;
-    /* Optional: padding bottom so content isn't hidden by nav */
     padding-bottom: 80px;
+    /* Prevent content from bleeding into sibling slides */
+    contain: layout paint;
+    isolation: isolate;
 }
 
 /* --- Search Engine & Suggestions --- */

@@ -42,8 +42,18 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Connection Pooling & Rate Limit Logic
+const rateLimit = require('express-rate-limit');
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 150, // limit each IP to 150 requests per windowMs
+    message: "Too Many Requests. Please try again later."
+});
+app.use('/api', limiter);
+
+// Decoupling: Removing express.static so backend acts strictly as API
+// (Frontend will be hosted on Vercel/Cloudflare Pages)
 
 // Ensure local uploads directory exists
 if (!fs.existsSync('uploads')){
@@ -70,7 +80,9 @@ let storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Database Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/unichat')
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/unichat', {
+    maxPoolSize: 10, // Limit connection pool size for 512MB RAM server
+})
   .then(() => console.log('Connected to MongoDB.'))
   .catch(err => console.error('MongoDB connection error:', err));
 
@@ -471,10 +483,17 @@ app.post('/api/posts', upload.array('images', 100), async (req, res) => {
 
 // 6. Get All Posts (Feed)
 app.get('/api/posts', async (req, res) => {
-    const user_id = req.query.user_id;
+    const user_id = req.query.user_id; // current user for likes/favorites
+    const target_user_id = req.query.target_user_id; // filter for specific profile
     
+    // Chunking & Pagination Logic: limit to 20 posts
+    const limit = parseInt(req.query.limit) || 20;
     try {
-        const posts = await Post.find().populate('user_id', 'username display_name photo_url last_active').sort({ created_at: -1 });
+        const query = target_user_id ? { user_id: target_user_id } : {};
+        const posts = await Post.find(query)
+            .populate('user_id', 'username display_name photo_url last_active')
+            .sort({ created_at: -1 })
+            .limit(limit);
         const postIds = posts.map(p => p._id);
         
         let userFavoriteSet = new Set();

@@ -60,7 +60,7 @@
         <!-- Header -->
         <header class="app-header"
             style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; position: relative;">
-            
+
             <!-- Left: Profile Pic -->
             <div style="flex: 1; display: flex; justify-content: flex-start;">
                 <img id="app-bar-profile-pic" src="https://ui-avatars.com/api/?name=User&background=random"
@@ -69,8 +69,11 @@
             </div>
 
             <!-- Center: Logo -->
-            <div class="logo-container" style="flex: 1; display: flex; justify-content: center; align-items: center; white-space: nowrap;">
-                <h1 style="margin: 0; color: var(--primary-color); font-size: 2.2rem; font-family: 'Grand Hotel', cursive; font-weight: 400;">Unify</h1>
+            <div class="logo-container"
+                style="flex: 1; display: flex; justify-content: center; align-items: center; white-space: nowrap;">
+                <h1
+                    style="margin: 0; color: var(--primary-color); font-size: 2.2rem; font-family: 'Grand Hotel', cursive; font-weight: 400;">
+                    Unify</h1>
             </div>
 
             <!-- Right: Actions -->
@@ -189,7 +192,7 @@
                             <!-- Stories injected by JS -->
                         </div>
                     </div>
-                    
+
                     <div id="posts-container">
                         <div class="app-loader-wrapper">
                             <div class="classic-only-loader">
@@ -204,9 +207,15 @@
                             </div>
                             <div class="glass-only-loader">
                                 <div class="glass-loader">
-                                    <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="50"></circle></svg>
-                                    <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="50"></circle></svg>
-                                    <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="50"></circle></svg>
+                                    <svg viewBox="0 0 200 200">
+                                        <circle cx="100" cy="100" r="50"></circle>
+                                    </svg>
+                                    <svg viewBox="0 0 200 200">
+                                        <circle cx="100" cy="100" r="50"></circle>
+                                    </svg>
+                                    <svg viewBox="0 0 200 200">
+                                        <circle cx="100" cy="100" r="50"></circle>
+                                    </svg>
                                 </div>
                             </div>
                         </div>
@@ -215,11 +224,7 @@
 
                 <!-- Users List Section -->
                 <section class="users-list-section swipe-slide" id="users-list-section">
-                    <div class="fb-profile-header"
-                        style="display: flex; flex-direction: column; align-items: flex-start; padding-top: 10px;">
-                        <img src="Topcat.gif" alt="Cat" style="height: 60px; margin-bottom: 5px; object-fit: contain;">
-                        <h2 style="margin: 0;">Users</h2>
-                    </div>
+
                     <div id="explore-users-list" style="padding: 15px;">
                         <div class="app-loader-wrapper">
                             <div class="classic-only-loader">
@@ -234,9 +239,15 @@
                             </div>
                             <div class="glass-only-loader">
                                 <div class="glass-loader">
-                                    <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="50"></circle></svg>
-                                    <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="50"></circle></svg>
-                                    <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="50"></circle></svg>
+                                    <svg viewBox="0 0 200 200">
+                                        <circle cx="100" cy="100" r="50"></circle>
+                                    </svg>
+                                    <svg viewBox="0 0 200 200">
+                                        <circle cx="100" cy="100" r="50"></circle>
+                                    </svg>
+                                    <svg viewBox="0 0 200 200">
+                                        <circle cx="100" cy="100" r="50"></circle>
+                                    </svg>
                                 </div>
                             </div>
                         </div>
@@ -276,9 +287,12 @@
                                 <input type="file" id="avatar-upload" accept="image/*" class="hidden-file-input">
                             </div>
 
-                            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 10px;">
-                                <h2 id="profile-banner-name" class="fb-profile-name" style="margin-bottom: 0;">User Name</h2>
-                                <span id="profile-banner-username" style="font-size: 0.9rem; color: var(--text-muted); font-weight: normal;">@username</span>
+                            <div
+                                style="display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 10px;">
+                                <h2 id="profile-banner-name" class="fb-profile-name" style="margin-bottom: 0;">User Name
+                                </h2>
+                                <span id="profile-banner-username"
+                                    style="font-size: 0.9rem; color: var(--text-muted); font-weight: normal;">@username</span>
                             </div>
                             <div class="profile-stats-grid">
                                 <div class="stat-box" onclick="openUsersListModal('following', currentProfileUserId)"
@@ -414,13 +428,18 @@
                                 </div>
                                 <div class="settings-action">
                                     <label class="ui-switch">
-                                        <input class="ui-switch__input" type="checkbox" role="switch" id="ui-style-switch" onchange="setUiStyle(this.checked ? 'glass' : 'classic')">
-                                        <svg class="ui-switch__scene" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 24" width="48px" height="24px" aria-hidden="true">
+                                        <input class="ui-switch__input" type="checkbox" role="switch"
+                                            id="ui-style-switch"
+                                            onchange="setUiStyle(this.checked ? 'glass' : 'classic')">
+                                        <svg class="ui-switch__scene" xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 48 24" width="48px" height="24px" aria-hidden="true">
                                             <symbol id="ui-switch-cloud" viewBox="0 0 10 6">
-                                                <path d="m7.5,1c-.238,0-.463.049-.675.125-.55-.681-1.381-1.125-2.325-1.125-1.13,0-2.103.633-2.614,1.556-.124-.033-.251-.056-.386-.056-.828,0-1.5.672-1.5,1.5s.672,1.5,1.5,1.5c.134,0,.262-.023.386-.056.511.924,1.484,1.556,2.614,1.556.943,0,1.775-.444,2.325-1.125.212.076.437.125.675.125,1.105,0,2-.895,2-2s-.895-2-2-2Z" />
+                                                <path
+                                                    d="m7.5,1c-.238,0-.463.049-.675.125-.55-.681-1.381-1.125-2.325-1.125-1.13,0-2.103.633-2.614,1.556-.124-.033-.251-.056-.386-.056-.828,0-1.5.672-1.5,1.5s.672,1.5,1.5,1.5c.134,0,.262-.023.386-.056.511.924,1.484,1.556,2.614,1.556.943,0,1.775-.444,2.325-1.125.212.076.437.125.675.125,1.105,0,2-.895,2-2s-.895-2-2-2Z" />
                                             </symbol>
                                             <symbol id="ui-switch-star" viewBox="0 0 4 4">
-                                                <path d="m2.277.172l.379.767c.045.091.132.154.233.169l.847.123c.253.037.355.348.171.527l-.613.597c-.073.071-.106.173-.089.273l.145.843c.043.252-.222.445-.448.326l-.757-.398c-.09-.047-.197-.047-.287,0l-.757.398c-.227.119-.491-.073-.448-.326l.145-.843c.017-.1-.016-.202-.089-.273L.094,1.758c-.183-.179-.082-.49.171-.527l.847-.123c.101-.015.188-.078.233-.169l.379-.767c.113-.23.441-.23.554,0Z" />
+                                                <path
+                                                    d="m2.277.172l.379.767c.045.091.132.154.233.169l.847.123c.253.037.355.348.171.527l-.613.597c-.073.071-.106.173-.089.273l.145.843c.043.252-.222.445-.448.326l-.757-.398c-.09-.047-.197-.047-.287,0l-.757.398c-.227.119-.491-.073-.448-.326l.145-.843c.017-.1-.016-.202-.089-.273L.094,1.758c-.183-.179-.082-.49.171-.527l.847-.123c.101-.015.188-.078.233-.169l.379-.767c.113-.23.441-.23.554,0Z" />
                                             </symbol>
                                             <defs>
                                                 <linearGradient id="ui-switch-sun1" x1="0" y1="0" x2="0" y2="1">
@@ -480,13 +499,17 @@
                                                         <circle class="ui-switch__moon-hole" r="1" cx="2" cy="0" />
                                                         <circle class="ui-switch__moon-hole" r="5" cx="8" cy="6" />
                                                     </clipPath>
-                                                    <circle r="8" fill="url(#ui-switch-moon3)" clip-path="url(#ui-switch-moon-clip)" />
+                                                    <circle r="8" fill="url(#ui-switch-moon3)"
+                                                        clip-path="url(#ui-switch-moon-clip)" />
                                                 </g>
                                             </g>
                                             <g fill="url(#ui-switch-cloud1)">
-                                                <use class="ui-switch__cloud" href="#ui-switch-cloud" width="10" height="6" transform="translate(34,9)" />
-                                                <use class="ui-switch__cloud" href="#ui-switch-cloud" width="10" height="6" transform="translate(24,13) scale(0.8)" />
-                                                <use class="ui-switch__cloud" href="#ui-switch-cloud" width="10" height="6" transform="translate(24,5) scale(0.6)" />
+                                                <use class="ui-switch__cloud" href="#ui-switch-cloud" width="10"
+                                                    height="6" transform="translate(34,9)" />
+                                                <use class="ui-switch__cloud" href="#ui-switch-cloud" width="10"
+                                                    height="6" transform="translate(24,13) scale(0.8)" />
+                                                <use class="ui-switch__cloud" href="#ui-switch-cloud" width="10"
+                                                    height="6" transform="translate(24,5) scale(0.6)" />
                                             </g>
                                         </svg>
                                         <span class="ui-switch__text">UI Style</span>
@@ -579,9 +602,15 @@
                 </div>
                 <div class="glass-only-loader">
                     <div class="glass-loader">
-                        <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="50"></circle></svg>
-                        <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="50"></circle></svg>
-                        <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="50"></circle></svg>
+                        <svg viewBox="0 0 200 200">
+                            <circle cx="100" cy="100" r="50"></circle>
+                        </svg>
+                        <svg viewBox="0 0 200 200">
+                            <circle cx="100" cy="100" r="50"></circle>
+                        </svg>
+                        <svg viewBox="0 0 200 200">
+                            <circle cx="100" cy="100" r="50"></circle>
+                        </svg>
                     </div>
                 </div>
             </div>
@@ -633,7 +662,8 @@
             <h2>Edit Display Name</h2>
             <form id="display-name-form">
                 <input type="text" id="display-name-input" placeholder="Your display name..."
-                    style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 4px; font-family: var(--font-family); background: var(--surface-color); color: var(--text-color);" required>
+                    style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 4px; font-family: var(--font-family); background: var(--surface-color); color: var(--text-color);"
+                    required>
                 <div class="modal-actions">
                     <button type="button" class="btn secondary-btn" onclick="closeDisplayNameModal()">Cancel</button>
                     <button type="submit" class="btn primary-btn">Save</button>
@@ -765,8 +795,10 @@
     <!-- Archive Modal -->
     <div id="archive-modal" class="modal" style="z-index: 5000;"
         onclick="if(event.target === this) this.classList.remove('active')">
-        <div class="modal-content" style="width: 100%; height: 100%; max-width: none; border-radius: 0; padding: 0; display: flex; flex-direction: column; overflow: hidden;">
-            <div class="fb-modal-header" style="position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border-color);">
+        <div class="modal-content"
+            style="width: 100%; height: 100%; max-width: none; border-radius: 0; padding: 0; display: flex; flex-direction: column; overflow: hidden;">
+            <div class="fb-modal-header"
+                style="position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border-color);">
                 <button type="button" class="fb-close-btn"
                     onclick="document.getElementById('archive-modal').classList.remove('active')">
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -776,7 +808,9 @@
                     </svg>
                 </button>
                 <h2>Story Archive</h2>
-                <button type="button" class="primary-btn" style="width: auto; padding: 8px 16px; font-weight: bold; border-radius: 20px;" onclick="proceedToHighlightTitle()">Next</button>
+                <button type="button" class="primary-btn"
+                    style="width: auto; padding: 8px 16px; font-weight: bold; border-radius: 20px;"
+                    onclick="proceedToHighlightTitle()">Next</button>
             </div>
             <div id="archive-feed"
                 style="flex: 1; padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); align-content: start; gap: 2px; overflow-y: auto;">
@@ -786,12 +820,16 @@
     </div>
 
     <!-- Highlight Title Modal -->
-    <div id="highlight-title-modal" class="modal bottom-sheet" style="z-index: 5100;" onclick="if(event.target === this) this.classList.remove('active')">
+    <div id="highlight-title-modal" class="modal bottom-sheet" style="z-index: 5100;"
+        onclick="if(event.target === this) this.classList.remove('active')">
         <div class="modal-content" style="text-align: center; padding: 20px;">
             <div class="sheet-handle"></div>
             <h3 style="margin-bottom: 20px; color: var(--text-color);">New Highlight</h3>
-            <input type="text" id="highlight-title-input" placeholder="Highlight Name" style="width: 100%; padding: 12px 15px; margin-bottom: 20px; text-align: center; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); font-size: 1rem; outline: none;" maxlength="15">
-            <button class="primary-btn" style="width: 100%; padding: 12px; font-size: 1rem; border-radius: 20px;" onclick="createHighlight()">Add</button>
+            <input type="text" id="highlight-title-input" placeholder="Highlight Name"
+                style="width: 100%; padding: 12px 15px; margin-bottom: 20px; text-align: center; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); font-size: 1rem; outline: none;"
+                maxlength="15">
+            <button class="primary-btn" style="width: 100%; padding: 12px; font-size: 1rem; border-radius: 20px;"
+                onclick="createHighlight()">Add</button>
         </div>
     </div>
 
@@ -898,18 +936,25 @@
 
     <!-- Crop Modal -->
     <div id="crop-modal" class="modal" style="z-index: 6000;">
-        <div class="modal-content" style="width: 100%; height: 100%; max-width: none; border-radius: 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: #000;">
-            <div class="fb-modal-header" style="position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #333; background: #111;">
+        <div class="modal-content"
+            style="width: 100%; height: 100%; max-width: none; border-radius: 0; padding: 0; display: flex; flex-direction: column; overflow: hidden; background: #000;">
+            <div class="fb-modal-header"
+                style="position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #333; background: #111;">
                 <button type="button" class="fb-close-btn" style="background: transparent; color: white;"
                     onclick="closeCropModal()">
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                        <path d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path>
+                        <path
+                            d="M18.3 5.71a.996.996 0 0 0-1.41 0L12 10.59 7.11 5.7A.996.996 0 1 0 5.7 7.11L10.59 12 5.7 16.89a.996.996 0 1 0 1.41 1.41L12 13.41l4.89 4.89a.996.996 0 1 0 1.41-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z">
+                        </path>
                     </svg>
                 </button>
                 <h2 style="color: white; font-size: 1.1rem;">Crop Photo</h2>
-                <button type="button" class="primary-btn" style="width: auto; padding: 8px 16px; font-weight: bold; border-radius: 20px;" onclick="handleCrop()">Crop</button>
+                <button type="button" class="primary-btn"
+                    style="width: auto; padding: 8px 16px; font-weight: bold; border-radius: 20px;"
+                    onclick="handleCrop()">Crop</button>
             </div>
-            <div style="flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;">
+            <div
+                style="flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000;">
                 <img id="crop-image" style="max-width: 100%; max-height: 100%; display: block;">
             </div>
         </div>
