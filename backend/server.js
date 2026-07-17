@@ -54,6 +54,8 @@ app.use('/api', limiter);
 
 // Decoupling: Removing express.static so backend acts strictly as API
 // (Frontend will be hosted on Vercel/Cloudflare Pages)
+// RESTORED FOR LOCAL DEV:
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 // Ensure local uploads directory exists
 if (!fs.existsSync('uploads')){
